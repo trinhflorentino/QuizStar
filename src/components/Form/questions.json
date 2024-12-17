@@ -1,0 +1,24 @@
+[
+  {
+    "answer": 1,
+    "question": "Câu hỏi trắc nghiệm ví dụ 1?",
+    "type": "mcq",
+    "options": [
+      "A.Đáp án 1",
+      "B.Đáp án 2",
+      "C.Đáp án 3",
+      "D.Đáp án 4"
+    ]
+  },
+  {
+      "type": "truefalse",
+      "question": "Câu hỏi đúng sai ví dụ 1?",
+      "options": ["Đáp án 1 đúng.", "Đáp án 2 sai."],
+      "answer": [true, false]
+  },
+  {
+      "type": "shortanswer",
+      "question": "Câu hỏi trả lời ngắn ví dụ 1?",
+      "answer": "Đáp án đúng"
+  }
+]

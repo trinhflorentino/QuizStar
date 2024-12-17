@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Trang chính</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="icon" type="image/png" href="img/Logo.png" />
+    <link rel='stylesheet' type='text/css' media='screen' href='css/Main.css'>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://fastly.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+        crossorigin="anonymous"></script>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-9BZ1P9KSJR');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7312982440694951"
+        crossorigin="anonymous"></script>
+</head>
+
+<body id="bd" style="font-family: 'Baloo 2', cursive">
+    <div class="header">
+        <img id="product_image" src="./img/laurels.png">
+        <p id="product_name">The Olympus Online</p>
+        <div class="joinmatchbutton" id="myBtn">
+            <p id="joinmatchbtn">Tham gia</p>
+        </div>
+        <div class="main-panel" onclick="showMenu();">
+            <img id='img' alt="user-avatar" src="img/default.png">
+            <p id="username-info"></p>
+            <img id="arrow" src="img/arrow-square-down.png">
+        </div>
+        <div class="dropdown_content">
+            <div class="admin dropdown_content_item" id="myBtn2">
+                <p>Tạo trận đấu mới</p>
+            </div>
+            <div class="admin dropdown_content_item" onclick="Technician()" id="myBtn2">
+                <p>Điều khiển trận đấu</p>
+            </div>
+            <div class="dropdown_content_item">
+                <p onclick="location.replace('ThemeCustomization.html')">Chỉnh sửa giao diện</p>
+            </div>
+            <!-- <div class="dropdown_content_item">
+                <p onclick="location.replace('Information.html')">Hướng dẫn sử dụng</p>
+            </div> -->
+            <div class="dropdown_content_item">
+                <p onclick="location.replace('Information.html')">Chỉnh sửa thông tin</p>
+            </div>
+            <div class="dropdown_content_item_last" onclick="signOut();">
+                <p>Đăng xuất</p>
+            </div>
+        </div>
+        <p id="match-choose">Trận đấu đang tham gia:
+            <a id="matchname"></a>
+            <a id="hostname"></a>
+            <a id="matchid"></a>
+        </p>
+    </div>
+
+    <div class="body">
+
+        <h4 class="current-match-title">
+            Trang chủ
+        </h4>
+
+        <div id="myModal" class="modal">
+            <img id="close" class="close" src="img/close-square.png">
+            <div class="modal-content">
+                <a class="modal-description">Chọn vị trí</a>
+                <br>
+                <button type="button" class="btn lighten-2 z-depth-0" onClick="join1()">VỊ TRÍ 1</button>
+                <button type="button" class="btn lighten-2 z-depth-0" onClick="join2()">VỊ TRÍ 2</button>
+                <button type="button" class="btn lighten-2 z-depth-0" onclick="join3()">VỊ TRÍ 3</button>
+                <button type="button" class="btn lighten-2 z-depth-0" onclick="join4()">VỊ TRÍ 4</button>
+                <button type="button" class="btn lighten-2 z-depth-0" onclick="joinMC();">VỊ TRÍ MC</button>
+                <button type="button" class="btn lighten-2 z-depth-0" onclick="joinMC2();">VỊ TRÍ MC 2</button>
+                <button type="button" class="btn lighten-2 z-depth-0" onclick="joinMAYCHIEU()">MÁY CHIẾU/VIEWER</button>
+                <button type="button" class="btn lighten-2 z-depth-0" onclick="joinBANGDIEM()">BẢNG ĐIỂM</button>
+            </div>
+        </div>
+
+        <div class="match-list">
+
+        </div>
+
+
+        <div class="joinform">
+            <div class="match-enter">
+                <p style="color: #31B3B5;font-weight: bold;">Nhập mã trận và mật khẩu được cung cấp bởi Host để tham
+                    gia.</p>
+                <input type="text" id="usermatchid" maxlength="6" placeholder="Mã trận">
+                <input type="text" id="usermatchpassword" placeholder="Mật khẩu trận đấu">
+                <button type="submit" onclick="joinmatch()" class="waves-effect waves-light btn"
+                    style="background-color: #036768;z-index: 0;cursor: pointer;border-radius: 10px;font-family: 'Baloo 2', cursive;font-weight: 500;">Xác
+                    nhận</button>
+            </div>
+
+        </div>
+
+        <div class="notification">
+            <p id="notification-text"></p>
+        </div>
+
+        <div ID="myModal2" class="modal">
+            <img id="close1" class="close1" src="img/close-square.png" onclick="HideModal()">
+            <div class="modal-content">
+                <a class="modal-description">Tạo trận đấu mới</a>
+                <br>
+                <!-- <div id="match-name-list">
+                    <p class="modal-require">Vui lòng điền đầy đủ thông tin yêu cầu</p>
+                    <p class="modal-require">Trước khi tạo trận, kiểm tra mã trận định tạo có trùng với danh sách trận
+                        đấu đã tạo dưới hay không, tuyệt đối không dùng mã trận đã được tạo trong bảng này.</p>
+
+              !-->
+                <button class="match-item modal-trigger btn"
+                    style="background-color: #036768;z-index: 0;cursor: pointer;border-radius: 10px;font-family: 'Baloo 2', cursive;font-weight: 500;width: 320px;"
+                    href="#modal1" onclick="loadMatchList();return false;">Danh sách trận
+                    đấu đã tạo</button>
+                <form>
+                    <input type="text" id="matchshortname" maxlength="6" placeholder="Mã trận/giải đấu*"
+                        autocomplete="off" style="color: white" required>
+                    <input type="text" id="matchfullname" maxlength="25" placeholder="Tên của trận/giải đấu*"
+                        autocomplete="off" style="color: white" required>
+                    <input type="text" id="matchpassword" placeholder="Mật khẩu của trận/giải đấu*" autocomplete="off"
+                        style="color: white" required>
+                    <button class=" btn waves-effect waves-light"
+                        style="background-color: #036768;z-index: 0;cursor: pointer;border-radius: 10px;font-family: 'Baloo 2', cursive;font-weight: 500;"
+                        onclick="checkExistingMatch();return false;" style="text-transform:uppercase">Tạo trận</button>
+                    <p id="success-creatematch">Đang tạo trận đấu. Vui lòng chờ....
+                    </p>
+                    <p id="failed-creatematch">
+                    </p>
+                </form>
+            </div>
+        </div>
+
+        <div id="modal1" class="modal">
+            <div class="modal-content">
+                <h4 style="color: white;">Danh sách trận đấu đã tạo</h4>
+                <input type="text" id="matchnamefind" onkeyup="SearchMatchName()" style="color: white;"
+                    placeholder="Nhập mã trận">
+                <table id="match-list-table">
+                    <tr>
+                        <th style="color:white">Mã trận</th>
+                        <th style="color:white">Tên trận</th>
+                        <th style="color:white">Host</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <nav>
+            <div class="nav-wrapper">
+                <a href="#" data-target="mobile-demo" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            </div>
+        </nav>
+
+        <ul class="sidenav" id="mobile-demo">
+            <img id="product-logo" src="img/Logo.png">
+            <span id="product-name">The Olympus Online</span>
+            <li class="sidenav-item">
+                <a onclick="location.replace('/Information.html')">Thay đổi thông tin</a>
+                <a onclick="signOut()">Đăng xuất</a>
+            </li>
+
+        </ul>
+
+        <div class="copyright">
+            <p>©️ 2021-2024 <a href="https://github.com/anhkhoatqt11" style="color: inherit;">Trương Anh Khoa</a>. Luật
+                chơi dựa trên <a
+                    href="https://vi.wikipedia.org/wiki/%C4%90%C6%B0%E1%BB%9Dng_l%C3%AAn_%C4%91%E1%BB%89nh_Olympia"
+                    style="color: inherit;">Đường lên đỉnh Olympia</a> của VTV3</p>
+        </div>
+        <script>
+            function SearchMatchName() {
+                var input, filter, table, tr, td, i, txtValue;
+                input = document.getElementById("matchnamefind");
+                filter = input.value.toUpperCase();
+                table = document.getElementById("match-list-table");
+                tr = table.getElementsByTagName("tr");
+                for (i = 0; i < tr.length; i++) {
+                    td = tr[i].getElementsByTagName("td")[0];
+                    if (td) {
+                        txtValue = td.textContent || td.innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            tr[i].style.display = "";
+                        } else {
+                            tr[i].style.display = "none";   
+                        }
+                    }
+                }
+            }
+        </script>
+</body>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-functions.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+<script src="js/keyboardshortcut.js"></script>
+<script src="js/authloggedin.js"></script>
+<script src="js/index.js"></script>
+<script src="js/Main.js"></script>
+<script src="js/Match.js"></script>
+<script type="application/javascript" src="https://api.ipify.org?format=jsonp&callback=getIP"></script>
+<script src="js/blockConsole.js"></script>
+<script src="js/Theme.js"></script>
+</html>

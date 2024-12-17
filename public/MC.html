@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Điều khiển trận đấu</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="icon" type="image/png" href="img/Logo.png" />
+    <link rel='stylesheet' type='text/css' media='screen' href='css/Technician.css'>
+    <link href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@1,700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
+        integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
+
+    <!-- jQuery and JS bundle w/ Popper.js -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://fastly.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ho+j7jyWK8fNQe+A12Hb8AhRq26LrZ/JpcUGGOn+Y7RsweNrtN/tE3MoK7ZeZDyx"
+        crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-9BZ1P9KSJR');
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap" rel="stylesheet">
+</head>
+
+<body style="font-family: 'Baloo 2', cursive;background-color:#121921">
+
+    <!-- Phòng chat-->
+    <div class="multichat" id="msgs">
+    </div>
+    <input class="chatbar" type="text" id="msg" placeholder="Nhắn gì đi nào ^^" autocomplete="off" required>
+    </input>
+    <div class="match">
+        <img id="product-logo" src="img/laurels.png">
+        <span id="matchname" style="color:white">The Olympus Online</span>
+        <!-- <span id="hostname" style="color:white"></span> -->
+        <div class="returnbutton" onclick="location.replace('Main.html')">
+            <p id="backtomain">THOÁT ĐIỀU KHIỂN TRẬN ĐẤU</p>
+        </div>
+    </div>
+    <br>
+    <div class="mainbutton inline">
+        <button class="leftbtn" onclick="window.open('QuestionManager.html')">QUẢN LÝ CÂU HỎI</button>
+        <button class="leftbtn" onclick="window.open('Result.html')">KẾT QUẢ</button>
+        <button class="leftbtn" onclick="pointUpdate()">CẬP NHẬT ĐIỂM SỐ</button>
+        <button class="leftbtn" onclick="passwordUpdate()">ĐỔI MẬT KHẨU TRẬN ĐẤU</button>
+        <div class="dropdown">
+            <button class="leftbtn dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                KICK THÍ SINH/MC
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#" id="tents1kick" onclick="kicks1()"></a>
+                <a class="dropdown-item" href="#" id="tents2kick" onclick="kicks2()"></a>
+                <a class="dropdown-item" href="#" id="tents3kick" onclick="kicks3()"></a>
+                <a class="dropdown-item" href="#" id="tents4kick" onclick="kicks4()"></a>
+                <a class="dropdown-item" href="#" id="tenmckick" onclick="kickmc()"></a>
+                <a class="dropdown-item" href="#" id="tenmc2kick" onclick="kickmc2()"></a>
+                <a class="dropdown-item" href="#" style="color: #022C43;" onclick="kickAll();">Kick tất cả người
+                    chơi</a>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="leftbtn dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                THAO TÁC KHÁC
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a class="dropdown-item" href="#" onClick="resetChat()">Xoá lịch sử chat</a>
+                <a class="dropdown-item" href="#" onClick="resetPoint();">Đặt lại điểm người chơi</a>
+                <a id="openchat" class="dropdown-item" href="#" onClick="OpenChat();">Mở trò chuyện</a>
+                <a id="closechat" class="dropdown-item" href="#" onClick="CloseChat();">Khoá trò chuyện</a>
+            </div>
+        </div>
+    </div>
+    <div class="mainbutton inline">
+        <button id="ButtonPCTech" class="leftbtn"
+            onClick="VDOffNSHV();resetChuong();resetOpenall();backtomain();setTimeout(function () {location.reload();},1500);">PHÒNG
+            CHAT</button>
+        <button id="ButtonBannerTech" class="leftbtn" onclick="startOpeningMaket();">GIỚI THIỆU</button>
+        <div class="dropdown">
+            <button id="ButtonIntroTech" class="leftbtn dropdown-toggle" class="leftbtn dropdown-toggle" type="button"
+                id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">INTRO</button>
+
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                <a id="IntroBtn" class="dropdown-item" href="#"
+                    onclick="StartIntro();VDOffNSHV();resetChuong();resetOpenall()">Intro đầu</a>
+                <a id="IntroKDBtn" class="dropdown-item" href="#"
+                    onclick="StartIntroKD();VDOffNSHV();resetChuong();resetOpenall()">Intro Khởi động</a>
+                <a id="IntroVCNVBtn" class="dropdown-item" href="#"
+                    onclick="StartIntroVCNV();VDOffNSHV();resetChuong();resetOpenall()">Intro VCNV</a>
+                <a id="IntroTTBtn" class="dropdown-item" href="#"
+                    onclick="StartIntroTT();VDOffNSHV();resetChuong();resetOpenall()">Intro Tăng tốc</a>
+                <a id="IntroVDBtn" class="dropdown-item" href="#"
+                    onclick="StartIntroVD();VDOffNSHV();resetChuong();resetOpenall()">Intro Về đích</a>
+            </div>
+        </div>
+        <!-- <button id="ButtonKDTech" class="leftbtn" onClick="start();tsreset();VDOffNSHV();resetChuong();resetOpenall();">KHỞI ĐỘNG</button> -->
+        <button id="ButtonKDTech" class="leftbtn" style="display: block;"
+            onClick="startkhoidongo22();KDO22Turn1();resetChuongKDO22();resetcauKDO22();resetcountdownKD022();resetlt();">KHỞi
+            ĐỘNG I
+        </button>
+        <button id="ButtonKDO23Tech" class="leftbtn" style="display: block;"
+            onClick="startkhoidongo22();KDO22Turn1();resetChuongKDO22();resetcauKDO22();resetcountdownKD022();resetlt();">KHỞi
+            ĐỘNG II
+        </button>
+        <button id="ButtonVCNVTech" class="leftbtn"
+            onClick="resetDapan();resetOverlay();resetChuong();resetOpenall();StopAudioHN();VDOffNSHV();startvcnv();setTimeout(function () {location.reload();},1500);">VƯỢT
+            CHƯỚNG NGẠI VẬT</button>
+        <button id="ButtonTTTech" class="leftbtn"
+            onclick="resetDapanTangtoc();NextQ();VDOffNSHV();resetChuong();resetOpenall();starttangtoc();">TĂNG
+            TỐC</button>
+        <button id="ButtonVDTech" class="leftbtn"
+            onclick="resetChuongVD();VDOffNSHV();stopVideo();resetChuong();resetOpenall();startvedich();">VỀ
+            ĐÍCH</button>
+        <button id="ButtonCHPTech" class="leftbtn"
+            onclick="resetChuongVDP();VDOffNSHV();resetChuong();resetOpenall();startvedichphu();">CÂU HỎI PHỤ</button>
+        <button id="ButtonTKDTech" class="leftbtn"
+            onClick="tongketdiem();VDOffNSHV();resetChuong();resetOpenall();">TỔNG KẾT ĐIỂM</button>
+        <!-- <button class="leftbtn" style="display: block;"
+            onClick="startkhoidongo22();KDO22Turn1();resetChuongKDO22();resetcauKDO22();resetcountdownKD022();">KHỞi
+            ĐỘNG O22
+        </button> -->
+    </div>
+    <div id="livekhoidong">
+        <img id="tskhoidong" style="width:300px;height:30f0px;object-fit: cover;">
+        <p id="tenthisinh" style="text-align:center"></p>
+    </div>
+    <!-- Khởi động  -->
+    <div class="dapan1" id="ts1khoidong">
+        <div class="inline">
+            <img class="playerkdimage" id="ts1kd" src="img/default.png">
+            <pre>  </pre>
+            <p id="tents1kd" class="playernamekd"></p>
+            <p class="point" id="pointts1kd"></p>
+        </div>
+    </div>
+    <div class="dapan2" id="ts2khoidong">
+        <div class="inline">
+            <img class="playerkdimage" id="ts2kd" src="img/default.png">
+            <pre>  </pre>
+            <p id="tents2kd" class="playernamekd"></p>
+            <p class="point" id="pointts2kd"></p>
+        </div>
+    </div>
+    <div class="dapan3" id="ts3khoidong">
+        <div class="inline">
+            <img class="playerkdimage" id="ts3kd" src="img/default.png">
+            <pre>  </pre>
+            <p id="tents3kd" class="playernamekd"></p>
+            <p class="point" id="pointts3kd"></p>
+        </div>
+    </div>
+    <div class="dapan4" id="ts4khoidong">
+        <div class="inline">
+            <img class="playerkdimage" id="ts4kd" src="img/default.png">
+            <pre>  </pre>
+            <p id="tents4kd" class="playernamekd"></p>
+            <p class="point" id="pointts4kd"></p>
+        </div>
+    </div>
+
+    <div class="inline">
+        <!-- <div class="timer" id="timerkd">
+            <p class="time" id="timekd"></p>
+        </div> -->
+        <div class="timerkd3s" id="timerkd5s">
+            <p class="time3s" id="tmkd5s"></p>
+        </div>
+        <div id="questionkhoidong">
+            <br>
+            <p class="qsnum" id="qsnum"></p>
+            <p class="qs" id="question1">
+                </a>
+            <p class="qs" id="question2">
+                </a>
+            <p class="qs" id="question3">
+                </a>
+            <p class="qs" id="question4">
+                </a>
+            <p class="qs" id="answer1">ĐÁP ÁN:</p>
+            <p class="qs" id="answer2">ĐÁP ÁN:</p>
+            <p class="qs" id="answer3">ĐÁP ÁN:</p>
+            <p class="qs" id="answer4">ĐÁP ÁN:</p>
+        </div>
+        <div id="thaotac">
+            <div class="inline">
+                <p class="btn-description">Thí sinh khởi động
+                <pre>   </pre>
+                </pre>
+                </p>
+                <button class="firstlnbtn" onclick="ts1khoidong();">
+                    Thí sinh 1
+                </button>
+                <button class="firstlnbtn" onclick="ts2khoidong();">
+                    Thí sinh 2
+                </button>
+                <button class="firstlnbtn" onclick="ts3khoidong();">
+                    Thí sinh 3
+                </button>
+                <button class="firstlnbtn" onclick="ts4khoidong();">
+                    Thí sinh 4
+                </button>
+            </div>
+            <div class="inline buttonkd">
+                <p class="btn-description">Đúng/sai:
+                <pre> </pre>
+                </p>
+                <button id="StartCorrectAns" class="vdcorrectbtn" id="VDCorrect" onclick="CorrectAnswer()" disabled>Trả
+                    lời đúng</button>
+                <button id="StartWrongAns" class="vdwrongbtn" id="VDWrong" onclick="WrongAnswer()" disabled>Trả lời
+                    sai</button>
+                <p class="qs2" id="answer11">ĐÁP ÁN:</p>
+                <p class="qs2" id="answer22">ĐÁP ÁN:</p>
+                <p class="qs2" id="answer33">ĐÁP ÁN:</p>
+                <p class="qs2" id="answer44">ĐÁP ÁN:</p>
+            </div>
+            <div class="inline buttonkd">
+                <p class="btn-description">Tính năng chung:
+                <pre> </pre>
+                </p>
+                <button class="thirdlnbtn" id="StartingStart" onclick="batdaukhoidong();">
+                    Bắt đầu khởi động
+                </button>
+                <!-- <button class="thirdlnbtn" onclick="ResetQuestion()">
+                    Đặt lại câu hỏi</button> -->
+            </div>
+            <!-- <div class="inline buttonkd">
+                <p class="btn-description">Dừng khẩn cấp: </p>
+                <pre></pre>
+                <button disabled class="thirdlnbtn" id="StartEStopStart" onclick="EmergencyStopStart()">Bật</button>
+                <button disabled class="thirdlnbtn" id="StartEStopStop" onclick="EmergencyStopStop()">Tắt
+                </button>
+            </div> -->
+
+        </div>
+    </div>
+    </div>
+    </div>
+
+
+
+    <!---->
+
+
+
+    <!-- Vượt chướng ngại vật-->
+
+    <div class="container" id="overlaycontainer">
+        <img id="vcnvimage">
+        <div id="vcnvoverlay">
+        </div>
+        <div id="vcnvoverlay1"></div>
+        <div id="vcnvoverlay2"></div>
+        <div id="vcnvoverlay3"></div>
+        <div id="vcnvoverlay4"></div>
+        <div id="vcnvoverlaycenter" onclick="hntt();resetDapan();">
+            <p>
+                Hàng ngang trung tâm
+            </p>
+        </div>
+    </div>
+
+    <div class="vcnv-row" id="vcnvrow">
+        <p id="cnvdapan">
+        </p>
+        <div class="hangngang">
+            <div id="overlay-hn1" onClick="hnso1();resetDapan();" style="cursor: pointer;">
+                <p class="vcnv-text-num">
+                    <a id="kituhn1"></a> ký tự
+                </p>
+            </div>
+            <div class="HN1">
+                <p class="dahnclass" id="dahn1">.</p>
+            </div>
+            <div id="overlay-hn2" onClick="hnso2();resetDapan();" style="cursor: pointer;">
+                <p class="vcnv-text-num">
+                    <a id="kituhn2"></a> ký tự
+                </p>
+            </div>
+            <div class="HN2">
+                <p class="dahnclass" id="dahn2">.</p>
+            </div>
+            <div id="overlay-hn3" onClick="hnso3();resetDapan();" style="cursor: pointer;">
+                <p class="vcnv-text-num">
+                    <a id="kituhn3"></a> ký tự
+                </p>
+            </div>
+            <div class="HN3">
+                <p class="dahnclass" id="dahn3">.</p>
+            </div>
+            <div id="overlay-hn4" onClick="hnso4();resetDapan();" style="cursor: pointer;">
+                <p class="vcnv-text-num">
+                    <a id="kituhn4"></a> ký tự
+                </p>
+            </div>
+            <div class="HN4">
+                <p class="dahnclass" id="dahn4">.</p>
+            </div>
+        </div>
+    </div>
+    <form>
+        <div class="dapan1" id="ts1vcnv">
+            <div class="inline">
+                <input type="checkbox" id="da1" name="da1" value='1' class="checkboxtech">
+                <img id="ts1ob" class="playervcnvimage" src="img/default.png">
+                <pre>  </pre>
+                <p class="namevcnv" id="tents1vcnv"></p>
+                <p class="point" id="pointts1vcnv"></p>
+                <p class="ans" id="dapan1"></p>
+                <p class="timestampobs" id="tstamp1"></p>
+            </div>
+        </div>
+        <div class="dapan2" id="ts2vcnv">
+            <div class="inline">
+                <input type="checkbox" id="da2" name="da2" value='1' class="checkboxtech">
+                <img id="ts2ob" class="playervcnvimage" src="img/default.png">
+                <pre>  </pre>
+                <p class="namevcnv" id="tents2vcnv"></p>
+                <p class="point" id="pointts2vcnv"></p>
+                <p class="ans" id="dapan2"></p>
+                <p class="timestampobs" id="tstamp2"></p>
+            </div>
+        </div>
+        <div class="dapan3" id="ts3vcnv">
+            <div class="inline">
+                <input type="checkbox" id="da3" name="da3" value='1' class="checkboxtech">
+                <img id="ts3ob" class="playervcnvimage" src="img/default.png">
+                <pre>  </pre>
+                <p class="namevcnv" id="tents3vcnv"></p>
+                <p class="point" id="pointts3vcnv"></p>
+                <p class="ans" id="dapan3"></p>
+                <p class="timestampobs" id="tstamp3"></p>
+            </div>
+        </div>
+        <div class="dapan4" id="ts4vcnv">
+            <div class="inline">
+                <input type="checkbox" id="da4" name="da4" value='1' class="checkboxtech">
+                <img id="ts4ob" class="playervcnvimage" src="img/default.png">
+                <pre>  </pre>
+                <p class="namevcnv" id="tents4vcnv"></p>
+                <p class="point" id="pointts4vcnv"></p>
+                <p class="ans" id="dapan4"></p>
+                <p class="timestampobs" id="tstamp4"></p>
+            </div>
+        </div>
+        <div class="inline">
+            <div class="timervcnv" id="tmvcnv">
+                <p class="time" id="timervcnv"></p>
+            </div>
+            <div id="questionvcnv">
+                <p id="question"></p>
+                <p id="answervcnv">
+
+                </p>
+            </div>
+    </form>
+
+    <div class="thaotacvcnv" id="thaotacvcnv">
+        <div class="inline buttonvcnv">
+            <p class="btn-description">CNV:
+            <pre> </pre>
+            </p>
+            <button class="thirdlnbtn" onclick="dungCNV();return false;">
+                Đúng CNV
+            </button>
+            <button class="thirdlnbtn" onclick="saiCNV();return false;">
+                Sai CNV
+            </button>
+            <button class="thirdlnbtn" onclick="countdown15s();return false;">
+                15s trả lời từ khoá
+            </button>
+            <button class="thirdlnbtn" onclick="resetChuong();return false;">Đặt lại chuông</button>
+        </div>
+        <div class="inline buttonvcnv">
+            <p class="btn-description">Tính năng chung:
+            </p>
+            <pre> </pre>
+            <button class="thirdlnbtn" id="VCNVStarting" onclick="vcnvdemgio();return false;">
+                Đếm thời gian
+            </button>
+            <button class="thirdlnbtn" onclick="uploadCNVResult();return false;">Chấm đáp án</button>
+            <button id="vcnvcheckansbtn" class="thirdlnbtn" onclick="ObstacleOpenAnswer();return false;">Hiển thị Đ/A
+                TS</button>
+            <button id="vcnvcloseansbtn" class="thirdlnbtn" onclick="ObstacleCloseAnswer();return false;">Ẩn Đ/A
+                TS</button>
+        </div>
+        <div class="inline buttonvcnv">
+            <p class="btn-description">Âm thanh:
+            </p>
+            <pre> </pre>
+            <button class="thirdlnbtn" id="audiohnbtn" onclick="AudioHN();return false;">Âm thanh hàng ngang</button>
+            <button class="thirdlnbtn" id="stopaudiohnbtn" onclick="StopAudioHN();return false;">Dừng âm thanh hàng
+                ngang</button>
+        </div>
+    </div>
+    </div>
+
+    <!---->
+
+
+
+
+    <!-- Tăng tốc-->
+
+    <div class="tangtoclive" id="tangtoclive">
+        <video class="tt-vid-img-view" disablePictureInPicture controlsList="nodownload" preload id="tt11"
+            muted></video>
+        <video class="tt-vid-img-view" disablePictureInPicture controlsList="nodownload" preload id="tt22"
+            muted></video>
+        <video class="tt-vid-img-view" disablePictureInPicture controlsList="nodownload" preload id="tt33"
+            muted></video>
+        <video class="tt-vid-img-view" disablePictureInPicture controlsList="nodownload" preload id="tt44"
+            muted></video>
+    </div>
+
+    <form>
+        <div class="dapan1" id="ts1tangtoc">
+            <div class="inline">
+                <input type="checkbox" id="datt1" name="datt1" value='1' class="checkboxtech">
+                <p class="tsttname" id="tentstt1"></p>
+                <p class="anstt" id="dapantt1"></p>
+                <p class="timestamp" id="tttstamp1"></p>
+                <p class="pointtt" id="accelerationpoint1"></p>
+            </div>
+        </div>
+        <div class="dapan2" id="ts2tangtoc">
+            <div class="inline">
+                <input type="checkbox" id="datt2" name="datt2" value='1' class="checkboxtech">
+                <p class="tsttname" id="tentstt2"></p>
+                <p class="anstt" id="dapantt2"></p>
+                <p class="timestamp" id="tttstamp2"></p>
+                <p class="pointtt" id="accelerationpoint2"></p>
+            </div>
+        </div>
+        <div class="dapan3" id="ts3tangtoc">
+            <div class="inline">
+                <input type="checkbox" id="datt3" name="datt1" value='1' class="checkboxtech">
+                <p class="tsttname" id="tentstt3"></p>
+                <p class="anstt" id="dapantt3"></p>
+                <p class="timestamp" id="tttstamp3"></p>
+                <p class="pointtt" id="accelerationpoint3"></p>
+            </div>
+        </div>
+        <div class="dapan4" id="ts4tangtoc">
+            <div class="inline">
+                <input type="checkbox" id="datt4" name="datt4" value='1' class="checkboxtech">
+                <p class="tsttname" id="tentstt4"></p>
+                <p class="anstt" id="dapantt4"></p>
+                <p class="timestamp" id="tttstamp4"></p>
+                <p class="pointtt" id="accelerationpoint4"></p>
+            </div>
+        </div>
+        <div class="inline">
+            <div class="timervcnv" id="tmvcnv">
+                <p class="time" id="timervcnv"></p>
+            </div>
+            <div id="questionvcnv">
+                <p id="question"></p>
+            </div>
+    </form>
+
+    <div class="timervcnv" id="tmtt">
+        <p class="time" id="timertt"></p>
+    </div>
+    <div id="questiontangtoc">
+        <p id="accelerationquestion"></p>
+
+        <p id="dapantangtoc"></p>
+    </div>
+
+    <div id="thaotactangtoc">
+
+        <br>
+        <div class="inline buttontt">
+            <p class="btn-description">Tăng tốc:
+            <pre> </pre>
+            </p>
+            <button class="thirdlnbtn" onclick="tt1();return false;">Tăng tốc 1</button>
+            <button class="thirdlnbtn" onclick="tt2();return false;">Tăng tốc 2</button>
+            <button class="thirdlnbtn" onclick="tt3();return false;">Tăng tốc 3</button>
+            <button class="thirdlnbtn" onclick="tt4();return false;">Tăng tốc 4</button>
+        </div>
+        <div class="inline buttontt">
+            <p class="btn-description">Tính năng chung:
+            <pre> </pre>
+            </p>
+            <button class="thirdlnbtn" id="AccelerationStarting" onclick="demgiotangtoc();return false;">
+                Đếm thời gian
+            </button>
+            <button class="thirdlnbtn" onclick="uploadTTResult();return false;">Chấm đáp án</button>
+            <button id="accelerationopenans" class="thirdlnbtn" onclick="AccelerationOpenAnswer();return false">Hiển thị
+                Đ/A TS</button>
+            <button id="accelerationcloseans" class="thirdlnbtn" onclick="AccelerationCloseAnswer();return false">Đóng
+                Đ/A TS</button>
+        </div>
+
+
+    </div>
+    </div>
+    <!---->
+
+
+    <!-- Về Đích-->
+
+
+    <div class="vedichlive" id="vedichlive">
+        <div class="inline buttonvd">
+            <p class="btn-description">Thí sinh về đích:
+            </p>
+            <button id="vdbtn1" class="thirdlnbtn tsvdbtn" onclick="ts1vedich();resetChuongVD();return false;">
+
+            </button>
+            <button id="vdbtn2" class="thirdlnbtn tsvdbtn" onclick="ts2vedich();resetChuongVD();return false;">
+
+            </button>
+            <button id="vdbtn3" class="thirdlnbtn tsvdbtn" onclick="ts3vedich();resetChuongVD();return false;">
+
+            </button>
+            <button id="vdbtn4" class="thirdlnbtn tsvdbtn" onclick="ts4vedich();resetChuongVD();return false;">
+
+            </button>
+            <button class="thirdlnbtn" onclick="ketthucluot();resetChuongVD();VDOffNSHV();return false;">
+                Kết thúc lượt
+            </button>
+        </div>
+        <!-- <a class="btn-description">Tín hiệu chuông:</a>
+        <a class="textboxname" id="tsvd1"></a>
+        <a class="textboxname" id="tsvd2"></a>
+        <a class="textboxname" id="tsvd3"></a>
+        <a class="textboxname" id="tsvd4"></a> -->
+        <div class="inline buttonvd">
+            <p class="btn-description">Ngôi sao hi vọng:
+            </p>
+            <button class="thirdlnbtn" onclick="VDNgoiSaoHiVong()">Ngôi sao hy vọng</button>
+            <button class="thirdlnbtn" onclick="VDOffNSHV()">Tắt Ngôi sao hy vọng</button>
+        </div>
+        <div class="inline buttonvd">
+            <p class="btn-description">Video:
+            </p>
+            <button id="vid1" class="thirdlnbtn" onclick="VideoVD1()">Video 1</button>
+            <button id="vid2" class="thirdlnbtn" onclick="VideoVD2()">Video 2</button>
+            <button id="vid3" class="thirdlnbtn" onclick="VideoVD3()">Video 3</button>
+            <button id="vid4" class="thirdlnbtn" onclick="VideoVD4()">Video 4</button>
+            <button id="stopvid" class="thirdlnbtn" onclick="stopVideo()">Dừng Video</button>
+
+        </div>
+        <div class="QuestionFinish">
+            <a id="label-finish" class="ineline" style="color: #036768;margin-left: 33px;"> 10 20 30</a>
+            <form id="questionpack">
+                <div class="ineline">
+                    <form>
+                        <label style="color: #036768">Câu 1</label>
+                        <input type="radio" id="vd10diemcau1" name="diemcau1" required>
+                        <input type="radio" id="vd20diemcau1" name="diemcau1">
+                        <input type="radio" id="vd30diemcau1" name="diemcau1">
+                    </form>
+                </div>
+                <div class="ineline">
+                    <form>
+                        <label style="color: #036768">Câu 2</label>
+                        <input type="radio" id="vd10diemcau2" name="diemcau2" required>
+                        <input type="radio" id="vd20diemcau2" name="diemcau2">
+                        <input type="radio" id="vd30diemcau2" name="diemcau2">
+                    </form>
+                </div>
+                <div class="ineline">
+                    <form>
+                        <label style="color: #036768">Câu 3</label>
+                        <input type="radio" id="vd10diemcau3" name="diemcau3" required>
+                        <input type="radio" id="vd20diemcau3" name="diemcau3">
+                        <input type="radio" id="vd30diemcau3" name="diemcau3">
+                    </form>
+                    <button class="thirdlnbtn" onclick="uploadQPVD();return false;">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <img id="ngoisao" src="img/Star.gif">
+    <div class="timervd" id="tmvd">
+        <p class="time" id="timervd"></p>
+    </div>
+    <div class="inline">
+
+        <div class="questionvedich" id="questionvedich">
+            <p id="questionnumber"></p>
+            <p id="NSHV"></p>
+            <p id="question12"></p>
+            <p id="vedichanswer"></p>
+        </div>
+        <div class="thaotac1" id="thaotacvedich">
+            <div class="inline buttonvd">
+                <p class="btn-description">Tính năng chung:
+                </p>
+                <button id="HTCHVDT" class="thirdlnbtn" onclick="hienthicauhoivedichtruoc();resetChuongVD();">Trở về câu
+                    trước</button>
+                <button id="HTCHVD" class="thirdlnbtn" onclick="hienthicauhoivedich();resetChuongVD();">Hiển thị câu hỏi
+                </button>
+                <button class="thirdlnbtn" id="FinalStarting" onclick="batdauvedich()">Đếm thời gian</button>
+            </div>
+            <div class="inline buttonvd">
+                <p class="btn-description">Đúng | Sai:
+                </p>
+                <button class="thirdlnbtn" id="VDCorrect" onclick="VDCorrentAns()">Trả lời đúng</button>
+                <button class="thirdlnbtn" id="VDWrong" onclick="VDWrongAns();resetChuongVD();WD5Seconds();">Trả lời
+                    sai/Giành quyền trả lời</button>
+            </div>
+            <div class="inline buttonvd">
+                <p class="btn-description">QTL:
+                </p>
+                <!-- <button id="5sec" class="thirdlnbtn" onclick="resetChuongVD();WD5Seconds();" disabled>Giành quyền trả
+                    lời</button> -->
+                <button id="5scorrect" class="thirdlnbtn" onclick="TS5STraloidung()" disabled>Trả lời đúng</button>
+                <button id="5swrong" class="thirdlnbtn" onclick="TS5STraloisai()" disabled>Trả lời sai</button>
+                <button id="5sreset" class="thirdlnbtn" onclick="resetChuongVD();" disabled>Đặt lại chuông</button>
+            </div>
+        </div>
+    </div>
+    <!---->
+
+
+
+
+    <!-- Câu Hỏi Phụ-->
+
+
+    <div id="playertt">
+        <div class="playertt1" id="playertt1">
+            <img class="playervdimage" id="tt1vdp">
+            <p class="ttname" id="tt1name"></p>
+            <p class="ttpoint" id="tt1point"></p>
+        </div>
+        <div class="playertt2" id="playertt2">
+            <img class="playervdimage" id="tt2vdp">
+            <p class="ttname" id="tt2name"></p>
+            <p class="ttpoint" id="tt2point"></p>
+        </div>
+        <div class="playertt3" id="playertt3">
+            <img class="playervdimage" id="tt3vdp">
+            <p class="ttname" id="tt3name"></p>
+            <p class="ttpoint" id="tt3point"></p>
+        </div>
+        <div class="playertt4" id="playertt4">
+            <img class="playervdimage" id="tt4vdp">
+            <p class="ttname" id="tt4name"></p>
+            <p class="ttpoint" id="tt4point"></p>
+        </div>
+    </div>
+
+
+    <div class="inline">
+        <div class="questionvedichphu" id="questionvedichphu">
+            <p id="questionnumbervdp"></p>
+            <p id="question1vdp"></p>
+            <p id="vedichphuanswer"></p>
+        </div>
+        <div class="thaotacvdp" id="thaotacvdp">
+            <br>
+            <div class="inline buttonkd">
+                <p class="btn-description">Tính năng chung</p>
+                <button id="TVCHVDP" class="thirdlnbtn" onclick="trovecauhoivdp();resetChuongVDP()">Trở về câu
+                    trước</button>
+                <button id="HTCHVDP" class="thirdlnbtn" onclick="hienthicauhoivdp();resetChuongVDP()">Hiển thị câu
+                    hỏi</button>
+                <button class="thirdlnbtn" id="AdditionalStarting" onclick="demgiovdp()">Đếm thời gian</button>
+            </div>
+            <div class="inline buttonkd">
+                <p class="btn-description">Đúng/Sai:</p>
+                <button class="thirdlnbtn" onclick="TLDungVDP()">Trả lời đúng</button>
+                <button class="thirdlnbtn" onclick="TLSaiVDP()">Trả lời sai</button>
+                <button class="thirdlnbtn" onclick="resetChuongVDP();">Đặt lại chuông</button>
+            </div>
+        </div>
+        <div class="timervdp" id="tmvdp">
+            <p class="time" id="timervdp"></p>
+        </div>
+
+
+
+    </div>
+
+
+    <!--Tổng kết điểm-->
+    <div class="inline-result" id="result">
+        <div>
+            <img class="tstkdimg" id="ts1tkd">
+            <h3 class="tstkdname" id="tents1"></h3>
+            <h1 class="tsktkdpoint" id="points1"></h1>
+        </div>
+        <div>
+            <img class="tstkdimg" id="ts2tkd">
+            <h3 class="tstkdname" id="tents2"></h3>
+            <h1 class="tsktkdpoint" id="points2"></h1>
+        </div>
+        <div>
+            <img class="tstkdimg" id="ts3tkd">
+            <h3 class="tstkdname" id="tents3"></h3>
+            <h1 class="tsktkdpoint" id="points3"></h1>
+        </div>
+        <div>
+            <img class="tstkdimg" id="ts4tkd">
+            <h3 class="tstkdname" id="tents4"></h3>
+            <h1 class="tsktkdpoint" id="points4"></h1>
+        </div>
+    </div>
+
+    <!-- Khởi động O22-->
+    <div class="inline player-list" id="kdo22playerlist">
+        <div class="playerkdo22" id="kdo22boxts1">
+            <img class="kdo22img" src="img/none.jpg" id="kdo22ts1img">
+            <br>
+            <span class="kdo20points" id="kdo22points1"></span>
+            <br>
+            <span class="kdo20namets" id="kdo22namets1"></span>
+        </div>
+        <div class="playerkdo22" id="kdo22boxts2">
+            <img class="kdo22img" src="img/none.jpg" id="kdo22ts2img">
+            <br>
+            <span class="kdo20points" id="kdo22points2"></span>
+            <br>
+            <span class="kdo20namets" id="kdo22namets2"></span>
+        </div>
+        <div class="playerkdo22" id="kdo22boxts3">
+            <img class="kdo22img" src="img/none.jpg" id="kdo22ts3img">
+            <br>
+            <span class="kdo20points" id="kdo22points3"></span>
+            <br>
+            <span class="kdo20namets" id="kdo22namets3"></span>
+            <br>
+        </div>
+        <div class="playerkdo22" id="kdo22boxts4">
+            <img class="kdo22img" src="img/none.jpg" id="kdo22ts4img">
+            <br>
+            <span class="kdo20points" id="kdo22points4"></span>
+            <br>
+            <span class="kdo20namets" id="kdo22namets4"></span>
+        </div>
+    </div>
+    <div class="inline" id="kdo22bar">
+        <div class="questionkdo22" id="qskdo22">
+            <p style="margin-left: 10px" id="kdo22qsnum"></p>
+            <p class="QuestionAndAnswerKDO22" id="kdo22question1"></p>
+            <p class="QuestionAndAnswerKDO22" id="kdo22question2"></p>
+            <p class="QuestionAndAnswerKDO22" id="kdo22question3"></p>
+            <p class="QuestionAndAnswerKDO22" id="kdo22answerts1"></p>
+            <p class="QuestionAndAnswerKDO22" id="kdo22answerts2"></p>
+            <p class="QuestionAndAnswerKDO22" id="kdo22answerts3"></p>
+        </div>
+        <div class="thaotackdo22">
+            <div class="inline buttonkd">
+                <p class="btn-description">Lượt khởi động:</p>
+                <button class="thirdlnbtn" id="KDO22L1Btn" onclick="KDO22Turn1();return false">Lượt 1</button>
+                <button class="thirdlnbtn" id="KDO22L2Btn" onclick="KDO22Turn2();return false">Lượt 2</button>
+                <button class="thirdlnbtn" id="KDO22L3Btn" onclick="KDO22Turn3();return false">Lượt 3</button>
+            </div>
+            <div class="inline buttonkd">
+                <p class="btn-description">Tính năng chung:</p>
+                <button id="KSO22Start" class="thirdlnbtn"
+                    onclick="batdaukhoidongo22();resetChuongKDO22();resetcauKDO22();return false">Bắt đầu lượt
+                    thi</button>
+                <button id="KDO22AnswerRights" class="thirdlnbtn">Cho phép trả lời</button>
+                <button id="KDO22CorrectBtn" class="thirdlnbtn" onclick="KDO22CorrectAns();return false">Trả
+                    lời đúng</button>
+                <button id="KDO22WrongBtn" class="thirdlnbtn" onclick="KDO22WrongAns();return false">Trả lờI
+                    sai</button>
+                <button class="thirdlnbtn" onclick="stopKDO22();">Dừng lượt</button>
+            </div>
+            <div class="inline buttonkd">
+                <p class="btn-description">Tính năng khác:</p>
+                <button id="KDO223sBtn" class="thirdlnbtn" onclick="KDO223sCountDown();return false">3s Count
+                </button>
+                <button disabled id="KDO22resetChuong" class="thirdlnbtn" onclick="resetChuongKDO22();return false">Đặt
+                    lại chuông</button>
+                <button disabled id="KDO22resetCau" class="thirdlnbtn" onclick="resetcauKDO22();return false">Đặt lại
+                    câu hỏi</button>
+                <!-- <button id="KDO22ngungChuong" class="thirdlnbtn" onclick="stopChuongKD();return false">Ngừng
+                    QTL</button>
+                <button id="KDO22tieptucChuong" class="thirdlnbtn" onclick="countinueChuongKD();return false">Tiếp tục
+                    QTL</button> -->
+            </div>
+        </div>
+        <div class="timerkdo22">
+            <p id="tmkdo22"></p>
+        </div>
+        <div class="timerkdo223s">
+            <p class="time3s" id="tmkdo223s"></p>
+        </div>
+    </div>
+
+    <!-- Opening Maket-->
+    <div>
+        <div class="thaotacbanner" id="openingMarket">
+            <div class="inline buttonkd">
+                <p class="btn-description">Giao diện Maket:</p>
+                <button class="thirdlnbtn" onclick="ContestantList();return false;">Danh sách thí sinh</button>
+                <button class="thirdlnbtn" onclick="MatchNameBanner();return false;">Tên trận đấu</button>
+                <button class="thirdlnbtn" onclick="CustomText(); return false;">Nội dung tuỳ chỉnh</button>
+            </div>
+            <div class="inline buttonkd">
+                <p class="btn-description">Nhạc chung:</p>
+                <button class="thirdlnbtn" onclick="changeMusic('MC');return false;">MC</button>
+                <button class="thirdlnbtn" onclick="changeMusic('ContesttantIntroduction');return false;">Giới thiệu thí
+                    sinh</button>
+                <button class="thirdlnbtn" onclick="changeMusic('GivingPrize');return false;">Nhạc trao giải</button>
+                <button class="thirdlnbtn" onclick="changeMusic('End');return false;">Nhạc kết thúc</button>
+            </div>
+            <div class="inline buttonkd">
+                <p class="btn-description">Nhạc giới thiệu cố vấn:</p>
+                <button class="thirdlnbtn" onclick="changeMusic('Advisor1');return false;">Cố vấn 1</button>
+                <button class="thirdlnbtn" onclick="changeMusic('Advisor2');return false;">Cố vấn 2</button>
+                <button class="thirdlnbtn" onclick="changeMusic('Advisor3');return false;">Cố vấn 3</button>
+                <button class="thirdlnbtn" onclick="changeMusic('Advisor4');return false;">Cố vấn 4</button>
+                <button class="thirdlnbtn" onclick="changeMusic('Advisor5');return false;">Cố vấn 5 </button>
+            </div>
+            <div class="inline buttonkd">
+                <p class="btn-description">Tính năng khác:</p>
+                <button class="thirdlnbtn" onclick="muteAllMusic();return false;">Tắt tất cả nhạc</button>
+                <button class="thirdlnbtn" onclick="changeMusic('Advisor2');return false;">Tắt giao diện</button>
+            </div>
+        </div>
+    </div>
+    <audio id="audio_15" src="audio/Obstacle/ObstacleAnswer.mp3"></audio>
+    <audio id="audio_34" src="audio/Finish/FinishAnswerGranted.mp3"></audio>
+    <audio id="audio_36" src="audio/Finish/FinishStarChose.mp3"></audio>
+    <div class="notification">
+        <p id="notification-text"></p>
+    </div>
+</body>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-functions.js"></script>
+<script src="js/keyboardshortcut.js"></script>
+<script src="js/authloggedin.js"></script>
+<script src="js/Chat.js"></script>
+<script src="js/PlayerList.js"></script>
+<script src="js/TechnicianData.js"></script>
+<script src="js/MC.js"></script>
+<script src="js/blockConsole.js"></script>
+<script src="js/Theme.js"></script>
+
+</html>

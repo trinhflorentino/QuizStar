@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Quản lý câu hỏi</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="icon" type="image/png" href="img/Logo.png" />
+    <link rel='stylesheet' type='text/css' media='screen' href='css/QuestionManager.css'>
+    <link href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@1,700&display=swap" rel="stylesheet">
+
+    <script src="https://unpkg.com/read-excel-file@4.x/bundle/read-excel-file.min.js"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-9BZ1P9KSJR');
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="match">
+        <img id="product-logo" src="img/laurels.png">
+        <span class="sectionname">Quản lý câu
+            hỏi</span>
+    </div>
+
+
+    <div class="inline">
+        <div class="control">
+            <button class="thirdlnbtn" id="GeneralInfoBtn" onclick="SwitchQuestionManager('GeneralInfo');">Thông tin
+                chung</button>
+            <button class="thirdlnbtn" id="StartBtn" onclick="SwitchQuestionManager('Start');">Khởi động I</button>
+            <button class="thirdlnbtn" id="StartBtnO23" onclick="SwitchQuestionManager('StartO23');">Khởi động
+                II</button>
+            <button class="thirdlnbtn" id="ObstacleBtn" onclick="SwitchQuestionManager('Obstacle');">Vượt chướng ngại
+                vật</button>
+            <button class="thirdlnbtn" id="AccelerationBtn" onclick="SwitchQuestionManager('Acceleration');">Tăng
+                tốc</button>
+            <button class="thirdlnbtn" id="FinishBtn" onclick="SwitchQuestionManager('Finish');">Về đích</button>
+            <button class="thirdlnbtn" id="AdditionalBtn" onclick="SwitchQuestionManager('ExtraQuestion');">Câu hỏi
+                phụ</button>
+        </div>
+        <div id="GeneralInfo">
+            <p class="Competition-Name">THÔNG TIN CHUNG</p>
+            <p class="bold" style="font-size: 18px;">Sử dụng trang web <a style="cursor: pointer;color: white;"
+                    href="https://www.videosmaller.com"> https://www.videosmaller.com </a> để
+                giảm
+                dung lượng video./</p>
+            <p class="red bold" style="font-size: 18px;">UPDATE: Phần thi Khởi động I chỉ sử dụng được 6 câu hỏi theo
+                luật Đường lên đỉnh Olympia năm thứ 24./</p>
+            <p class="red bold" style="font-size: 18px;">UPDATE: Phần thi Khởi động II, lượt 1 giới hạn nhạc hiệu ở 12
+                câu hỏi theo luật Đường lên đỉnh Olympia năm thứ 24./</p>
+            <div class="ExcelUpload">
+
+                <button class="leftbtn"
+                    onclick="uploadGeneralInfo();uploadQuestion();uploadQuestion2();uploadQuestion3();uploadQuestion4();uploadCNV();uploadHN();uploadTT();uploadVD();uploadCHP();uploadL1KDO22Question();uploadL2KDO22Question();uploadL3KDO22Question();Notification('Lưu tất cả câu hỏi và đáp án thành công');return false;">Lưu
+                    tất cả câu hỏi & đáp án</button>
+                <!-- <button onclick="DeleteTournament();" class="leftbtn">Xoá trận & giải
+                    đấu</button> -->
+                <button onclick="DeleteAllImageVideo()" class="leftbtn">Xoá tất cả hình ảnh & video</button>
+                <button
+                    onclick="window.open('https://drive.google.com/file/d/1LP6M9S0m5mGHrbDFHCBzWrNjm5RXbU1V/view?usp=sharing')"
+                    class="leftbtn">Form đề Excel mẫu</button>
+                <button class="leftbtn" onclick="window.open('https://youtu.be/GjHaZXssBW8?si=GnnSPNUP-nzpeODR')">Hướng
+                    dẫn dành cho kỹ thuật viên</button>
+                <p id="notify-general" style="color:lightblue"></p>
+                <p id="notify-general1" style="color: red"></p>
+                <p style="font-size: 18px;">NHẬP ĐỀ BẰNG FILE EXCEL</p>
+                <input type="file" id="excel_file"
+                    accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+                <button class="button btn waves-effect waves-light " id="confirm_excel" onclick="ReadData()">Nhập
+                    đề</button>
+
+                <p id="notify-uploadexcel" style="color:lightblue"></p>
+                <p id="notify-uploadexcel-error" style="color: red"></p>
+            </div>
+            <p style="font-size: 18px;">TÊN TRẬN ĐẤU</p>
+            <input style="width:500px" id="matchname">
+            <br>
+            <br>
+            <button onclick="uploadGeneralInfo();" class="btn waves-effect waves-light ">XÁC NHẬN</button>
+            <p id="notify-uploadinfo" style="color:lightblue"></p>
+            <p style="font-size: 32px;">INTRO</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <div class="IntroUpload">
+                    <span style="color:white;">Intro Đầu</span>
+                    <pre></pre>
+                    <input type="file" onchange="chooseFile(event)" accept="video/mp4,audio/mp3">
+                    <button class="button btn waves-effect waves-light " onclick="uploadIntroVideo();">Tải
+                        lên</button>
+                    <video controls id="intro" style="width:378px;height:250px;"></video>
+                </div>
+                <div class="IntroUpload">
+                    <span style="color:white;">Intro Khởi động</span>
+                    <div class="intro-input">
+                        <input style="margin-right:0px" type="file" onchange="chooseFile(event)"
+                            accept="video/mp4,audio/mp3">
+                        <button style="margin-right:41px" class="button btn waves-effect waves-light "
+                            onclick="uploadIntroKD();">Tải lên</button>
+                    </div>
+                    <video controls id="introkd" style="width:378px;height:250px;"></video>
+
+                </div>
+                <div class="IntroUpload">
+                    <span style="color:white;">Intro VCNV</span>
+                    <div class="intro-input">
+                        <input type="file" onchange="chooseFile(event)" accept="video/mp4,audio/mp3">
+                        <button style="margin-right:12px" class="button btn waves-effect waves-light "
+                            onclick="uploadIntroVCNV();">Tải lên</button>
+                    </div>
+                    <video controls id="introvcnv" style="width:378px;height:250px;"></video>
+
+                </div>
+                <div class="IntroUpload">
+                    <span style="color:white;">Intro Tăng tốc</span>
+                    <div class="intro-input">
+                        <input type="file" onchange="chooseFile(event)" accept="video/mp4,audio/mp3">
+                        <button style="margin-right:28px" class="button btn waves-effect waves-light "
+                            onclick="uploadIntroTT();">Tải lên</button>
+                    </div>
+                    <video controls id="intrott" style="width:378px;height:250px;"></video>
+
+                </div>
+                <div class="IntroUpload">
+                    <span style="color:white;">Intro Về đích</span>
+                    <div class="intro-input">
+                        <input type="file" onchange="chooseFile(event)" accept="video/mp4,audio/mp3">
+                        <button style="margin-right:21px" class="button btn waves-effect waves-light "
+                            onclick="uploadIntroVD();">Tải lên</button>
+                    </div>
+                    <video controls id="introvd" style="width:378px;height:250px;"></video>
+
+                </div>
+            </div>
+            <p style="font-size: 32px;">Nội dung tuỳ chỉnh (sử dụng nguồn ngoài)</p>
+            <a style="color: white;" href="https://youtu.be/kX65cBeGigA?si=gZk1XBA-0QolrHrP" target="_blank">Video hướng
+                dẫn cách nhúng Video từ Youtube</a>
+            <div>
+                <div class="container">
+                    <form id="videoForm">
+                        <input type="text" id="title" placeholder="Tiêu đề" required>
+                        <input type="text" id="link" placeholder="Link phương tiện" required>
+                        <button type="submit">Thêm nội dung</button>
+                    </form>
+                    <pre>
+
+
+                    </pre>
+                    <table id="videoTable">
+                        <thead>
+                            <tr>
+                                <th>Tiêu đề</th>
+                                <th>Link</th>
+                                <th>Hành động</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="videoTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <br>
+        </div>
+
+
+
+
+        <div id="Start">
+            <p class="Competition-Name">KHỞI ĐỘNG I</p>
+            <div>
+                <p style="font-size:20px;">Gói câu hỏi 1</p>
+            </div>
+            <form id="goi1form">
+                <div class="inline ">
+                    <p>|CÂU 01|</p>
+                    <textarea style="width:500px" id="toan1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="datoan1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 02|</p>
+                    <textarea style="width:500px" id="ly1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="daly1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 03|</p>
+                    <textarea style="width:500px" id="hoa1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dahoa1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 04|</p>
+                    <textarea style="width:500px" id="sinh1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dasinh1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 05|</p>
+                    <textarea style="width:500px" id="su1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dasu1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 06|</p>
+                    <textarea style="width:500px" id="dia1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dadia1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 07|</p>
+                    <textarea style="width:500px" id="van1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="davan1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 08|</p>
+                    <textarea style="width:500px" id="anh1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="daanh1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 09|</p>
+                    <textarea style="width:500px" id="thethao1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dathethao1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 10|</p>
+                    <textarea style="width:500px" id="nghethuat1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="danghethuat1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 11|</p>
+                    <textarea style="width:500px" id="hbc1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dahbc1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 12|</p>
+                    <textarea style="width:500px" id="lvk1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dalvk1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 13|</p>
+                    <textarea style="width:500px" id="cht11"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dacht11"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 14|</p>
+                    <textarea style="width:500px" id="cht21"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dacht21"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 15|</p>
+                    <textarea style="width:500px" id="cht31"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dacht31"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 16|</p>
+                    <textarea style="width:500px" id="cht41"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dacht41"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 17|</p>
+                    <textarea style="width:500px" id="cht51"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dacht51"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 18|</p>
+                    <textarea style="width:500px" id="cht61"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dacht61"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 19|</p>
+                    <textarea style="width:500px" id="cht71"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dacht71"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 20|</p>
+                    <textarea style="width:500px" id="cht81"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dacht81"></textarea>
+                </div>
+                <button class="button btn waves-effect waves-light " onclick="uploadQuestion();return false;">XÁC
+                    NHẬN</button>
+                <p id="notify-uploadkdgch1" style="color:lightblue"></p>
+            </form>
+            <br>
+            <div>
+                <p style="font-size:20px;">Gói câu hỏi 2</p>
+                <form id="goi2form">
+                    <div class="inline ">
+                        <p>|CÂU 01|</p>
+                        <textarea style="width:500px" id="toan2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="datoan2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 02|</p>
+                        <textarea style="width:500px" id="ly2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="daly2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 03|</p>
+                        <textarea style="width:500px" id="hoa2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dahoa2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 04|</p>
+                        <textarea style="width:500px" id="sinh2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dasinh2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 05|</p>
+                        <textarea style="width:500px" id="su2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dasu2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 06|</p>
+                        <textarea style="width:500px" id="dia2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dadia2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 07|</p>
+                        <textarea style="width:500px" id="van2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="davan2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 08|</p>
+                        <textarea style="width:500px" id="anh2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="daanh2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 09|</p>
+                        <textarea style="width:500px" id="thethao2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dathethao2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 10|</p>
+                        <textarea style="width:500px" id="nghethuat2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="danghethuat2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 11|</p>
+                        <textarea style="width:500px" id="hbc2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dahbc2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 12|</p>
+                        <textarea style="width:500px" id="lvk2"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dalvk2"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 13|</p>
+                        <textarea style="width:500px" id="cht12"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht12"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 14|</p>
+                        <textarea style="width:500px" id="cht22"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht22"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 15|</p>
+                        <textarea style="width:500px" id="cht32"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht32"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 16|</p>
+                        <textarea style="width:500px" id="cht42"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht42"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 17|</p>
+                        <textarea style="width:500px" id="cht52"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht52"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 18|</p>
+                        <textarea style="width:500px" id="cht62"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht62"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 19|</p>
+                        <textarea style="width:500px" id="cht72"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht72"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 20|</p>
+                        <textarea style="width:500px" id="cht82"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht82"></textarea>
+                    </div>
+                    <button class="button btn waves-effect waves-light " onclick="uploadQuestion2();return false;">XÁC
+                        NHẬN</button>
+                    <p id="notify-uploadkdgch2" style="color:lightblue"></p>
+                    <br>
+                </form>
+            </div>
+            <div>
+                <p style="font-size:20px;">Gói câu hỏi 3</p>
+                <form id="goi3form">
+                    <div class="inline ">
+                        <p>|CÂU 01|</p>
+                        <textarea style="width:500px" id="toan3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="datoan3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 02|</p>
+                        <textarea style="width:500px" id="ly3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="daly3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 03|</p>
+                        <textarea style="width:500px" id="hoa3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dahoa3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 04|</p>
+                        <textarea style="width:500px" id="sinh3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dasinh3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 05|</p>
+                        <textarea style="width:500px" id="su3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dasu3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 06|</p>
+                        <textarea style="width:500px" id="dia3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dadia3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 07|</p>
+                        <textarea style="width:500px" id="van3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="davan3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 08|</p>
+                        <textarea style="width:500px" id="anh3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="daanh3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 09|</p>
+                        <textarea style="width:500px" id="thethao3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dathethao3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 10|</p>
+                        <textarea style="width:500px" id="nghethuat3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="danghethuat3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 11|</p>
+                        <textarea style="width:500px" id="hbc3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dahbc3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 12|</p>
+                        <textarea style="width:500px" id="lvk3"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dalvk3"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 13|</p>
+                        <textarea style="width:500px" id="cht13"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht13"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 14|</p>
+                        <textarea style="width:500px" id="cht23"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht23"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 15|</p>
+                        <textarea style="width:500px" id="cht33"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht33"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 16|</p>
+                        <textarea style="width:500px" id="cht43"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht43"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 17|</p>
+                        <textarea style="width:500px" id="cht53"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht53"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 18|</p>
+                        <textarea style="width:500px" id="cht63"></textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht63"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 19|</p>
+                        <textarea style="width:500px" id="cht73"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht73"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 20|</p>
+                        <textarea style="width:500px" id="cht83"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht83"> </textarea>
+                    </div>
+                    <button class="button btn waves-effect waves-light " onclick="uploadQuestion3();return false;">XÁC
+                        NHẬN</button>
+                    <p id="notify-uploadkdgch3" style="color:lightblue"></p>
+                </form>
+            </div>
+            <div>
+                <p style="font-size: 20px;">Gói câu hỏi 4</p>
+                <form id="goi4form">
+                    <div class="inline ">
+                        <p>|CÂU 01|</p>
+                        <textarea style="width:500px" id="toan4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="datoan4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 02|</p>
+                        <textarea style="width:500px" id="ly4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="daly4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 03|</p>
+                        <textarea style="width:500px" id="hoa4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dahoa4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 04|</p>
+                        <textarea style="width:500px" id="sinh4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dasinh4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 05|</p>
+                        <textarea style="width:500px" id="su4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dasu4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 06|</p>
+                        <textarea style="width:500px" id="dia4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dadia4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 07|</p>
+                        <textarea style="width:500px" id="van4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="davan4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 08|</p>
+                        <textarea style="width:500px" id="anh4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="daanh4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 09|</p>
+                        <textarea style="width:500px" id="thethao4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dathethao4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 10|</p>
+                        <textarea style="width:500px" id="nghethuat4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="danghethuat4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 11|</p>
+                        <textarea style="width:500px" id="hbc4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dahbc4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 12|</p>
+                        <textarea style="width:500px" id="lvk4"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dalvk4"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 13|</p>
+                        <textarea style="width:500px" id="cht14"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht14"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 14|</p>
+                        <textarea style="width:500px" id="cht24"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht24"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 15|</p>
+                        <textarea style="width:500px" id="cht34"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht34"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 16|</p>
+                        <textarea style="width:500px" id="cht44"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht44"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 17|</p>
+                        <textarea style="width:500px" id="cht54"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht54"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 18|</p>
+                        <textarea style="width:500px" id="cht64"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht64"> </textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 19|</p>
+                        <textarea style="width:500px" id="cht74"> </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht74"></textarea>
+                    </div>
+                    <div class="inline ">
+                        <p>|CÂU 20|</p>
+                        <textarea style="width:500px" id="cht84">
+                    </textarea>
+                        <pre>  </pre>
+                        <p>|ĐÁP ÁN|</p>
+                        <textarea style="width:500px" id="dacht84">
+                </textarea>
+                    </div>
+                    <button class="button btn waves-effect waves-light " onclick="uploadQuestion4();return false;">XÁC
+                        NHẬN</button>
+                    <p id="notify-uploadkdgch4" style="color:lightblue"></p>
+                </form>
+            </div>
+
+
+        </div>
+
+        <div id="Obstacle">
+            <p class="Competition-Name">VƯỢT CHƯỚNG NGẠI VẬT</p>
+            <div style="margin-left:34px">
+                <form id="cnvkeytype" class="inline">
+                    <label id="labelkeytype" for="keytype4">Lựa chọn hiển thị kiểu Chướng ngại vật:</label>
+                    <select id="keytype" name="keytype4">
+                        <option id="kytu" value="1">ký tự</option>
+                        <option id="chucai" value="2">chữ cái</option>
+                        <option id="chuso" value="3">chữ số</option>
+                    </select>
+                    <pre>   </pre>
+                    <button class="button btn waves-effect waves-light " onclick="uploadCNVKeyType(); return false;">Xác
+                        nhận</button>
+                </form>
+                <p id="notify-uploadkcnv" style="color:lightblue;margin-left: 25px;"></p>
+                <pre></pre>
+                <span style="color: white;">|Ảnh CNV|</span> <img id="cnvimage">
+
+
+                <input type="file" onchange="chooseFile(event)" style="margin-left:30px"
+                    accept="image/x-png,image/gif,image/jpeg" />
+                <button class="button btn waves-effect waves-light " onclick="uploadCNVImage()">Tải lên</button>
+                <p id="notify-uploadhacnv" style="color:lightblue;margin-left: 25px;"></p>
+                <p id="notify-uploadhacnvfilesize" style="color:red;margin-left: 25px;"></p>
+            </div>
+            <div style="margin-left:30px">
+                <span style="color: white;">|Audio HN|</span>
+
+
+                <input type="file" onchange="chooseFile(event)" style="margin-left:30px" accept=".mp3,.wav" />
+                <button class="button btn waves-effect waves-light " onclick="uploadCNVAudio()">Tải lên</button>
+                <p id="notify-uploadatcnv" style="color:lightblue;margin-left: 25px;"></p>
+                <p id="notify-uploadatcnvfilesize" style="color:red;margin-left: 25px;"></p>
+            </div>
+            <audio controls style="width:300px;margin-left: 30px;" id="hnaudio"></audio>
+            <form id="cnvform">
+                <div style="margin-left:30px;margin-top: 100px;position: absolute;">
+                    <a style="color: white;">|CHƯỚNG NGẠI VẬT:|</a>
+                    <input style="width:300px; color:white" id="cnv" placeholder="Chướng ngại vật">
+                    <button class="button btn waves-effect waves-light " onclick="uploadCNV();return false;">XÁC
+                        NHẬN</button>
+                    <p id="notify-uploadchuongngaivat" style="color:lightblue;margin-left: 25px;"></p>
+                </div>
+
+            </form>
+            <pre>
+
+
+
+
+
+
+
+
+
+
+
+</pre>
+            <form id="hangngang">
+                <div class="inline ">
+                    <p>|CÂU HỎI HN 1:|</p>
+                    <textarea style="width:500px" id="chhn1"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN HN 1:|</p>
+                    <textarea style="width:500px" id="ctlhn1"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI HN 2:|</p>
+                    <textarea style="width:500px" id="chhn2"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN HN 2:|</p>
+                    <textarea style="width:500px" id="ctlhn2"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI HN 3:|</p>
+                    <textarea style="width:500px" id="chhn3"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN HN 3:|</p>
+                    <textarea style="width:500px" id="ctlhn3"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI HN 4:|</p>
+                    <textarea style="width:500px" id="chhn4"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN HN 4:|</p>
+                    <textarea style="width:500px" id="ctlhn4"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI Ô TT:| </p>
+                    <pre></pre>
+                    <textarea style="width:500px;" id="chhntt"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN Ô TT:|</p>
+                    <pre> </pre>
+                    <textarea style="width:500px;" id="ctlhntt"> </textarea>
+                </div>
+                <button class="button btn waves-effect waves-light " onclick="uploadHN();return false;">XÁC
+                    NHẬN</button>
+                <p id="notify-uploadchcnv" style="color:lightblue"></p>
+            </form>
+        </div>
+
+
+
+
+
+        <div id="Acceleration">
+            <p class="Competition-Name">TĂNG TỐC</p>
+            <!-- <div class="inline">
+                <span style="color:white;">File Tăng tốc 1</span>
+                <Button id="ImagesTT1Btn" onclick="displayTT1(false)">Chuỗi hình ảnh</Button>
+                <Button id="VideoTT1Btn" onclick="displayTT1(true)">Video</Button>
+                <div id="ImageUploadTT1" style="display: none;">
+                    <div id="imageList">
+                        <div class="imageItem">
+                            <input type="file" accept="image/*" onchange="chooseImage(event)" />
+                            <input type="text" placeholder="Thời gian hiển thị (giây)" />
+                            <button class="removeBtn" onclick="removeImageItem(this)">-</button>
+                        </div>
+                    </div>
+                    <button id="addImageBtn" onclick="addImageItem()">+</button>
+                    <button class="button btn waves-effect waves-light" onclick="uploadImageSequence()">Tải lên</button>
+                    <span id="notify-uploadimgtt1" style="color:lightblue"></span>
+                </div>
+                <div id="tt1Preview"></div>
+
+                <div id="VideoUploadTT1" style="display: none;">
+                    <input accept="video/*, image/*" type="file" onchange="chooseFile(event)" />
+                    <button class="button btn waves-effect waves-light " onclick="uploadTT1Image()">Tải lên</button>
+                    <span id="notify-uploadvidtt1" style="color:lightblue"></span>
+                    <span id="notify-uploadvidtt1filesize" style="color:red"></span>
+                    <video controls id="tt1" style="width:400px;height:250px"></video>
+                </div>
+            </div> -->
+            <div style="display: flex; gap: 10px;">
+                <div>
+                    <div>
+                        <span style="color:white;">File Tăng tốc 1</span>
+                        <input accept="video/*, image/*" type="file" onchange="chooseFile(event)" />
+                        <button class="button btn waves-effect waves-light " onclick="uploadTT1Image()">Tải lên</button>
+                        <span id="notify-uploadvidtt1" style="color:lightblue"></span>
+                        <span id="notify-uploadvidtt1filesize" style="color:red"></span>
+                    </div>
+                    <div>
+                        <span style="color:white">File Tăng tốc 2</span>
+                        <input accept="video/*, image/*" type="file" onchange="chooseFile(event)" />
+                        <button class="button btn waves-effect waves-light " onclick="uploadTT2Video()">Tải lên</button>
+                        <span id="notify-uploadvidtt2" style="color:lightblue"></span>
+                        <span id="notify-uploadvidtt2filesize" style="color:red"></span>
+                    </div>
+                    <div>
+                        <span style="color:white;">File Tăng tốc 3</span>
+                        <input accept="video/*, image/*" type="file" onchange="chooseFile(event)" />
+                        <button class="button btn waves-effect waves-light " onclick="uploadTT3Image()">Tải lên</button>
+                        <span id="notify-uploadvidtt3" style="color:lightblue"></span>
+                        <span id="notify-uploadvidtt3filesize" style="color:red"></span>
+                    </div>
+                    <div>
+                        <span style="color:white">File Tăng tốc 4</span>
+                        <input accept="video/*, image/*" type="file" onchange="chooseFile(event)" />
+                        <button class="button btn waves-effect waves-light " onclick="uploadTT4Video()">Tải lên</button>
+                        <span id="notify-uploadvidtt4" style="color:lightblue"></span>
+                        <span id="notify-uploadvidtt4filesize" style="color:red"></span>
+                    </div>
+                </div>
+
+                <div>
+                    <div>
+                        <span style="color:white;">File đáp án Tăng tốc 1</span>
+                        <input accept="video/*, image/*" type="file" onchange="chooseFile(event)" />
+                        <button class="button btn waves-effect waves-light " onclick="uploadDATTImage(1)">Tải
+                            lên</button>
+                        <span id="notify-uploadvidtt1" style="color:lightblue"></span>
+                        <span id="notify-uploadvidtt1filesize" style="color:red"></span>
+                    </div>
+                    <div>
+                        <span style="color:white">File đáp án Tăng tốc 2</span>
+                        <input accept="video/*, image/*" type="file" onchange="chooseFile(event)" />
+                        <button class="button btn waves-effect waves-light " onclick="uploadDATTImage(2)">Tải
+                            lên</button>
+                        <span id="notify-uploadvidtt2" style="color:lightblue"></span>
+                        <span id="notify-uploadvidtt2filesize" style="color:red"></span>
+                    </div>
+                    <div>
+                        <span style="color:white;">File đáp án Tăng tốc 3</span>
+                        <input accept="video/*, image/*" type="file" onchange="chooseFile(event)" />
+                        <button class="button btn waves-effect waves-light " onclick="uploadDATTImage(3)">Tải
+                            lên</button>
+                        <span id="notify-uploadvidtt3" style="color:lightblue"></span>
+                        <span id="notify-uploadvidtt3filesize" style="color:red"></span>
+                    </div>
+                    <div>
+                        <span style="color:white">File đáp án Tăng tốc 4</span>
+                        <input accept="video/*, image/*" type="file" onchange="chooseFile(event)" />
+                        <button class="button btn waves-effect waves-light " onclick="uploadDATTImage(4)">Tải
+                            lên</button>
+                        <span id="notify-uploadvidtt4" style="color:lightblue"></span>
+                        <span id="notify-uploadvidtt4filesize" style="color:red"></span>
+                    </div>
+                </div>
+            </div>
+            <pre>
+
+        </pre>
+            <div class="videottpreview">
+                <p>Câu hỏi:</p>
+                <video controls id="tt1" style="width:400px;height:250px"></video>
+                <video controls id="tt2" style="width:400px;height:250px"></video>
+                <video controls id="tt3" style="width:400px;height:250px"></video>
+                <video controls id="tt4" style="width:400px;height:250px"></video>
+            </div>
+            <div class="videottpreview">
+                <p>Đáp án:</p>
+                <video controls id="answertt1" style="width:400px;height:250px"></video>
+                <video controls id="answertt2" style="width:400px;height:250px"></video>
+                <video controls id="answertt3" style="width:400px;height:250px"></video>
+                <video controls id="answertt4" style="width:400px;height:250px"></video>
+            </div>
+            <pre>
+
+        </pre>
+            <form id="tangtoc">
+                <div class="inline ">
+                    <p>|CÂU HỎI TĂNG TỐC 1:|</p>
+                    <textarea style="width:500px" id="chtt1"> </textarea>
+                    <pre>   </pre>
+                    <p>|ĐÁP ÁN TĂNG TỐC 1:|</p>
+                    <textarea style="width:500px" id="ctltt1"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI TĂNG TỐC 2:|</p>
+                    <textarea style="width:500px" id="chtt2"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN TĂNG TỐC 2:|</p>
+                    <textarea style="width:500px" id="ctltt2"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI TĂNG TỐC 3:|</p>
+                    <textarea style="width:500px" id="chtt3"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN TĂNG TỐC 3:|</p>
+                    <textarea style="width:500px" id="ctltt3"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI TĂNG TỐC 4:|</p>
+                    <textarea style="width:500px" id="chtt4"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN TĂNG TỐC 4:|</p>
+                    <textarea style="width:500px" id="ctltt4"> </textarea>
+                </div>
+                <button class="button btn waves-effect waves-light " onclick="uploadTT();return false;">XÁC
+                    NHẬN</button>
+                <p id="notify-uploadtt" style="color:lightblue"></p>
+            </form>
+        </div>
+        <div id="Finish">
+            <p class="Competition-Name">VỀ ĐÍCH</p>
+            <div>
+                <p>Video/Audio câu hỏi</p>
+                <span style="color:white">Video/Audio về đích TS 1</span>
+                <input accept="video/*,audio/*" type="file" onchange="chooseFile(event)">
+                <button class="button btn waves-effect waves-light " onclick="uploadVD1Video();">Tải lên</button>
+                <span id="notify-uploadvidvd1" style="color:lightblue"></span>
+                <span id="notify-uploadvidvd1filesize" style="color:red"></span>
+                <br>
+                <span style="color:white">Video/Audio về đích TS 2</span>
+                <input accept="video/*,audio/*" type="file" onchange="chooseFile(event)" />
+                <button class="button btn waves-effect waves-light " onclick="uploadVD2Video();">Tải lên</button>
+                <span id="notify-uploadvidvd2" style="color:lightblue"></span>
+                <span id="notify-uploadvidvd2filesize" style="color:red"></span>
+                <br>
+                <span style="color:white">Video/Audio về đích TS 3</span>
+                <input accept="video/*,audio/*" type="file" onchange="chooseFile(event)" />
+                <button class="button btn waves-effect waves-light " onclick="uploadVD3Video();">Tải lên</button>
+                <span id="notify-uploadvidvd3" style="color:lightblue"></span>
+                <span id="notify-uploadvidvd3filesize" style="color:red"></span>
+                <br>
+                <span style="color:white">Video/Audio về đích TS 4</span>
+                <input accept="video/*,audio/*" type="file" onchange="chooseFile(event)" />
+                <button class="button btn waves-effect waves-light " onclick="uploadVD4Video();">Tải lên</button>
+                <span id="notify-uploadvidvd4" style="color:lightblue"></span>
+                <span id="notify-uploadvidvd4filesize" style="color:red"></span>
+            </div>
+            <div class="videottpreview">
+                <video controls id="video1" style="width:378px;height:250px"></video>
+                <video controls id="video2" style="width:378px;height:250px"></video>
+                <video controls id="video3" style="width:378px;height:250px"></video>
+                <video controls id="video4" style="width:378px;height:250px"></video>
+            </div>
+            <p style="font-size: 30px;">Gói câu hỏi 1/Thí sinh 1</p>
+            <form id="vedich">
+                <p style="font-size: 25px;">Gói câu hỏi 10 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g1chvd11"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g1ctlvd11"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g1chvd12"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g1ctlvd12"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g1chvd13"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g1ctlvd13"> </textarea>
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 20 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g1chvd21"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g1ctlvd21"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g1chvd22"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g1ctlvd22"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g1chvd23"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g1ctlvd23"> </textarea>
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 30 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g1chvd31"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g1ctlvd31"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g1chvd32"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g1ctlvd32"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g1chvd33"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g1ctlvd33"> </textarea>
+                </div>
+                <p style="font-size: 30px;">Gói câu hỏi 2/Thí sinh 2</p>
+                <div>
+
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 10 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g2chvd11"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g2ctlvd11"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g2chvd12"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g2ctlvd12"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g2chvd13"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g2ctlvd13"> </textarea>
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 20 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g2chvd21"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g2ctlvd21"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g2chvd22"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g2ctlvd22"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g2chvd23"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g2ctlvd23"> </textarea>
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 30 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g2chvd31"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g2ctlvd31"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g2chvd32"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g2ctlvd32"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g2chvd33"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g2ctlvd33"> </textarea>
+                </div>
+                <p style="font-size: 30px;">Gói câu hỏi 3/Thí sinh 3</p>
+                <div>
+
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 10 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g3chvd11"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g3ctlvd11"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g3chvd12"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g3ctlvd12"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g3chvd13"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g3ctlvd13"> </textarea>
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 20 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g3chvd21"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g3ctlvd21"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g3chvd22"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g3ctlvd22"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g3chvd23"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g3ctlvd23"> </textarea>
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 30 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g3chvd31"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g3ctlvd31"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g3chvd32"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g3ctlvd32"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g3chvd33"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g3ctlvd33"> </textarea>
+                </div>
+                <p style="font-size: 30px;">Gói câu hỏi 4/Thí sinh 4</p>
+                <div>
+
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 10 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g4chvd11"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g4ctlvd11"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g4chvd12"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g4ctlvd12"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g4chvd13"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g4ctlvd13"> </textarea>
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 20 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g4chvd21"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g4ctlvd21"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g4chvd22"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g4ctlvd22"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g4chvd23"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g4ctlvd23"> </textarea>
+                </div>
+                <p style="font-size: 25px;">Gói câu hỏi 30 điểm</p>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g4chvd31"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g4ctlvd31"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g4chvd32"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g4ctlvd32"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI|</p>
+                    <textarea style="width:500px" id="g4chvd33"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="g4ctlvd33"> </textarea>
+                </div>
+                <button class="button btn waves-effect waves-light " onclick="uploadVD();return false;">Xác
+                    nhận</button>
+                <p id="notify-uploadchvd" style="color:lightblue"></p>
+            </form>
+        </div>
+
+
+
+        <div id="ExtraQuestion">
+            <p class="Competition-Name">CÂU HỎI PHỤ</p>
+            <form id="chpqs">
+                <div class="inline ">
+                    <p>|CÂU HỎI 01|</p>
+                    <textarea style="width:500px" id="chvdp1"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="ctlvdp1"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI 02|</p>
+                    <textarea style="width:500px" id="chvdp2"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="ctlvdp2"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI 03|</p>
+                    <textarea style="width:500px" id="chvdp3"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="ctlvdp3"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI 04|</p>
+                    <textarea style="width:500px" id="chvdp4"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="ctlvdp4"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI 05|</p>
+                    <textarea style="width:500px" id="chvdp5"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="ctlvdp5"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI 06|</p>
+                    <textarea style="width:500px" id="chvdp6"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="ctlvdp6"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI 07|</p>
+                    <textarea style="width:500px" id="chvdp7"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="ctlvdp7"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI 08|</p>
+                    <textarea style="width:500px" id="chvdp8"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="ctlvdp8"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI 09|</p>
+                    <textarea style="width:500px" id="chvdp9"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="ctlvdp9"> </textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU HỎI 10|</p>
+                    <textarea style="width:500px" id="chvdp10"> </textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="ctlvdp10"> </textarea>
+                </div>
+                <button class="button btn waves-effect waves-light " onclick="uploadCHP();return false;">Xác
+                    nhận</button>
+                <p id="notify-uploadchvdp" style="color:lightblue"></p>
+            </form>
+        </div>
+
+
+
+
+        <div id="StartO23">
+            <p class="Competition-Name">KHỞI ĐỘNG II</p>
+            <div>
+                <p style="font-size:24px;">Lượt 1</p>
+            </div>
+            <form id="kdo22qsl1">
+                <div class="inline ">
+                    <p>|CÂU 01|</p>
+                    <textarea style="width:500px" id="kdo22l1c1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 02|</p>
+                    <textarea style="width:500px" id="kdo22l1c2"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c2"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 03|</p>
+                    <textarea style="width:500px" id="kdo22l1c3"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c3"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 04|</p>
+                    <textarea style="width:500px" id="kdo22l1c4"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c4"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 05|</p>
+                    <textarea style="width:500px" id="kdo22l1c5"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c5"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 06|</p>
+                    <textarea style="width:500px" id="kdo22l1c6"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c6"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 07|</p>
+                    <textarea style="width:500px" id="kdo22l1c7"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c7"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 08|</p>
+                    <textarea style="width:500px" id="kdo22l1c8"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c8"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 09|</p>
+                    <textarea style="width:500px" id="kdo22l1c9"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c9"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 10|</p>
+                    <textarea style="width:500px" id="kdo22l1c10"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c10"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 11|</p>
+                    <textarea style="width:500px" id="kdo22l1c11"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c11"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 12|</p>
+                    <textarea style="width:500px" id="kdo22l1c12"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c12"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 13|</p>
+                    <textarea style="width:500px" id="kdo22l1c13"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c13"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 14|</p>
+                    <textarea style="width:500px" id="kdo22l1c14"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c14"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 15|</p>
+                    <textarea style="width:500px" id="kdo22l1c15"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l1c15"></textarea>
+                </div>
+                <p id="notify-uploadkdo22l1" style="color:lightblue"></p>
+                <button class="button btn waves-effect waves-light " onclick="uploadL1KDO22Question();return false;">Xác
+                    nhận</button>
+            </form>
+            <div>
+                <p style="font-size:24px;">Lượt 2</p>
+            </div>
+            <form id="kdo22qsl2">
+                <div class="inline ">
+                    <p>|CÂU 01|</p>
+                    <textarea style="width:500px" id="kdo22l2c1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 02|</p>
+                    <textarea style="width:500px" id="kdo22l2c2"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c2"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 03|</p>
+                    <textarea style="width:500px" id="kdo22l2c3"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c3"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 04|</p>
+                    <textarea style="width:500px" id="kdo22l2c4"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c4"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 05|</p>
+                    <textarea style="width:500px" id="kdo22l2c5"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c5"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 06|</p>
+                    <textarea style="width:500px" id="kdo22l2c6"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c6"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 07|</p>
+                    <textarea style="width:500px" id="kdo22l2c7"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c7"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 08|</p>
+                    <textarea style="width:500px" id="kdo22l2c8"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c8"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 09|</p>
+                    <textarea style="width:500px" id="kdo22l2c9"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c9"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 10|</p>
+                    <textarea style="width:500px" id="kdo22l2c10"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c10"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 11|</p>
+                    <textarea style="width:500px" id="kdo22l2c11"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c11"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 12|</p>
+                    <textarea style="width:500px" id="kdo22l2c12"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c12"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 13|</p>
+                    <textarea style="width:500px" id="kdo22l2c13"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c13"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 14|</p>
+                    <textarea style="width:500px" id="kdo22l2c14"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c14"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 15|</p>
+                    <textarea style="width:500px" id="kdo22l2c15"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c15"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 16|</p>
+                    <textarea style="width:500px" id="kdo22l2c16"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c16"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 17|</p>
+                    <textarea style="width:500px" id="kdo22l2c17"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c17"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 18|</p>
+                    <textarea style="width:500px" id="kdo22l2c18"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c18"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 19|</p>
+                    <textarea style="width:500px" id="kdo22l2c19"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c19"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 20|</p>
+                    <textarea style="width:500px" id="kdo22l2c20"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c20"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 21|</p>
+                    <textarea style="width:500px" id="kdo22l2c21"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c21"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 22|</p>
+                    <textarea style="width:500px" id="kdo22l2c22"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c22"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 23|</p>
+                    <textarea style="width:500px" id="kdo22l2c23"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c23"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 24|</p>
+                    <textarea style="width:500px" id="kdo22l2c24"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c24"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 25|</p>
+                    <textarea style="width:500px" id="kdo22l2c25"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l2c25"></textarea>
+                </div>
+                <p id="notify-uploadkdo22l2" style="color:lightblue"></p>
+                <button class="button btn waves-effect waves-light " onclick="uploadL2KDO22Question();return false;">Xác
+                    nhận</button>
+            </form>
+            <div>
+                <p style="font-size:24px;">Lượt 3</p>
+            </div>
+            <form id="kdo22qsl3">
+                <div class="inline ">
+                    <p>|CÂU 01|</p>
+                    <textarea style="width:500px" id="kdo22l3c1"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c1"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 02|</p>
+                    <textarea style="width:500px" id="kdo22l3c2"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c2"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 03|</p>
+                    <textarea style="width:500px" id="kdo22l3c3"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c3"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 04|</p>
+                    <textarea style="width:500px" id="kdo22l3c4"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c4"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 05|</p>
+                    <textarea style="width:500px" id="kdo22l3c5"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c5"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 06|</p>
+                    <textarea style="width:500px" id="kdo22l3c6"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c6"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 07|</p>
+                    <textarea style="width:500px" id="kdo22l3c7"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c7"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 08|</p>
+                    <textarea style="width:500px" id="kdo22l3c8"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c8"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 09|</p>
+                    <textarea style="width:500px" id="kdo22l3c9"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c9"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 10|</p>
+                    <textarea style="width:500px" id="kdo22l3c10"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c10"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 11|</p>
+                    <textarea style="width:500px" id="kdo22l3c11"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c11"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 12|</p>
+                    <textarea style="width:500px" id="kdo22l3c12"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c12"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 13|</p>
+                    <textarea style="width:500px" id="kdo22l3c13"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c13"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 14|</p>
+                    <textarea style="width:500px" id="kdo22l3c14"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c14"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 15|</p>
+                    <textarea style="width:500px" id="kdo22l3c15"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c15"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 16|</p>
+                    <textarea style="width:500px" id="kdo22l3c16"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c16"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 17|</p>
+                    <textarea style="width:500px" id="kdo22l3c17"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c17"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 18|</p>
+                    <textarea style="width:500px" id="kdo22l3c18"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c18"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 19|</p>
+                    <textarea style="width:500px" id="kdo22l3c19"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c19"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 20|</p>
+                    <textarea style="width:500px" id="kdo22l3c20"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c20"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 21|</p>
+                    <textarea style="width:500px" id="kdo22l3c21"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c21"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 22|</p>
+                    <textarea style="width:500px" id="kdo22l3c22"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c22"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 23|</p>
+                    <textarea style="width:500px" id="kdo22l3c23"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c23"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 24|</p>
+                    <textarea style="width:500px" id="kdo22l3c24"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c24"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 25|</p>
+                    <textarea style="width:500px" id="kdo22l3c25"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c25"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 26|</p>
+                    <textarea style="width:500px" id="kdo22l3c26"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c26"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 27|</p>
+                    <textarea style="width:500px" id="kdo22l3c27"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c27"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 28|</p>
+                    <textarea style="width:500px" id="kdo22l3c28"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c28"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 29|</p>
+                    <textarea style="width:500px" id="kdo22l3c29"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c29"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 30|</p>
+                    <textarea style="width:500px" id="kdo22l3c30"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c30"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 31|</p>
+                    <textarea style="width:500px" id="kdo22l3c31"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c31"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 32|</p>
+                    <textarea style="width:500px" id="kdo22l3c32"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c32"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 33|</p>
+                    <textarea style="width:500px" id="kdo22l3c33"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c33"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 34|</p>
+                    <textarea style="width:500px" id="kdo22l3c34"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c34"></textarea>
+                </div>
+                <div class="inline ">
+                    <p>|CÂU 35|</p>
+                    <textarea style="width:500px" id="kdo22l3c35"></textarea>
+                    <pre>  </pre>
+                    <p>|ĐÁP ÁN|</p>
+                    <textarea style="width:500px" id="dakdo22l3c35"></textarea>
+                </div>
+                <p id="notify-uploadkdo22l3" style="color:lightblue"></p>
+                <button class="button btn waves-effect waves-light " onclick="uploadL3KDO22Question();return false;">Xác
+                    nhận</button>
+            </form>
+        </div>
+    </div>
+    </div>
+    </div>
+
+    <div class="notification">
+        <p id="notification-text"></p>
+    </div>
+</body>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-functions.js"></script>
+<script src="js/authloggedin.js"></script>
+<script src="js/keyboardshortcut.js"></script>
+<script src="js/index.js"></script>
+<script src="js/QuestionManager.js"></script>
+<script src="js/video.js"></script>
+<script src="js/blockConsole.js"></script>
+
+</html>

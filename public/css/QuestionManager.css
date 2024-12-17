@@ -1,0 +1,435 @@
+body {
+    background-color: #121921;
+    /* overflow-x: hidden; */
+    font-family: 'Baloo 2', cursive;
+}
+
+input {
+    left: 15px;
+    margin-left: 10px;
+}
+
+
+.brand {
+    padding-left: 20px;
+    padding-top: 20px;
+    padding: 10px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.brand-text {
+    display: inline-block;
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #7FB0E0
+}
+
+.superscript {
+    position: relative;
+    top: -0.5em;
+    font-size: 40%;
+}
+
+
+.multichat {
+    width: 1200px;
+    height: 650px;
+    margin: left;
+    border: 3px solid #000000;
+    background: white;
+    border-radius: 10px;
+    overflow-y: scroll;
+}
+
+.player {
+    width: 250px;
+    height: 650px;
+    margin-right: 15px;
+    right: 10px;
+    border: 3px solid #000000;
+    background: white;
+    border-radius: 10px;
+}
+
+.sectionname {
+    font-family: 'Baloo 2', cursive;
+    font-size: 30px;
+    font-weight: 500;
+    margin-left: 50px;
+    color: white;
+}
+
+
+.match-css {
+    display: fixed;
+    margin: auto;
+    width: 300px;
+    height: 20px;
+    border: 3px solid #000000;
+    background: white;
+    border-radius: 10px;
+    padding: 40px;
+    padding-left: 90px;
+    top: 400px;
+}
+
+
+.button-intomatch {
+    position: absolute;
+    right: 0;
+    width: 100px;
+    height: 30px;
+    background-color: white;
+    margin-right: 10px;
+    color: #7FB0E0;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.button-logout {
+    position: absolute;
+    right: 0;
+    top: 60px;
+    width: 100px;
+    height: 30px;
+    background-color: white;
+    margin-right: 10px;
+    color: #7FB0E0;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+
+
+#product-logo {
+    position: absolute;
+    width: 32px;
+    left: 10px;
+    top: 15px;
+}
+
+.match {
+    width: 100%;
+    height: 49px;
+    background-color: #121921;
+    font-size: 15px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+
+}
+
+.inline {
+    display: flex;
+    margin-top: 10px;
+}
+
+.chat {
+    margin-left: 12px;
+    margin-top: 30px;
+    width: auto;
+}
+
+.chatbar {
+    width: 1460px;
+    height: 20px;
+    border-radius: 5px;
+    border: 3px solid #000000;
+}
+
+.pointinm {
+    position: absolute;
+    margin-left: 200px;
+    font-weight: bold;
+}
+
+
+
+.videottpreview {
+    overflow-x: auto;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: white;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(54, 56, 58);
+}
+
+.Competition-Name {
+    font-size: 35px;
+    font-weight: bold;
+}
+
+
+.notification {
+    position: fixed;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+    height: 40px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    background-color: #009A9C;
+    bottom: 35px;
+    animation-name: in;
+    animation-duration: 0.3s;
+    display: none;
+    z-index: 1;
+}
+
+@keyframes in {
+    0% {
+        position: fixed;
+        bottom: 0px;
+        visibility: hidden;
+    }
+
+    80% {
+        position: fixed;
+        bottom: 60px;
+        visibility: visible;
+    }
+
+    100% {
+        position: fixed;
+        bottom: 35px;
+        visibility: visible;
+    }
+}
+
+#notification-text {
+    text-align: center;
+    font-weight: 500;
+    font-size: 15px;
+    color: white;
+    margin-top: 10px;
+    font-family: 'Baloo 2', cursive;
+}
+
+
+
+#labelkeytype {
+    color: white;
+    font-size: 15px;
+}
+
+#keytype {
+    display: block;
+    width: 83px;
+    height: 30px;
+    font-size: 15px;
+    margin-left: 10px;
+}
+
+
+.thirdlnbtn {
+    background-color: #009A9C;
+    font-family: 'Baloo 2', cursive;
+    height: 45px;
+    width: 120px;
+    font-size: 16px;
+    border: 1px solid black;
+    color: white;
+    border-radius: 10px;
+    margin-left: 3px;
+    font-size: 14px;
+    margin-top: 20px;
+}
+
+
+
+
+#GeneralInfo {
+    margin-left: 20px;
+    display: none;
+}
+
+#Obstacle {
+    margin-left: 20px;
+    display: none;
+}
+
+#Acceleration {
+    margin-left: 20px;
+    display: none;
+}
+
+#Finish {
+    margin-left: 20px;
+    display: none;
+}
+
+#Start {
+    margin-left: 20px;
+    display: none;
+}
+
+#StartO23 {
+    margin-left: 20px;
+    display: none;
+}
+
+#ExtraQuestion {
+    margin-left: 20px;
+    display: none;
+}
+
+.control {
+    width: 120px;
+}
+
+
+
+.thirdlnbtn:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
+button {
+    background: #036768;
+    font-family: 'Baloo 2', cursive;
+    height: 35px;
+    min-width: 120px;
+    width: fit-content;
+    font-size: 16px;
+    border: 1px solid black;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+input {
+    background-color: #171E28;
+    color: #6ce3e5;
+    font-size: 14px;
+    font-family: 'Baloo 2', cursive;
+    font-weight: 300;
+    border: none;
+    border-radius: 10px;
+}
+
+
+
+input::file-selector-button {
+    background-color: #46515f;
+    color: white;
+    font-size: 14px;
+    font-family: 'Baloo 2', cursive;
+    font-weight: 300;
+    border: none;
+    border-radius: 10px;
+}
+
+input::file-selector-button:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.IntroUpload span {
+    font-size: 18px;
+    font-weight: 200;
+    margin: 0 auto;
+}
+
+textarea {
+    background-color: #171E28;
+    color: #6ce3e5;
+    font-size: 14px;
+    font-family: 'Baloo 2', cursive;
+    font-weight: 300;
+    height: 50px;
+    border: none;
+    border-radius: 10px;
+    margin-left: 5px;
+}
+
+p {
+    color: white
+}
+
+#cnvimage {
+    position: absolute;
+    width: 450px;
+    height: 350px;
+    border-radius: 10px;
+    margin-left: 700px;
+    border: 3px white solid;
+    object-fit: cover;
+    top: 120px;
+}
+
+#matchname {
+    margin-left: 0px;
+    padding: 10px;
+}
+
+.ExcelUpload {
+    background-color: #171E28;
+    padding: 10px;
+    display: inline-block;
+    border-radius: 10px;
+}
+
+.intro-input {
+    position: relative;
+    margin-top: 10px;
+
+}
+
+.IntroUpload {
+    background-color: #171E28;
+    margin-top: 50px;
+    width: 380px;
+    border-radius: 10px;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 0, 0, 0.5);
+    /* Red color with 50% opacity */
+    pointer-events: none;
+    /* Allows interaction with elements behind the overlay */
+    z-index: 0;
+    /* Ensure the overlay is behind other elements */
+}
+
+
+/* Add your custom CSS styles here */
+.imageItem {
+    margin-bottom: 10px;
+}
+.removeBtn {
+    margin-left: 5px;
+}
+
+li{
+    list-style-type: none;
+}
+
+th {
+    color: white;
+}
