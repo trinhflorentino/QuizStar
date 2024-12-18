@@ -135,10 +135,12 @@ function FormMaker() {
       // Check if an answer is selected
       if (
         (question.type === "mcq" && (question.answer === "" || question.answer === null)) ||
-        (question.type === "truefalse" 
-          // && !options.some(opt => opt.answer === true || opt.answer === false) 
+        (question.type === "truefalse" && 
+           !options.some(opt => opt.answer === true || opt.answer === false) 
         )
       ) {
+        console.log(question);
+        console.log(options);
         alert(`Vui lòng chọn đáp án cho câu hỏi ${i + 1}.`);
         return false;
       }
@@ -167,10 +169,10 @@ function FormMaker() {
         }
       } else if (question.type === "truefalse") {
         // Ensure there are exactly two options for True/False
-        if (options.length !== 2) {
-          alert(`True/False question ${i + 1} must have exactly two options.`);
-          return false;
-        }
+        // if (options.length !== 2) {
+        //   alert(`True/False question ${i + 1} must have exactly two options.`);
+        //   return false;
+        // }
 
         // Check that each option text is not empty
         for (let j = 0; j < options.length; j++) {
@@ -335,10 +337,14 @@ function FormMaker() {
   // const apiKey = "AIzaSyD0CdU3giLumipay1SVMpPDO4uFD6iF-HM"; 
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({
-    model: "gemini-exp-1206", 
+    model: "gemini-1.5-flash", 
     generationConfig: {
       "responseMimeType": "application/json",
       // responseSchema: schema,
+      temperature: 0.6,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 8192,    
     },
   });
 
