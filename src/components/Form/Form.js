@@ -202,39 +202,39 @@ function Form() {
                 </div>
                 <ul className="stu_info">
                   <li>
-                    Name:{" "}
+                    Họ và tên:{" "}
                     <input
                       type="text"
                       id="studName"
                       className="studInfo faintShadow"
-                      placeholder="Enter Name"
+                      placeholder="Nhập họ và tên"
                     ></input>
                   </li>
                   <li>
-                    Roll No:{" "}
+                    lớp:{" "}
                     <input
                       type="text"
                       id="studRollNo"
                       className="studInfo faintShadow"
-                      placeholder="Enter Roll Number"
+                      placeholder="Nhập lớp"
                     ></input>
                   </li>
                   <li>
-                    Class:{" "}
+                    Trường:{" "}
                     <input
                       type="text"
                       id="studClass"
                       className="studInfo faintShadow"
-                      placeholder="Enter Class"
+                      placeholder="Nhập trường"
                     ></input>
-                  </li>
+                  </li> 
                 </ul>
                 {questions.map((question, questionIndex) => {
                   // console.log(question);
                   return (
                     <div key={uuid()}>
                       <p className="questionP">
-                        {" "}
+                        {"Câu "}
                         {questionIndex + 1}. {question.question}
                       </p>
                       {question.options.map((option, optionIndex) => {
@@ -286,13 +286,13 @@ function Form() {
               <p className="centeredP">Creator has closed the responses!</p>
             )
           ) : (
-            <p className="centeredP">You have already attempted this exam!</p>
+            <p className="centeredP">Bạn đã làm bài kiểm tra này rồi.</p>
           )
         ) : (
-          <p className="centeredP">Incorrect Pin</p>
+          <p className="centeredP">Sai mã pin.</p>
         )
       ) : (
-        <p className="centeredP">Loading...</p>
+        <p className="centeredP">Đang tải...</p>
       )}
     </form>
   );
