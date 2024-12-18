@@ -14,6 +14,7 @@ import About from "./pages/About";
 import React from 'react';
 import LegacyRedirect from "./components/LegacyRedirect";
 import Login from "./components/Login";
+import MathConfig from "./components/MathJaxTest";
 
 function App() {
   React.useEffect(() => {
@@ -59,6 +60,7 @@ function App() {
           ></Route>
           <Route path="/Main" element={<LegacyRedirect />} />
           <Route path="/Login" element={<Login />} />
+          <Route path="/Math" element={<MathConfig />} />
         </Routes>
       </BrowserRouter>
     </div>

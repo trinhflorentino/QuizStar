@@ -11,10 +11,10 @@ import {
   getDocs,
   setDoc,
 } from "firebase/firestore/lite";
+// import { MathJaxContext, MathJax } from 'better-react-mathjax';
 
 function Form() {
   const [questions, setQuestions] = useState(() => []);
-  // const [options, setOptions] = useState(() => [{}]);
   const [title, setTitle] = useState();
   const [selectedList, setSelectedList] = useState(() => [{}]);
   const [studInfo, setStudInfo] = useState(() => {});
@@ -24,9 +24,7 @@ function Form() {
 
   useEffect(() => {
     async function f() {
-      // console.log(Object.keys(selectedList[0]).length);
-      if (Object.keys(selectedList[0]).length !== 0) {
-        // console.log(studInfo);
+      if (selectedList.length > 0 && Object.keys(selectedList[0]).length !== 0) {
         await setDoc(
           doc(
             db,
@@ -71,7 +69,6 @@ function Form() {
             );
             // console.log(check.data());
             if (check.data() === undefined) {
-              //console.log("Not Attempted");
               res(false);
             } else {
               //console.log("Already Attempted");
@@ -87,39 +84,32 @@ function Form() {
         return some;
       }
 
-      // async function statusChecker() {
-
-      // }
-
       const getQuestions = async () => {
         //function to get Question Paper
         const settersCollectionRef = collection(
-          //Path to Question Papers Collection
           db,
           "Paper_Setters",
           pin.toString(),
           "Question_Papers_MCQ"
         );
-        const docos = await getDocs(settersCollectionRef); //Getting all documents inside Question Papers Collection
+        const docos = await getDocs(settersCollectionRef);
         if (Object.keys(docos.docs).length !== 0) {
           //checks whether the Question Papers collection is empty
           // console.log(await attemptChecker());
           if ((await attemptChecker()) === true) {
-            //calls attemptChecker() which checks if the user has already attempted the exam
             setQuestions("Already Attempted");
           } else {
             const docosData = docos.docs.map((docs, index) => {
               if (index === 0) {
-                //checks index === 0 because the question paper always gets stored as the first document in the Question Papers collection
-                setTitle(docs.id); //sets Quiz Title
+                setTitle(docs.id);
               }
               return docs.data(); //returns question paper
             });
-            setQuestions(docosData[0]["question_question"].map((doc) => doc)); //sets question paper
-            setStatus(docosData[0]["status"]); //sets status already attempted or appearing for the first time
+            setQuestions(docosData[0]["question_question"].map((doc) => doc));
+            setStatus(docosData[0]["status"]);
           }
         } else {
-          setQuestions("Sai mã pin"); //if Question Papers collection is empty
+          setQuestions("Sai mã pin");
         }
       };
 
@@ -133,9 +123,7 @@ function Form() {
   }, [questions]);
 
   function onSubmit() {
-    // setSelectedList([]);
     let count = 0;
-    //console.log("Submitted");
     let infoBool = false;
 
     if (
@@ -145,53 +133,66 @@ function Form() {
     ) {
       infoBool = true;
     }
-    // console.log(count);
 
+    let tempSelectedList = [];
     for (let i = 0; i < questions.length; i++) {
-      if (
-        document.querySelector(
+      let selectedAnswer = null;
+      if (questions[i].type === "mcq") {
+        const selectedRadio = document.querySelector(
           `input[name="${i + 1}. ${questions[i].question}"]:checked`
-        ) != null
-      ) {
-        count++;
-        //console.log(count + " = " + questions.length);
-        if (count === questions.length && infoBool) {
-          let tempSelectedList = [];
-          questions.map((q, cnt) =>
-            tempSelectedList.push({
-              selectedAnswer: document.querySelector(
-                `input[name="${cnt + 1}. ${questions[cnt].question}"]:checked`
-              ).value,
-            })
+        );
+        if (selectedRadio) {
+          selectedAnswer = parseInt(selectedRadio.value, 10) -1 ;
+          count++;
+        }
+      } else if (questions[i].type === "truefalse") {
+        selectedAnswer = questions[i].options.map((_, index) => {
+          const selected = document.querySelector(
+            `input[name="${i + 1}. ${questions[i].question}.option${index}"]:checked`
           );
-          setSelectedList(tempSelectedList);
-          setStudInfo({
-            name: document.getElementById("studName").value,
-            email: getAuth().currentUser.email,
-            roll_no: document.getElementById("studRollNo").value,
-            class: document.getElementById("studClass").value,
-          });
-        } else {
-          // handle incomplete response
-          //alert("Incomplete");
+          if (selected) {
+            return selected.value === "true";
+          }
+          return null; // Handle unselected options
+        });
+
+        // Check if all options have a selection
+        if (selectedAnswer.every((answer) => answer !== null)) {
+          count++;
+        }
+      } else if (questions[i].type === "shortanswer") {
+        selectedAnswer = document.getElementById(`shortAnswer${i}`).value;
+        if (selectedAnswer.trim() !== "") {
+          count++;
         }
       }
-      if (i === questions.length - 1) {
-        if (!infoBool && count < questions.length) {
-          alert("Please Enter Student Details and Attempt All Questions");
-        } else if (count < questions.length) {
-          alert("Please Attempt All Questions");
-        } else if (!infoBool) {
-          alert("Please Enter Student Details");
-        }
+
+      tempSelectedList.push({ selectedAnswer });
+    }
+
+    if (count === questions.length && infoBool) {
+      setSelectedList(tempSelectedList);
+      setStudInfo({
+        name: document.getElementById("studName").value,
+        email: getAuth().currentUser.email,
+        roll_no: document.getElementById("studRollNo").value,
+        class: document.getElementById("studClass").value,
+      });
+    } else {
+      if (!infoBool && count < questions.length) {
+        alert("Please Enter Student Details and Attempt All Questions");
+      } else if (count < questions.length) {
+        alert("Please Attempt All Questions");
+      } else if (!infoBool) {
+        alert("Please Enter Student Details");
       }
     }
   }
 
   return (
-    <form id="mainForm">
+    <form id="mainForm" className="m-4 md:m-10 lg:m-14">
       {questions.length !== 0 ? (
-        questions !== "Incorrect Pin" ? (
+        questions !== "Sai mã pin" ? (
           questions !== "Already Attempted" ? (
             status !== "inactive" ? (
               <div>
@@ -230,46 +231,77 @@ function Form() {
                   </li> 
                 </ul>
                 {questions.map((question, questionIndex) => {
-                  // console.log(question);
                   return (
                     <div key={uuid()}>
                       <p className="questionP">
                         {"Câu "}
                         {questionIndex + 1}. {question.question}
                       </p>
-                      {question.options.map((option, optionIndex) => {
-                        // console.log(option);
-                        // return <p key={uuid()}>{option["option"]}</p>;
-                        return (
-                          <div key={uuid()}>
-                            <li key={uuid()} className="radioButtonsLi">
-                              <input
-                                key={uuid()}
-                                id={
-                                  questionIndex.toString() +
-                                  optionIndex.toString()
-                                }
-                                type="radio"
-                                className="radioInput"
-                                value={optionIndex + 1}
-                                name={`${questionIndex + 1}. ${
-                                  question.question
-                                }`}
-                              />
-
-                              <label
-                                className="radioLabel faintShadow hov"
-                                htmlFor={
-                                  questionIndex.toString() +
-                                  optionIndex.toString()
-                                }
-                              >
-                                {option["option"]}
-                              </label>
-                            </li>
-                          </div>
-                        );
-                      })}
+                      {question.type === "mcq" &&
+                        question.options.map((option, optionIndex) => {
+                          return (
+                            <div key={uuid()} className="mb-7">
+                              <li key={uuid()} className="radioButtonsLi">
+                                <input
+                                  key={uuid()}
+                                  id={`${questionIndex}-${optionIndex}`}
+                                  type="radio"
+                                  className="radioInput"
+                                  value={optionIndex + 1}
+                                  name={`${questionIndex + 1}. ${question.question}`}
+                                />
+                                <label
+                                  className="radioLabel faintShadow hov"
+                                  htmlFor={`${questionIndex}-${optionIndex}`}
+                                >
+                                  {option.option}
+                                </label>
+                              </li>
+                            </div>
+                          );
+                        })}
+                      {question.type === "truefalse" &&
+                        question.options.map((option, optionIndex) => {
+                          return (
+                            <div key={uuid()}>
+                              <li key={uuid()} className="radioButtonsLi">
+                                <label
+                                  className="radioLabel faintShadow hov"
+                                >
+                                  {option.option}
+                                </label>
+                                <input
+                                  type="radio"
+                                  id={`${questionIndex}-${optionIndex}-true`}
+                                  name={`${questionIndex + 1}. ${question.question}.option${optionIndex}`}
+                                  value="true"
+                                />
+                                <label htmlFor={`${questionIndex}-${optionIndex}-true`}>
+                                  Đúng
+                                </label>
+                                <input
+                                  type="radio"
+                                  id={`${questionIndex}-${optionIndex}-false`}
+                                  name={`${questionIndex + 1}. ${question.question}.option${optionIndex}`}
+                                  value="false"
+                                />
+                                <label htmlFor={`${questionIndex}-${optionIndex}-false`}>
+                                  Sai
+                                </label>
+                              </li>
+                            </div>
+                          );
+                        })}
+                      {question.type === "shortanswer" && (
+                        <div className="m-[20px]">
+                          <textarea autoresize
+                            type="text"
+                            id={`shortAnswer${questionIndex}`}
+                            placeholder="Nhập câu trả lời của bạn"
+                            className="faintShadow w-[50%] overflow-hidden p-[12px] rounded-lg" 
+                          />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -283,13 +315,13 @@ function Form() {
                 </div>
               </div>
             ) : (
-              <p className="centeredP">Creator has closed the responses!</p>
+              <p className="centeredP">Người tạo đã khóa bài thi.</p>
             )
           ) : (
             <p className="centeredP">Bạn đã làm bài kiểm tra này rồi.</p>
           )
         ) : (
-          <p className="centeredP">Sai mã pin.</p>
+          <p className="centeredP">Bài thi không tồn tại hoặc người tạo đã xóa bài thi.</p>
         )
       ) : (
         <p className="centeredP">Đang tải...</p>

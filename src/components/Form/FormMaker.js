@@ -6,6 +6,8 @@ import { getAuth } from "firebase/auth";
 import React from 'react';
 import TrashBin from "../../images/trash_bin-100_copy.jpg";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+// import { MathJaxContext, MathJax } from 'better-react-mathjax';
+
 // import fs from "fs";
 var mammoth = require("mammoth");
 
