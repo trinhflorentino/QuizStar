@@ -119,7 +119,7 @@ function Form() {
             setStatus(docosData[0]["status"]); //sets status already attempted or appearing for the first time
           }
         } else {
-          setQuestions("Incorrect Pin"); //if Question Papers collection is empty
+          setQuestions("Sai mã pin"); //if Question Papers collection is empty
         }
       };
 
@@ -211,7 +211,7 @@ function Form() {
                     ></input>
                   </li>
                   <li>
-                    lớp:{" "}
+                    Lớp:{" "}
                     <input
                       type="text"
                       id="studRollNo"
