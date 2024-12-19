@@ -875,13 +875,12 @@ Lưu ý:
         </form>
 
       {list.map((soloList, index) => (
-        <div key={soloList.id} id="questionnaire" className="sm:p-[30px] ">
+        <div key={soloList.id} id="questionnaire">
           <ul>
             <li className="dlt_li">
               <select
                 value={soloList.type}
                 onChange={(event) => handleQuestionTypeChange(event, index)}
-                className=""
               >
                 <option value="mcq">Trắc nghiệm</option>
                 <option value="truefalse">Đúng/Sai</option>

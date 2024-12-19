@@ -196,9 +196,9 @@ input[type="radio"]:checked + label {
   /* border: 2px solid black; */
 }
 
-/* #questionnaire {
+#questionnaire {
   padding: 30px;
-} */
+}
 
 .questionBox {
   width: 85vw;
