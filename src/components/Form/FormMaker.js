@@ -6,7 +6,7 @@ import { getAuth } from "firebase/auth";
 import React from 'react';
 import TrashBin from "../../images/trash_bin-100_copy.jpg";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-// import { MathJaxContext, MathJax } from 'better-react-mathjax';
+import { MathJaxContext, MathJax } from 'better-react-mathjax';
 
 // import fs from "fs";
 var mammoth = require("mammoth");
@@ -22,6 +22,31 @@ function FormMaker() {
       { id: uuid(), option: "", optionNo: 2, answer: true },
     ],
   ]);
+  
+  const [mathJaxInputActive, setMathJaxInputActive] = useState(false);
+  const [mathJaxQuestionIndex, setMathJaxQuestionIndex] = useState(null);
+  const [mathJaxInputValue, setMathJaxInputValue] = useState("");
+  const handleMathJaxInput = (index) => {
+    setMathJaxInputActive(true);
+    setMathJaxQuestionIndex(index);
+    setMathJaxInputValue(list[index].question);
+  };
+  const handleMathJaxInputChange = (value) => {
+    setMathJaxInputValue(value);
+  };
+  const saveMathJaxInput = () => {
+    if (mathJaxQuestionIndex !== null) {
+      const updatedList = [...list];
+      updatedList[mathJaxQuestionIndex].question = mathJaxInputValue;
+      setList(updatedList);
+      // ...reset state variables
+    }
+  };
+  const cancelMathJaxInput = () => {
+    setMathJaxInputActive(false);
+    setMathJaxQuestionIndex(null);
+    setMathJaxInputValue("");
+  };
 
   // Create refs for the number inputs
   const mcqRef = React.useRef(null);
@@ -744,8 +769,35 @@ Lưu ý:
     }
   }
 
+  const [mathJaxReady, setMathJaxReady] = useState(false);
+
+  const config = {
+    loader: { load: ['[tex]/html'] },
+    tex: {
+      packages: { '[+]': ['html'] },
+      inlineMath: [
+        ['$', '$'],
+        ['\\(', '\\)'],
+      ],
+      displayMath: [
+        ['$$', '$$'],
+        ['\\[', '\\]'],
+      ],
+    },
+  };
   
   return (
+  <MathJaxContext
+    version={3}
+    config={config}
+    onLoad={() => {
+      console.log("MathJax is loaded and ready!");
+      setMathJaxReady(true);
+    }}
+    onError={(error) => {
+      console.error("MathJax Load Error:", error);
+    }}
+  >
     <div id="mainForm">
       <div className="quizBox">
         <input
@@ -982,6 +1034,7 @@ Lưu ý:
         />
       </div>
     </div>
+  </MathJaxContext>
   );
 }
 
