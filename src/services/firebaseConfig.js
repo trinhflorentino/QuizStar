@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore/lite";
 import { useEffect, useState } from "react";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -16,8 +17,7 @@ const firebaseConfig = {
 };
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-export const auth = getAuth(app);
+var db = getFirestore(app);
 
 const provider = new GoogleAuthProvider();
 
@@ -73,5 +73,9 @@ export function Stater() {
       .catch((e) => console.log(e));
   };
 }
-
+// export storage;
+// export default db;
+export var storage = getStorage(app);
+export var auth = getAuth(app);
+// export var firestore = db;
 export default db;

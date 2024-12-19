@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import db from "../../services/firebaseConfig";
+import { default as db, storage } from "../../services/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore/lite";
 import { v4 as uuid } from "uuid";
 import { getAuth } from "firebase/auth";
@@ -7,9 +7,11 @@ import React from 'react';
 import TrashBin from "../../images/trash_bin-100_copy.jpg";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { MathJaxContext, MathJax } from 'better-react-mathjax';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 // import fs from "fs";
 var mammoth = require("mammoth");
+// const storage = getStorage();
 
 function FormMaker() {
   const [quizTitle, setQuizTitle] = useState("");
@@ -297,31 +299,39 @@ function FormMaker() {
       alert("Please fill all the textfields to proceed");
       return;
     }
-    // console.log(optionList);
+  
     try {
       const examPin = Math.floor(100000 + Math.random() * 900000);
+      
+      // Upload images first and get URLs
+      const uploadPromises = list.map(async (question, index) => {
+        const imageFile = document.querySelector(`input[type="file"][data-index="${index}"]`)?.files[0];
+        if (imageFile) {
+          return await uploadImage(imageFile, examPin, question.id);
+        }
+        return null;
+      });
+  
+      const imageUrls = await Promise.all(uploadPromises);
+  
+      // Add image URLs to questions
       const questionQuestions = list.map((question, index) => {
-        // if (question.type === "shortanswer") {
-        //   return {
-        //     question: question.question.trim(),
-        //     answer: question.answer.trim(),
-        //     type: question.type,
-        //   };
-        // }
         let options = [];
-        if(question.type!=="shortanswer") {
+        if(question.type !== "shortanswer") {
           options = optionList[index].filter(option => option.option && option.optionNo);
         }
+        
         return {
           question: question.question.trim(),
           options: options.map(option => ({ option: option.option.trim(), optionNo: option.optionNo })),
           type: question.type,
+          imageUrl: imageUrls[index] // Add image URL to question data
         };
       });
-
+  
       const answerAnswers = list.map((question, index) => {
         if (question.type === "mcq") {
-          return { answer: question.answer + 1 }; // Assuming answers are 1-based indexes
+          return { answer: question.answer + 1 };
         } else if (question.type === "truefalse") {
           return { answer: optionList[index].map(option => option.answer) };
         } else if (question.type === "shortanswer") {
@@ -329,23 +339,21 @@ function FormMaker() {
         }
         return {};
       });
-      // console.log(questionQuestions);
-      // console.log(answerAnswers);
+  
       // Save data to Firestore
       await Promise.all([
         setQuestionPaper(examPin, quizTitle, questionQuestions),
         setAnswerSheet(examPin, quizTitle, answerAnswers),
         setResponseStatus(examPin, quizTitle),
       ]);
-
-      // Redirect to DisplayPin page
+  
       window.location.href += `/DisplayPin/${examPin}`;
     } catch (error) {
       console.error("Error submitting the form:", error);
       alert("There was an error submitting the form. Please try again.");
     }
   }
-  //alert("Test Created Successfully");
+    //alert("Test Created Successfully");
 
 
   function resetForm() {
@@ -786,6 +794,31 @@ Lưu ý:
     },
   };
   
+  const [imagePreview, setImagePreview] = useState({});
+
+// Add handler function
+const handleImageChange = (event, index) => {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(prev => ({
+        ...prev,
+        [index]: reader.result
+      }));
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+async function uploadImage(file, examPin, questionId) {
+  if (!file) return null;
+  
+  const storageRef = ref(storage, `question_images/${examPin}/${questionId}`);
+  await uploadBytes(storageRef, file);
+  return await getDownloadURL(storageRef);
+}
+
   return (
   <MathJaxContext
     version={3}
@@ -877,15 +910,35 @@ Lưu ý:
       {list.map((soloList, index) => (
         <div key={soloList.id} id="questionnaire">
           <ul>
+          <li className="m-[5px] flex items-center ">
+            <div className="mr-3 border-r pr-3 border-black">Câu {index + 1}</div>
+            <div className="mr-3 border-r pr-3 border-black">Nhập điểm</div>
+            <select
+              value={soloList.type}
+              className="mr-3 border-r pr-3 border-black"
+              onChange={(event) => handleQuestionTypeChange(event, index)}
+            >
+              <option value="mcq">Trắc nghiệm</option>
+              <option value="truefalse">Đúng/Sai</option>
+              <option value="shortanswer">Trả lời ngắn</option>
+            </select>
+            <label className="cursor-pointer bg-blue-500 text-white px-3 py-1 rounded">
+              Thêm ảnh/audio
+              <input 
+                type="file" 
+                className="hidden"
+                data-index={index}
+                onChange={(event) => handleImageChange(event, index)}
+                accept="image/*, audio/*"
+              />            
+            </label>
+            {imagePreview[index] && (
+              <div className="ml-3">
+                <img src={imagePreview[index]} alt="Preview" className="h-20 w-20 object-cover" />
+              </div>
+            )}
+          </li>            
             <li className="dlt_li">
-              <select
-                value={soloList.type}
-                onChange={(event) => handleQuestionTypeChange(event, index)}
-              >
-                <option value="mcq">Trắc nghiệm</option>
-                <option value="truefalse">Đúng/Sai</option>
-                <option value="shortanswer">Trả lời ngắn</option>
-              </select>
               <input
                 type="text"
                 placeholder={`Câu hỏi ${index + 1}`}
@@ -895,7 +948,7 @@ Lưu ý:
                   questChangeHandler(event, index, "question")
                 }
               />
-              {list.length > 1 && index !== 0 && (
+              {list.length > 1 && (
                 <button className="dlt_btn">
                   <img
                     className="dlt_img faintShadow"
@@ -953,12 +1006,13 @@ Lưu ý:
                     }
                   />
                   <select
+                    className="m-[7px] p-[7px]"
                     value={soloOption.answer === null ? "" : soloOption.answer ? "true" : "false"}
                     onChange={(event) =>
                       handleCorrectOptionChange(event, index, ind)
                     }
                   >
-                    <option value="">Lựa chọn</option>
+                    {/* <option value="">Lựa chọn</option> */}
                     <option value="true">Đúng</option>
                     <option value="false">Sai</option>
                   </select>

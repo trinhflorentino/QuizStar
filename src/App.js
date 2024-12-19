@@ -60,7 +60,7 @@ function App() {
           ></Route>
           <Route path="/Main" element={<LegacyRedirect />} />
           <Route path="/Login" element={<Login />} />
-          <Route path="/Math" element={<MathConfig />} />
+          {/* <Route path="/Math" element={<MathConfig />} /> */}
         </Routes>
       </BrowserRouter>
     </div>

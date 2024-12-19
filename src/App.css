@@ -223,7 +223,7 @@ input[type="radio"]:checked + label {
 
 .dlt_img {
   height: 8vh;
-  width: 4vw;
+  /* width: 4vw; */
   border-radius: 10px;
   border: 2px solid red;
 }
