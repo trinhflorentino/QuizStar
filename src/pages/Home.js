@@ -30,7 +30,7 @@ function Home() {
       <div className="heroTextBox midShadow centeredP">
         <ul>
           <li>
-            <h1 className="heroText">SmartTest</h1>
+            <h1 className="heroText">QuizStar</h1>
           </li>
           <li>
             <p className="sideKickText">
@@ -40,7 +40,7 @@ function Home() {
           <li>
             <p className="sideKickText">
               {user === true
-                ? "Tạo đề thi của bạn ngay bên dưới"
+                ? "Tạo đề thi của bạn bằng cách bấm nút tạo bài thi mới ngay bên dưới"
                 : "Bắt đầu đăng nhập để khám phá"}
             </p>
           </li>

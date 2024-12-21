@@ -371,8 +371,8 @@ function FormMaker() {
   const apiKey = "AIzaSyBha8XFvoYiAXXHYPjPIAwBwlkqNpq4m9w"; 
   // const apiKey = "AIzaSyD0CdU3giLumipay1SVMpPDO4uFD6iF-HM"; 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash", 
+  const model20flash = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash-exp", 
     generationConfig: {
       "responseMimeType": "application/json",
       // responseSchema: schema,
@@ -382,6 +382,18 @@ function FormMaker() {
       maxOutputTokens: 8192,    
     },
   });
+  const model1206 = genAI.getGenerativeModel({
+    model: "gemini-exp-1206", 
+    generationConfig: {
+      "responseMimeType": "application/json",
+      // responseSchema: schema,
+      temperature: 0.6,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 8192,    
+    },
+  });
+
 
   async function extractQuestionsJSON(file) {
 
@@ -463,7 +475,114 @@ Tuân thủ nghiêm ngặt định dạng JSON.
       const fileUri = uploadResponse.file.uri;
       // console.log(uploadResponse);
       console.log(fileUri);
-      const result = await model.generateContent([
+      const result = await model20flash.generateContent([
+        {
+          fileData: {
+            mimeType: fileType,
+            fileUri: fileUri,
+          },
+        },
+        { text: prompt },
+      ]);
+
+      console.timeEnd("Thời gian thực hiện");
+      // console.log(result.response.text()); 
+      
+      let responseText = result.response.text();
+      if (responseText.endsWith("]}]}]")) {
+        responseText = responseText.slice(0, -2);
+      }
+      return responseText;
+    } catch (error) {
+      console.error("Error uploading or summarizing:", error); 
+    }
+  }
+
+  async function matrixQuestionsJSON(file) {
+
+    const prompt = `
+Hãy phân tích file được upload (ma trận/đặc tả/đề cương) và tạo ra các câu hỏi thuộc các dạng "mcq", "truefalse", và "shortanswer" cùng với đáp án của chúng dựa trên nội dung file. Kết quả bắt buộc phải được định dạng JSON theo cấu trúc sau:
+
+[
+{
+"answer": "<đáp án>",
+"question": "<nội dung câu hỏi>",
+"type": "<loại câu hỏi>",
+"options": ["<lựa chọn 1>", "<lựa chọn 2>", ...] // Chỉ dành cho mcq và truefalse
+},
+...
+]
+
+Yêu cầu cụ thể:
+
+Dựa vào nội dung được cung cấp trong file để tạo ra các câu hỏi phù hợp.
+
+mcq: "answer" chứa ký tự đại diện cho đáp án đúng (A, B, C, hoặc D). "options" chứa mảng các lựa chọn.
+
+truefalse: "question" chứa nội dung câu hỏi. "options" chứa mảng các mệnh đề cần đánh giá. "answer" là mảng các giá trị boolean (true/false) tương ứng với từng mệnh đề trong "options". Ưu tiên sử dụng mảng boolean [true, false, ...] thay vì dạng chuỗi "Đáp án a [true, false]".
+
+shortanswer: "answer" chứa đáp án ngắn gọn dưới dạng chuỗi. Nếu câu hỏi yêu cầu đánh giá đúng/sai nhiều mệnh đề, "answer" sẽ là mảng các giá trị boolean (true/false). Ưu tiên sử dụng mảng boolean [true, false, ...] nếu có thể.
+
+Lưu ý:
+
+Chỉ tạo câu hỏi thuộc ba dạng trên.
+
+Mỗi câu hỏi phải rõ ràng, dễ hiểu và có đáp án duy nhất.
+
+Đối với câu hỏi truefalse, mỗi mệnh đề phải có giá trị đúng hoặc sai rõ ràng, các mệnh đề phải nằm trong mảng options, không để trên question.
+
+Đối với câu hỏi shortanswer, đáp án cần ngắn gọn, súc tích và chính xác.
+
+Tuân thủ nghiêm ngặt định dạng JSON.
+
+Ưu tiên sử dụng mảng boolean [true, false] cho câu hỏi truefalse và shortanswer thay vì dạng chuỗi "Đáp án a [true, false]", trừ khi format của file input không cho phép.
+
+Số lượng và nội dung câu hỏi phải bám sát ma trận/đặc tả/đề cương trong file upload.
+`;
+
+    console.time("Thời gian thực hiện"); 
+    if (!file) {
+      console.error("Please select a file first.");
+      return;
+    }
+    try {
+      let fileContent = await readFile(file);
+      let fileType = file.type;
+      // If it's a .docx file, convert it to HTML
+      if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+        const arrayBuffer = await readFileAsArrayBuffer(file);
+        const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+        fileContent = result.value; 
+        fileType = "text/html"; // Update the file type
+
+        // Auto download the converted HTML file
+        const blob = new Blob([fileContent], { type: "text/html" });
+        // const link = document.createElement("a");
+        // link.href = URL.createObjectURL(blob);
+        // link.download = "converted.html";
+        // document.body.appendChild(link);
+        // link.click();
+        // document.body.removeChild(link);
+      }
+      console.log(fileContent);
+      // Make a request to the media.upload endpoint 
+      const response = await fetch(
+        "https://generativelanguage.googleapis.com/upload/v1beta/files",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": fileType, 
+            "x-goog-api-key": apiKey,
+          },
+          body: fileContent, 
+        }
+      );
+      // console.log(response);
+      const uploadResponse = await response.json();
+      const fileUri = uploadResponse.file.uri;
+      // console.log(uploadResponse);
+      console.log(fileUri);
+      const result = await model1206.generateContent([
         {
           fileData: {
             mimeType: fileType,
@@ -554,7 +673,7 @@ Lưu ý:
     console.log(prompt);
     console.time("Thời gian thực hiện"); 
     try {
-      const result = await model.generateContent(prompt);
+      const result = await model1206.generateContent(prompt);
     
       console.timeEnd("Thời gian thực hiện");
       // console.log(result.response.text()); 
@@ -614,9 +733,33 @@ Lưu ý:
       alert("Vui lòng chọn file trước.");
       return;
     }
-    console.log(file);
+    // console.log(file);
     try {
       const ketQua = await extractQuestionsJSON(file);
+      console.log("Original Extracted Data:", ketQua);
+      if (ketQua) {
+        const parsedData = JSON.parse(ketQua); // Ensure it's an array
+        validateQuestionsArray(parsedData);
+        const convertedData = convertAnswers(parsedData); // Convert answers
+        console.log("Converted Data:", convertedData);
+        addQuestionsFromJSON(convertedData); // Pass the array, not string
+      }
+    } catch (error) {
+      console.error("Error extracting questions:", error);
+      alert(`Error: ${error.message}`);
+    }
+  }
+
+  async function matrixQuestion() {
+    const fileInput = document.getElementById('matrixInput');
+    const file = fileInput.files[0];
+    if (file === undefined) {
+      alert("Vui lòng chọn file trước.");
+      return;
+    }
+    // console.log(file);
+    try {
+      const ketQua = await matrixQuestionsJSON(file);
       console.log("Original Extracted Data:", ketQua);
       if (ketQua) {
         const parsedData = JSON.parse(ketQua); // Ensure it's an array
@@ -869,8 +1012,21 @@ async function uploadImage(file, examPin, questionId) {
       {/* <input type="button" className="sub_btn_actual hov" onClick={() => createQuestions()} value="Tạo câu hỏi mới"></input> */}
       <br />
       {/* <div className="numberOfQuestionsBox"> */}
+      <form>
+        <h1>Tải tệp ma trận/đặc tả</h1>
+        <input
+          type="file"
+          id="matrixInput"
+          title="Tải tệp ma trận/đặc tả"
+          aria-label="Tải tệp ma trận/đặc tả"
+          accept=".docx, .pdf, image/*"
+          // multiple
+        />
+        {/* <button type="button" onClick={extractQuestions}>Submit File</button> */}
+      </form>
+      <input type="button" className="sub_btn_actual hov" onClick={() => matrixQuestion()} value="Tạo câu hỏi từ ma trận/đặc tả"></input>
+      <form>
         <h2>Tạo các câu hỏi mới</h2>
-        <form>
           <div className="questionType">
             <label htmlFor="mcq">Số lượng Trắc nghiệm:</label>
             <input
@@ -904,9 +1060,9 @@ async function uploadImage(file, examPin, questionId) {
               ref={shortAnswerRef}
             />
           </div>
-          <input className="sub_btn_actual hov" type="button" onClick={() => createQuestions()} value="Tạo câu hỏi mới"></input>
-        </form>
-
+          <input className="sub_btn_actual hov" type="button" onClick={() => createQuestions()} value="Tạo câu hỏi mới theo form"></input>
+      </form>
+        
       {list.map((soloList, index) => (
         <div key={soloList.id} id="questionnaire">
           <ul>
@@ -980,7 +1136,7 @@ async function uploadImage(file, examPin, questionId) {
                       handleCorrectOptionChange(event, index, ind)
                     }
                   />
-                  {optionList[index].length > 2 && ind !== 0 && ind !== 1 && (
+                  {optionList[index].length > 2 && (
                     <button className="dlt_btn opt">
                       <img
                         className="dlt_img opt faintShadow"

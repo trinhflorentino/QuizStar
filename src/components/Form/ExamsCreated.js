@@ -123,11 +123,11 @@ function ExamsCreated() {
         createdExams[0] != "Empty" ? (
           createdExams.map((exam, index) => (
             <div className="mainForm" key={uuid()}>
-              <p className="leftMargin">Exam Title: {exam["quiz_title"]}</p>
-              <p className="leftMargin">Pin: {examPins[index]}</p>
+              <p className="leftMargin">Tên đề thi: {exam["quiz_title"]}</p>
+              <p className="leftMargin">Mã đề thi: {examPins[index]}</p>
               <input
                 type="button"
-                value="Check Responses"
+                value="Xem các câu trả lời"
                 className="sub_btn_actual hov"
                 onClick={() => checkResponses(index)}
               />
@@ -135,8 +135,8 @@ function ExamsCreated() {
                 type="button"
                 value={
                   status[index] === "active"
-                    ? "Stop Responses"
-                    : "Resume Responses"
+                    ? "Khóa đề thi"
+                    : "Mở đề thi"
                 }
                 className="sub_btn_actual hov respo"
                 onClick={() => handleResponseStatus(status[index], index)}
