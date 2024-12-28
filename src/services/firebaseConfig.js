@@ -25,27 +25,33 @@ export function Stater() {
   const [authState, setAuthState] = useState();
 
   useEffect(() => {
-    document.querySelector(".sign").innerHTML = "Loading...";
     getAuth().onAuthStateChanged((user) => {
       let some = document.querySelectorAll('[class*="logged"]');
+      let signElements = document.querySelectorAll('.sign');
       if (user) {
-        document.querySelector(".sign").style.display = "none";
         for (let i = 0; i < some.length; i++) {
-          // some[i].classList.remove("displayNoner");
-          // some[i].classList.add("displayUnsetter");
           some[i].style.display = "unset";
         }
-        document.querySelector("#displayName").innerHTML = user.displayName;
-        //console.log(user.displayName);
+        for (let i = 0; i < signElements.length; i++) {
+          signElements[i].style.display = "none";
+        }
+        const name = document.querySelector("#displayName");
+        if(name) {
+          name.innerHTML = user.displayName;
+        }
+        const avatarElement = document.querySelector("#profileAvatar");
+        if (avatarElement) {
+          avatarElement.src = user.photoURL || `require("../../images/Avatar.png")`;
+        }
       } else {
-        document.querySelector(".sign").style.display = "";
         for (let i = 0; i < some.length; i++) {
           some[i].style.display = "none";
         }
-        document.querySelector(".sign").innerHTML = `<a>Đăng nhập</a>`;
+        for (let i = 0; i < signElements.length; i++) {
+          signElements[i].style.display = "block";
+        }
       }
     });
-    // document.querySelector(".sign").innerHTML = authState;
   }, [authState]);
 
   this.signInWithGoogle = () => {

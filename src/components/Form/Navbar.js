@@ -1,12 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Stater } from "../../services/firebaseConfig";
 import { useLocation, useNavigate } from "react-router-dom";
+import { TbLogout } from "react-icons/tb";
+import { CgProfile } from "react-icons/cg";
 const Logo = require("../../images/Logo.jpg");
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
   const funct = new Stater();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   function selectOptionClickHandler(index) {
     switch (index) {
@@ -98,23 +113,60 @@ const Navbar = () => {
             </ul>
 
             {/* Profile Dropdown */}
-            <select
-              className="profile logged hidden lg:block bg-transparent border-none cursor-pointer"
-              value="DEFAULT"
-              readOnly
-              onChange={(change) => selectOptionClickHandler(change.currentTarget.selectedIndex)}
-            >
-              <option className="logOptions" id="displayName" value="DEFAULT"></option>
-              <option className="logOptions" id="previousExams" value="previousExams">
-                Bài thi đã tham gia
-              </option>
-              <option className="logOptions" id="conductedExams" value="conductedExams">
-                Bài thi đã tạo
-              </option>
-              <option className="logOptions" id="select" value="Logout">
-                Đăng xuất
-              </option>
-            </select>
+            <div className="relative" ref={profileRef}>
+              <div className="sign" style={{display: "none"}}>
+                <button 
+                  className="px-4 py-2 text-black hover:bg-blue-50"
+                  onClick={() => navigate('/Login')}
+                >
+                  Đăng nhập
+                </button>
+              </div>
+              <div className="logged">
+                <button 
+                  className="flex items-center space-x-3 focus:outline-none"
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                >
+                  <img
+                    id="profileAvatar"
+                    className="h-8 w-8 rounded-full"
+                    src={require("../../images/profile.jpg")}
+                    alt="Profile"
+                  />
+                  <span id="displayName" className="text-black"></span>
+                  <svg className={`w-5 h-5 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} 
+                       fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Dropdown Menu */}
+                {isProfileOpen && (
+                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-md shadow-lg py-1 z-50">
+                    <button
+                      onClick={() => { navigate('/Profile'); setIsProfileOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <CgProfile className="inline mr-1"/> Chỉnh sửa thông tin 
+                    </button>
+                    {/* <button
+                      onClick={() => { navigate('/ExamsCreated'); setIsProfileOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Bài thi đã tạo
+                    </button> */}
+                    <div className="border-t border-gray-100"></div>
+                    <button
+                      onClick={() => { funct.signOutWithGoogle(); setIsProfileOpen(false); }}
+                      className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    >
+                      <TbLogout className="inline mr-1"/> Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
 
           {/* Mobile Navigation - Left Sidebar */}

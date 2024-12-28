@@ -16,6 +16,8 @@ import LegacyRedirect from "./components/LegacyRedirect";
 import Login from "./components/Login";
 import MathConfig from "./components/MathJaxTest";
 import Dashboard from "./pages/Dashboard";
+import TestManagement from "./pages/TestManagement";
+import Profile from "./pages/Profile";
 
 const NavigationWrapper = () => {
   const navigate = useNavigate();
@@ -47,9 +49,7 @@ function App() {
         document.querySelector(".Nav").classList.remove("whiteBg", "faintShadow");
       }
     };
-
     window.addEventListener("scroll", handleScroll);
-    
     // Cleanup the event listener on component unmount
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -86,6 +86,8 @@ function App() {
           {/* <Route path="/Math" element={<MathConfig />} /> */}
           <Route path="/Dashboard" element={<Dashboard />} />
           {/* <Route path="MatchList" element={<gg/> } /> */}
+          <Route path="TestManagement" element={<TestManagement />} />
+          <Route path="Profile" element={<Profile/>} />
         </Routes>
       </BrowserRouter>
     </div>

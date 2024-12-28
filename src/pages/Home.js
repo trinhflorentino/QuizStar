@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Stater } from "../services/firebaseConfig";
 import React from 'react'
 import { useNavigate } from "react-router-dom";
+import { FaStar } from "react-icons/fa";
 
 function Home() {
   const [user, setUser] = useState(false);
@@ -23,13 +24,13 @@ function Home() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 px-4 bg-gradient-to-br from-[#F6F8FC] to-[#E9F0F9] rounded-2xl">
+      <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 px-4 bg-gradient-to-br from-white/60 to-white/20 rounded-2xl">
         {/* Left Content */}
         <div className="flex-1 text-center md:text-left space-y-8 p-3">
           <div className="space-y-4">
-            <h1 className="text-5xl md:text-7xl font-black text-[#1A2B3B] font-['Catamaran'] tracking-tight">
-              QuizStar
-            </h1>
+            <div className="text-5xl md:text-7xl font-black text-[#1A2B3B] font-['Catamaran'] tracking-tight">
+              QuizStar 
+            </div>
             <p className="text-xl md:text-2xl text-gray-600 max-w-xl leading-relaxed">
               Nền tảng hỗ trợ kiểm tra và tổ chức trò chơi học tập cho giáo viên và học sinh.
             </p>
@@ -45,7 +46,7 @@ function Home() {
             onClick={
               user === true
                 ? () => navigate("/Dashboard")
-                : () => funct.signInWithGoogle()
+                : () => navigate("/Login")
             }
             className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-[#1A2B3B] rounded-xl overflow-hidden transition-all duration-300 ease-out hover:bg-[#2C4159] hover:scale-105 transform"
           >

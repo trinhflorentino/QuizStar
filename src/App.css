@@ -22,6 +22,7 @@
 html {
   background: linear-gradient(to left top, #2641c2, #adf7f2) no-repeat center
     fixed;
+  min-height: 100vh;
 }
 
 a {
@@ -128,30 +129,31 @@ input[type="radio"]:checked + label {
   appearance: none;
 } */
 
-.sign,
-.profile {
+.sign
+/* .profile  */
+{
   transition: box-shadow 0.5s;
 }
 
-.profile:hover,
+/* .profile:hover, */
 .sign:hover {
   color: white;
   background: linear-gradient(#333, #000);
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.7);
 }
 
-.logOptions {
-  /* color: white; */
+/* .logOptions {
+  color: white; 
   background: black;
 }
 
-/* .logOptions:hover {
+.logOptions:hover {
   background: white;
 } */
 
-#displayName {
+/* #displayName {
   display: none;
-}
+} */
 
 #select:hover {
   background-color: #fff;
