@@ -15,12 +15,23 @@ import {
 
 function Form() {
   const [questions, setQuestions] = useState(() => []);
+  const [originalQuestionOrder, setOriginalQuestionOrder] = useState([]); // Add this state
   const [title, setTitle] = useState();
   const [selectedList, setSelectedList] = useState(() => [{}]);
   const [studInfo, setStudInfo] = useState(() => {});
   const [status, setStatus] = useState(() => "");
 
   let { pin } = useParams();
+
+  // Add shuffle function
+  const shuffleArray = (array) => {
+    let shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
 
   useEffect(() => {
     async function f() {
@@ -105,7 +116,9 @@ function Form() {
               }
               return docs.data(); //returns question paper
             });
-            setQuestions(docosData[0]["question_question"].map((doc) => doc));
+            const questionArray = docosData[0]["question_question"].map((doc) => doc);
+            setOriginalQuestionOrder(questionArray); // Store original order
+            setQuestions(shuffleArray(questionArray)); // Set shuffled questions
             setStatus(docosData[0]["status"]);
           }
         } else {
@@ -134,8 +147,13 @@ function Form() {
       infoBool = true;
     }
 
-    let tempSelectedList = [];
+    let tempSelectedList = new Array(questions.length);
+    
     for (let i = 0; i < questions.length; i++) {
+      const originalIndex = originalQuestionOrder.findIndex(q => 
+        q.question === questions[i].question
+      );
+      
       let selectedAnswer = null;
       if (questions[i].type === "mcq") {
         const selectedRadio = document.querySelector(
@@ -167,7 +185,7 @@ function Form() {
         }
       }
 
-      tempSelectedList.push({ selectedAnswer });
+      tempSelectedList[originalIndex] = { selectedAnswer };
     }
 
     if (count === questions.length && infoBool) {
