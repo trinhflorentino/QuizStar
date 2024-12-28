@@ -3,19 +3,20 @@
 
 
 body {
-    background-color: #121921;
+    /* background-color: #121921; */
     height: 100vh;
     margin: 0px;
+    background: linear-gradient(to left top, #2641c2, #adf7f2) no-repeat center fixed;
 }
 
 .body {
-    background-color: #121921;
+    /* background-color: #121921; */
     margin: 0px;
     padding: 14px;
 }
 
 .header {
-    background-color: #121921;
+    /* background-color: #121921; */
     width: 100%;
     height: 64px;
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
@@ -66,7 +67,7 @@ body {
     margin-left: 0px;
     font-size: 20px;
     position: absolute;
-    color: black;
+    /* color: black; */
     font-family: 'Baloo 2', cursive;
     font-size: 20px;
     font-weight: bold;
@@ -76,8 +77,9 @@ body {
     letter-spacing: normal;
     text-align: left;
     left: 110px;
-    color: #ffffff;
+    /* color: #ffffff; */
     z-index: 1;
+    color: #1A2B3B;
 }
 
 #product_image {
@@ -443,12 +445,12 @@ button {
 
 
 .part-name {
-    color: white;
+    color: #1A2B3B;
     font-family: 'Baloo 2', cursive;
 }
 
 .part-description {
-    color: white;
+    color: #1A2B3B;
     font-family: 'Baloo 2', cursive;
 }
 

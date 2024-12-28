@@ -15,6 +15,7 @@ import React from 'react';
 import LegacyRedirect from "./components/LegacyRedirect";
 import Login from "./components/Login";
 import MathConfig from "./components/MathJaxTest";
+import Dashboard from "./pages/Dashboard";
 
 const NavigationWrapper = () => {
   const navigate = useNavigate();
@@ -83,6 +84,8 @@ function App() {
           <Route path="/Main" element={<LegacyRedirect />} />
           <Route path="/Login" element={<Login />} />
           {/* <Route path="/Math" element={<MathConfig />} /> */}
+          <Route path="/Dashboard" element={<Dashboard />} />
+          {/* <Route path="MatchList" element={<gg/> } /> */}
         </Routes>
       </BrowserRouter>
     </div>

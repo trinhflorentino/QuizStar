@@ -37,20 +37,20 @@ function Home() {
           
           <p className="text-lg text-gray-500 max-w-xl">
             {user === true
-              ? "Tạo đề thi của bạn bằng cách bấm nút tạo bài thi mới ngay bên dưới"
+              ? "Tạo đề thi của bạn và trò chơi bằng cách bấm nút ngay bên dưới!"
               : "Bắt đầu đăng nhập để khám phá"}
           </p>
 
           <button
             onClick={
               user === true
-                ? () => navigate("/FormMaker")
+                ? () => navigate("/Dashboard")
                 : () => funct.signInWithGoogle()
             }
             className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-[#1A2B3B] rounded-xl overflow-hidden transition-all duration-300 ease-out hover:bg-[#2C4159] hover:scale-105 transform"
           >
             <span className="relative">
-              {user === true ? "Tạo bài thi mới" : "Đăng nhập"}
+              {user === true ? "Khám phá ngay" : "Đăng nhập"}
             </span>
             <svg
               className="w-5 h-5 ml-2 transform transition-transform group-hover:translate-x-1"
