@@ -2,10 +2,12 @@ import { getAuth } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { Stater } from "../services/firebaseConfig";
 import React from 'react'
+import { useNavigate } from "react-router-dom";
 
 function Home() {
   const [user, setUser] = useState(false);
   const funct = new Stater();
+  const navigate = useNavigate();
 
   useEffect(() => {
     getAuth().onAuthStateChanged(function (user) {
@@ -42,7 +44,7 @@ function Home() {
           <button
             onClick={
               user === true
-                ? () => (window.location = "/FormMaker")
+                ? () => navigate("/FormMaker")
                 : () => funct.signInWithGoogle()
             }
             className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-[#1A2B3B] rounded-xl overflow-hidden transition-all duration-300 ease-out hover:bg-[#2C4159] hover:scale-105 transform"

@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Stater } from "../../services/firebaseConfig";
+import { useLocation, useNavigate } from "react-router-dom";
 const Logo = require("../../images/Logo.jpg");
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   const funct = new Stater();
 
   function selectOptionClickHandler(index) {
     switch (index) {
       case 1:
-        window.location = `/ExamsAttempted`;
+        navigate('/ExamsAttempted');
         break;
       case 2:
-        window.location = `/ExamsCreated`;
+        navigate('/ExamsCreated');
         break;
       case 3:
         funct.signOutWithGoogle();
@@ -21,17 +24,18 @@ const Navbar = () => {
 
   useEffect(() => {
     activeHighlighter();
-  }, [document.URL]);
+  }, [location.pathname]);
 
   function activeHighlighter() {
-    let some = document.querySelectorAll(".NavLink > a");
-    for (let i = 0; i < some.length; i++) {
-      if (window.location.href === some[i].href) {
-        some[i].classList.add("active");
+    let links = document.querySelectorAll(".NavLink > a");
+    links.forEach(link => {
+      const href = link.getAttribute('href');
+      if (href === location.pathname) {
+        link.classList.add("active");
       } else {
-        some[i].classList.remove("active");
+        link.classList.remove("active");
       }
-    }
+    });
   }
 
   return (

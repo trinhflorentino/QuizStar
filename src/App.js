@@ -3,7 +3,7 @@ import Form from "./components/Form/Form";
 import FormMaker from "./components/Form/FormMaker";
 import PinVerify from "./components/Form/PinVerify";
 import Navbar from "./components/Form/Navbar";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import ResultFetch from "./components/Form/ResultFetch";
 import DisplayPin from "./components/Form/DisplayPin";
 import ExamsCreated from "./components/Form/ExamsCreated";
@@ -15,6 +15,27 @@ import React from 'react';
 import LegacyRedirect from "./components/LegacyRedirect";
 import Login from "./components/Login";
 import MathConfig from "./components/MathJaxTest";
+
+const NavigationWrapper = () => {
+  const navigate = useNavigate();
+  React.useEffect(() => {
+    const handleNavigation = (e) => {
+      e.preventDefault();
+      const target = e.target.closest('a');
+      if (target && target.href) {
+        const path = target.getAttribute('href');
+        if (path && !path.startsWith('http')) {
+          navigate(path);
+        }
+      }
+    };
+
+    document.addEventListener('click', handleNavigation);
+    return () => document.removeEventListener('click', handleNavigation);
+  }, [navigate]);
+
+  return null;
+};
 
 function App() {
   React.useEffect(() => {
@@ -37,6 +58,7 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter>
+        <NavigationWrapper />
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />}></Route>
