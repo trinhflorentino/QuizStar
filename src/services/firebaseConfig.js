@@ -41,7 +41,7 @@ export function Stater() {
         }
         const avatarElement = document.querySelector("#profileAvatar");
         if (avatarElement) {
-          avatarElement.src = user.photoURL || `require("../../images/Avatar.png")`;
+          avatarElement.src = user?.photoURL || require("../images/profile.jpg");
         }
       } else {
         for (let i = 0; i < some.length; i++) {

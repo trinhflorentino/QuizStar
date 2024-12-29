@@ -1064,7 +1064,7 @@ async function uploadImage(file, examPin, questionId) {
       </form>
         
       {list.map((soloList, index) => (
-        <div key={soloList.id} id="questionnaire">
+        <div key={soloList.id} id="questionnaire" className="m-5">
           <ul>
           <li className="m-[5px] flex items-center ">
             <div className="mr-3 border-r pr-3 border-black">Câu {index + 1}</div>

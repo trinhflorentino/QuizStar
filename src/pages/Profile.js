@@ -29,53 +29,41 @@ const Profile = () => {
         return () => unsubscribe();
     }, []);
 
-    const handleFileSelect = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        // Check file type
-        if (!file.type.startsWith('image/')) {
-            alert('Vui lòng tải lên file hình ảnh');
-            return;
-        }
-
-        // Check file size (limit to 2MB)
-        if (file.size > 2 * 1024 * 1024) {
-            alert('Kích thước file không được vượt quá 2MB');
-            return;
-        }
+    const handleDeleteAvatar = async () => {
+        if (!user.photoURL) return;
 
         try {
-            const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
-            await uploadBytes(storageRef, file);
-            const downloadURL = await getDownloadURL(storageRef);
+            if (user.photoURL.includes(`users/${user.uid}`)) {
+                const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
+                await deleteObject(storageRef);
+            }
             
             await updateProfile(auth.currentUser, {
-                photoURL: downloadURL
+                photoURL: null
             });
             
-            setUser({ ...user, photoURL: downloadURL });
-            alert('Cập nhật ảnh đại diện thành công');
-            
+            setUser({ ...user, photoURL: null });
+            alert('Xóa ảnh đại diện thành công');
         } catch (error) {
-            console.error("Error uploading avatar:", error);
-            alert('Tải ảnh lên thất bại. Vui lòng thử lại.');
+            console.error("Error deleting avatar:", error);
+            alert('Xóa ảnh đại diện thất bại. Vui lòng thử lại.');
         }
     };
 
-    const handleDeleteAvatar = async () => {
+    const handleUploadAvatar = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
         try {
-            // Changed storage path to match new structure
-            const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
-            await deleteObject(storageRef);
-            
-            await updateProfile(auth.currentUser, {
-                photoURL: ``
-            });
-            
-            setUser({ ...user, photoURL: `` });
+            await uploadBytes(storageRef, file);
+            const photoURL = await getDownloadURL(storageRef);
+            await updateProfile(auth.currentUser, { photoURL });
+            setUser({ ...user, photoURL });
+            alert('Tải ảnh lên thành công');
         } catch (error) {
-            console.error("Error deleting avatar:", error);
+            console.error("Error uploading avatar:", error);
+            alert('Tải ảnh lên thất bại. Vui lòng thử lại.');
         }
     };
 
@@ -101,6 +89,7 @@ const Profile = () => {
         // Add password change logic here
     };
 
+
     return (
         <div className="container mx-auto px-4 py-8">
             {/* Background Banner */}
@@ -121,7 +110,7 @@ const Profile = () => {
             {/* User Info */}
             <div className="text-center mt-20">
                 <h1 className="font-bold text-3xl text-gray-900">{user?.displayName}</h1>
-                <p className="text-gray-500 text-sm">
+                <p className="text-black text-sm">
                     {`Tham gia QuizStar ngày ${new Date(user?.metadata?.creationTime).toLocaleDateString()}`}
                 </p>
             </div>
@@ -130,14 +119,14 @@ const Profile = () => {
             <div className="mt-4 flex justify-center gap-4">
                 <button
                     onClick={() => setIsEditing(!isEditing)}
-                    className="flex items-center rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800"
+                    className="flex items-center bg-slate-50 rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800"
                 >
                     <CgProfile className="mr-1.5"/>
                     Chỉnh sửa thông tin
                 </button>
                 <button
                     onClick={() => auth.signOut()}
-                    className="flex items-center rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-red-500"
+                    className="flex items-center bg-slate-50 rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-red-500"
                 >
                     <TbLogout className="mr-1.5"/>
                     Đăng xuất
@@ -153,23 +142,23 @@ const Profile = () => {
                     <div className="mb-6">
                         <p className="text-base font-medium text-gray-900 mb-4">Ảnh đại diện</p>
                         <div className="flex flex-col sm:flex-row gap-2">
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileSelect}
-                                className="hidden"
-                                ref={fileInputRef}
-                                id="avatar-upload"
-                            />
-                            <label
-                                htmlFor="avatar-upload"
+                            <button
+                                onClick={() => fileInputRef.current.click()}
+                                type="button"
                                 className="rounded-md bg-blue-500 py-2 px-4 text-center text-sm text-white cursor-pointer hover:bg-blue-600 inline-flex items-center"
                             >
                                 <MdFileUpload className="mr-1.5"/>
                                 Tải ảnh lên
-                            </label>
+                            </button>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleUploadAvatar}
+                                style={{ display: 'none' }}
+                            />
                             <button
                                 onClick={handleDeleteAvatar}
+                                type="button"
                                 className="rounded-md bg-red-500 py-2 px-4 text-center text-sm text-white hover:bg-red-600 inline-flex items-center"
                             >
                                 <RiDeleteBin6Line className="mr-1.5"/>
@@ -180,32 +169,32 @@ const Profile = () => {
 
                     {/* Name Change Form */}
                     <form onSubmit={handleNameChange} className="mb-6">
-                        <p className="text-base font-medium text-gray-900 mb-2">Full Name</p>
+                        <p className="text-base font-medium text-gray-900 mb-2">Họ và tên</p>
                         <div className="relative">
                             <input
                                 type="text"
                                 value={newName}
                                 onChange={(e) => setNewName(e.target.value)}
                                 className="w-full bg-white border border-slate-200 rounded-md pl-3 pr-16 py-4 text-gray-900"
-                                placeholder="Full Name"
+                                placeholder="Họ và tên"
                             />
                             <button
                                 type="submit"
-                                className="absolute right-1 top-1.5 rounded bg-slate-800 py-2.5 px-2.5 text-white hover:bg-slate-700"
+                                className="absolute right-1 top-3.5 rounded bg-slate-800 py-2.5 px-2.5 text-white hover:bg-slate-700"
                             >
-                                Confirm
+                                Xác nhận
                             </button>
                         </div>
                     </form>
 
                     {/* Password Change Form */}
                     <form onSubmit={handlePasswordChange} className="space-y-4">
-                        <p className="text-lg font-medium text-gray-900">Change Password</p>
+                        <p className="text-lg font-medium text-gray-900">Thay đổi mật khẩu</p>
                         <div className="space-y-4">
                             {/* Current Password */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-900">
-                                    Current Password
+                                    Mật khẩu hiện tại
                                 </label>
                                 <input
                                     type="password"
@@ -218,7 +207,7 @@ const Profile = () => {
                             {/* New Password */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-900">
-                                    New Password
+                                    Mật khẩu mới
                                 </label>
                                 <input
                                     type="password"
@@ -231,7 +220,7 @@ const Profile = () => {
                             {/* Confirm New Password */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-900">
-                                    Confirm New Password
+                                    Xác nhận mật khẩu mới
                                 </label>
                                 <input
                                     type="password"
