@@ -1234,20 +1234,20 @@ async function uploadImage(file, examPin, questionId) {
             {soloList.type === "mcq" &&
               optionList[index].map((soloOption, ind) => (
                 <li key={soloOption.id} className="dlt_li flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-2">
+                  <div className="flex items-center gap-2">
                   <input
                     type="text"
-                    className="optionBox faintShadow w-full sm:w-[70%] p-2 text-sm sm:text-base"
+                    className="optionBox faintShadow w-[50%] sm:w-[70%] p-2 text-sm sm:text-base"
                     placeholder={`Tùy chọn ${ind + 1}`}
                     value={soloOption.option}
                     onChange={(event) => optionChangeHandler(event, index, ind)}
                   />
-                  <div className="flex items-center gap-2">
                     <input
                       type="radio"
                       name={`correctOption-${index}`}
                       checked={list[index].answer === ind}
                       onChange={(event) => handleCorrectOptionChange(event, index, ind)}
-                      className="w-4 h-4"
+                      className="w-5 h-5"
                     />
                     {optionList[index].length > 2 && (
                       <button className="dlt_btn">

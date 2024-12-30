@@ -19,26 +19,26 @@ import Dashboard from "./pages/Dashboard";
 import TestManagement from "./pages/TestManagement";
 import Profile from "./pages/Profile";
 
-const NavigationWrapper = () => {
-  const navigate = useNavigate();
-  React.useEffect(() => {
-    const handleNavigation = (e) => {
-      e.preventDefault();
-      const target = e.target.closest('a');
-      if (target && target.href) {
-        const path = target.getAttribute('href');
-        if (path && !path.startsWith('http')) {
-          navigate(path);
-        }
-      }
-    };
+// const NavigationWrapper = () => {
+//   const navigate = useNavigate();
+//   React.useEffect(() => {
+//     const handleNavigation = (e) => {
+//       e.preventDefault();
+//       const target = e.target.closest('a');
+//       if (target && target.href) {
+//         const path = target.getAttribute('href');
+//         if (path && !path.startsWith('http')) {
+//           navigate(path);
+//         }
+//       }
+//     };
 
-    document.addEventListener('click', handleNavigation);
-    return () => document.removeEventListener('click', handleNavigation);
-  }, [navigate]);
+//     document.addEventListener('click', handleNavigation);
+//     return () => document.removeEventListener('click', handleNavigation);
+//   }, [navigate]);
 
-  return null;
-};
+//   return null;
+// };
 
 function App() {
   React.useEffect(() => {
@@ -59,7 +59,7 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <NavigationWrapper />
+        {/* <NavigationWrapper /> */}
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />}></Route>
