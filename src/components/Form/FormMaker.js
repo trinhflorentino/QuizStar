@@ -127,10 +127,31 @@ function FormMaker() {
   }
 
   function handleQuestionTypeChange(event, index) {
+    const newType = event.target.value;
     let values = [...list];
-    values[index].type = event.target.value;
+    let options = [...optionList];
+    
+    // Preserve existing question
+    const currentQuestion = { ...values[index] };
+    currentQuestion.type = newType;
+    values[index] = currentQuestion;
+
+    // Create default options if none exist
+    if (!options[index]) {
+        options[index] = newType === "truefalse" 
+            ? [
+                { id: uuid(), option: "True", optionNo: 1, answer: false },
+                { id: uuid(), option: "False", optionNo: 2, answer: false }
+              ]
+            : [
+                { id: uuid(), option: "", optionNo: 1, answer: false },
+                { id: uuid(), option: "", optionNo: 2, answer: false }
+              ];
+    }
+
     setList(values);
-  }
+    setOptionList(options);
+}
 
   function handleCorrectOptionChange(event, questionIndex, optionIndex) {
     let values = [...list];
