@@ -182,15 +182,15 @@ input[type="radio"]:checked + label {
   /* border: #010606; */
 }
 
-#quiz_title {
+/* #quiz_title {
   width: 70vw;
   border-radius: 16px;
   padding: 15px 20px;
   font-size: 20px;
   text-align: center;
   background-color: white;
-  /* border: 2px solid black; */
-}
+  border: 2px solid black;
+} */
 
 #questionnaire {
   padding: 30px;
@@ -526,4 +526,19 @@ table {
     padding: 2vh 3vw;
     font-size: 13px;
   }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.4s ease-out;
 }

@@ -8,6 +8,9 @@ import TrashBin from "../../images/trash_bin-100_copy.jpg";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { MathJaxContext, MathJax } from 'better-react-mathjax';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { MdCloudUpload } from "react-icons/md";
+import { RiAiGenerate2 } from "react-icons/ri";
+import { TbMatrix } from "react-icons/tb";
 
 // import fs from "fs";
 var mammoth = require("mammoth");
@@ -962,6 +965,10 @@ async function uploadImage(file, examPin, questionId) {
   return await getDownloadURL(storageRef);
 }
 
+  const [showModal, setShowModal] = useState(false);
+  const [showExerciseModal, setShowExerciseModal] = useState(false);
+  const [showMatrixModal, setShowMatrixModal] = useState(false);
+
   return (
   <MathJaxContext
     version={3}
@@ -974,94 +981,211 @@ async function uploadImage(file, examPin, questionId) {
       console.error("MathJax Load Error:", error);
     }}
   >
-    <div id="mainForm">
+    <div id="mainForm" className="m-7">
       <div className="quizBox">
         <input
           type="text"
-          className="faintShadow"
+          className="shadow shadow-slate-300 mx-8 my-4 lg:mx-40 rounded-xl text-lg text-center p-4 w-full"
           name="quiz_title"
           id="quiz_title"
-          placeholder="Nhập tiêu đề bài kiểm tra"
+          placeholder="Nhập tiêu đề bài thi..."
           onChange={(event) => setQuizTitle(event.target.value)}
         />
       </div>
-      <form>
-        <h1>Tải tệp bài tập lên</h1>
-        <input
-          type="file"
-          id="fileInput"
-          title="Tải tệp bài tập lên"
-          aria-label="Tải tệp bài tập lên"
-          accept=".docx, .pdf, image/*"
-          // multiple
-        />
-        {/* <button type="button" onClick={extractQuestions}>Submit File</button> */}
-      </form>
-      <input type="button" className="sub_btn_actual hov" onClick={() => extractQuestions()} value="Thêm câu hỏi từ file"></input>
-      {/* <form className="fileInput">
-        <h1>Khởi tạo câu hỏi mới từ file bài tập và các câu hỏi có sẵn trong form</h1>
-        <input  
-          type="file"
-          id="fileInput"
-          title="Tải tệp bài tập lên"
-          aria-label="Tải tệp bài tập lên"
-          accept=".docx, .pdf, image/*"
-        />
-        <button type="button" onClick={extractQuestions}>Submit File</button>
-      </form> */}
-      {/* <input type="button" className="sub_btn_actual hov" onClick={() => createQuestions()} value="Tạo câu hỏi mới"></input> */}
-      <br />
-      {/* <div className="numberOfQuestionsBox"> */}
-      <form>
-        <h1>Tải tệp ma trận/đặc tả</h1>
-        <input
-          type="file"
-          id="matrixInput"
-          title="Tải tệp ma trận/đặc tả"
-          aria-label="Tải tệp ma trận/đặc tả"
-          accept=".docx, .pdf, image/*"
-          // multiple
-        />
-        {/* <button type="button" onClick={extractQuestions}>Submit File</button> */}
-      </form>
-      <input type="button" className="sub_btn_actual hov" onClick={() => matrixQuestion()} value="Tạo câu hỏi từ ma trận/đặc tả"></input>
-      <form>
-        <h2>Tạo các câu hỏi mới</h2>
-          <div className="questionType">
-            <label htmlFor="mcq">Số lượng Trắc nghiệm:</label>
-            <input
-              type="number"
-              id="mcq"
-              name="mcq"
-              min="0"
-              defaultValue="3"
-              ref={mcqRef}
-            />
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => setShowExerciseModal(true)}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg transform transition hover:scale-105"
+        >
+          <MdCloudUpload className="inline mr-2"/>
+          Tải bài tập lên
+        </button>
+
+        <button
+          onClick={() => setShowMatrixModal(true)}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow-lg transform transition hover:scale-105"
+        >
+          <TbMatrix className="inline mr-2"/>
+          Tải ma trận/đặc tả
+        </button>
+
+        {/* Exercise Upload Modal */}
+        {showExerciseModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-8 max-w-md w-full m-4">
+              <button
+                onClick={() => setShowExerciseModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              >
+                <span className="text-2xl">&times;</span>
+              </button>
+              
+              <form className="bg-white rounded">
+                <h2 className="text-2xl font-bold mb-6">Tải tệp bài tập lên</h2>
+                <div className="mb-6">
+                  <input
+                    type="file"
+                    id="fileInput"
+                    className="block w-full text-gray-700 bg-white border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    accept=".docx, .pdf, image/*"
+                  />
+                </div>
+                <div className="flex justify-end gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      extractQuestions();
+                      setShowExerciseModal(false);
+                    }}
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Thêm câu hỏi
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowExerciseModal(false)}
+                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Hủy
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-          <div className="questionType">
-            <label htmlFor="trueFalse">Số lượng Đúng/Sai:</label>
-            <input
-              type="number"
-              id="trueFalse"
-              name="trueFalse"
-              min="0"
-              defaultValue="2"
-              ref={trueFalseRef}
-            />
+        )}
+
+        {/* Matrix Upload Modal */}
+        {showMatrixModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
+            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-8 max-w-md w-full m-4">
+              <button
+                onClick={() => setShowMatrixModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              >
+                <span className="text-2xl">&times;</span>
+              </button>
+              
+              <form className="bg-white rounded">
+                <h2 className="text-2xl font-bold mb-6">Tải tệp ma trận/đặc tả</h2>
+                <div className="mb-6">
+                  <input
+                    type="file"
+                    id="matrixInput"
+                    className="block w-full text-gray-700 bg-white border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    accept=".docx, .pdf, image/*"
+                  />
+                </div>
+                <div className="flex justify-end gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      matrixQuestion();
+                      setShowMatrixModal(false);
+                    }}
+                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Tạo câu hỏi
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowMatrixModal(false)}
+                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                  >
+                    Hủy
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-          <div className="questionType">
-            <label htmlFor="shortAnswer">Số lượng Trả Lời Ngắn:</label>
-            <input
-              type="number"
-              id="shortAnswer"
-              name="shortAnswer"
-              min="0"
-              defaultValue="1"
-              ref={shortAnswerRef}
-            />
+        )}
+                <button
+          onClick={() => setShowModal(true)}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        >
+          <RiAiGenerate2 className="inline mr-2"/>
+          Tạo câu hỏi mới
+        </button>
+
+        {showModal && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
+            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-8 max-w-md w-full m-4">
+              <button
+                onClick={() => setShowModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              >
+                <span className="text-2xl">&times;</span>
+              </button>
+              
+              <form className="bg-white rounded">
+                <h2 className="text-2xl font-bold mb-6 text-center">Tạo các câu hỏi mới</h2>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mcq">
+                    Số lượng Trắc nghiệm:
+                  </label>
+                  <input
+                    type="number"
+                    id="mcq"
+                    name="mcq"
+                    min="0"
+                    defaultValue="3"
+                    ref={mcqRef}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="trueFalse">
+                    Số lượng Đúng/Sai:
+                  </label>
+                  <input
+                    type="number"
+                    id="trueFalse"
+                    name="trueFalse"
+                    min="0"
+                    defaultValue="2"
+                    ref={trueFalseRef}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="mb-6">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="shortAnswer">
+                    Số lượng Trả Lời Ngắn:
+                  </label>
+                  <input
+                    type="number"
+                    id="shortAnswer"
+                    name="shortAnswer"
+                    min="0"
+                    defaultValue="1"
+                    ref={shortAnswerRef}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <button
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="button"
+                    onClick={() => {
+                      createQuestions();
+                      setShowModal(false);
+                    }}
+                  >
+                    Tạo câu hỏi
+                  </button>
+                  <button
+                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="button"
+                    onClick={() => setShowModal(false)}
+                  >
+                    Hủy
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-          <input className="sub_btn_actual hov" type="button" onClick={() => createQuestions()} value="Tạo câu hỏi mới theo form"></input>
-      </form>
+        )}
+      </div>
+      <div>
+      </div>
         
       {list.map((soloList, index) => (
         <div key={soloList.id} id="questionnaire" className="m-5">
@@ -1209,7 +1333,7 @@ async function uploadImage(file, examPin, questionId) {
             <li>
               {optionList[index].length < 6 && (
                 <input
-                  className="sub_btn_actual hov"
+                  className="rounded-xl p-4 text-base m-2 bg-[#000137] shadow-slate-50 text-white hov"
                   type="button"
                   value="Thêm tùy chọn"
                   onClick={() =>

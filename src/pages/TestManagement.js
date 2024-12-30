@@ -4,6 +4,7 @@ import {
   getDocs,
   doc,
   setDoc,
+  addDoc,
 } from "firebase/firestore/lite";
 import { useEffect, useState } from "react";
 import db from "../services/firebaseConfig";
@@ -11,13 +12,14 @@ import { getAuth } from "firebase/auth";
 import { v4 as uuid } from "uuid";
 import { FaSearch, FaPlus, FaRegFolderOpen } from "react-icons/fa";
 import { PiBankBold } from "react-icons/pi";
+import { useNavigate } from "react-router-dom";
 
 function TestManagement() {
   const [createdExams, setCreatedExams] = useState(() => []);
   const [examPins, setExamPins] = useState(() => []);
   const [status, setStatus] = useState(() => []);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const navigate = useNavigate();
   useEffect(() => {
     examSetter();
   }, []);
@@ -49,7 +51,7 @@ function TestManagement() {
   }
 
   async function checkResponses(index) {
-    window.location = `ExamsCreated/DisplayResponses/${examPins[index]}`;
+    navigate(`/ExamsCreated/DisplayResponses/${examPins[index]}`);
   }
 
   async function handleResponseStatus(soloStatus, index) {
@@ -119,6 +121,32 @@ function TestManagement() {
     });
   }
 
+  async function createFolder() {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    
+    if (user) {
+      const folderName = prompt("Nhập tên thư mục:");
+      
+      if (folderName) {
+        try {
+          const folderRef = collection(db, "Users", user.uid, "Folders");
+          await addDoc(folderRef, {
+            name: folderName,
+            createdAt: new Date(),
+            exams: []
+          });
+          alert("Folder created successfully!");
+        } catch (error) {
+          console.error("Error creating folder:", error);
+          alert("Failed to create folder");
+        }
+      }
+    } else {
+      alert("Please login to create a folder");
+    }
+  }
+
   const filteredExams = createdExams.length > 0 && createdExams[0] !== "Empty" 
     ? createdExams.filter(exam => 
         exam.quiz_title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -136,20 +164,20 @@ function TestManagement() {
             Quay lại
           </button>
           <button
-            onClick={() => window.location.href = '/FormMaker'}
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300"
+            onClick={() => navigate("/FormMaker")}
+            className="bg-green-600			 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors duration-300"
           >
             <FaPlus className='inline mr-2'/>Tạo đề thi
           </button>
           <button
-            onClick={() => window.location.href = '/statistics'}
-            className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors duration-300"
+            onClick={() => navigate("/QuestionBank")}
+            className="bg-amber-400 text-white px-6 py-2 rounded-md hover:bg-amber-600 transition-colors duration-300"
           >
             <PiBankBold className='inline mr-2'/> Tạo ngân hàng câu hỏi
           </button>
           <button
-            onClick={() => window.location.href = '/settings'}
-            className="bg-purple-600 text-white px-6 py-2 rounded-md hover:bg-purple-700 transition-colors duration-300"
+            onClick={() => createFolder()}
+            className="bg-blue-800 text-white px-6 py-2 rounded-md hover:bg-blue-950 transition-colors duration-300"
           >
             <FaRegFolderOpen className='inline mr-2'/>Tạo thư mục
           </button>
@@ -195,7 +223,7 @@ function TestManagement() {
                 </div>
                 <div className="flex flex-col gap-2">
                   <button
-                    onClick={() => checkResponses(index)}
+                    onClick={() => checkResponses(index)} //    window.location = `ExamsCreated/DisplayResponses/${examPins[index]}`;
                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300"
                   >
                     Xem các câu trả lời
