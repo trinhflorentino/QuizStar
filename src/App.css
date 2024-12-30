@@ -192,19 +192,19 @@ input[type="radio"]:checked + label {
   border: 2px solid black;
 } */
 
-#questionnaire {
+/* #questionnaire {
   padding: 30px;
-}
+} */
 
 .questionBox {
-  width: 85vw;
-  margin: 7px;
+  /* width: 85vw; */
+  /* margin: 7px; */
 }
 
 .optionBox {
-  height: 7vh;
-  width: 40vw;
-  background-color: #fff;
+  /* height: 7vh; */
+  /* width: 40vw; */
+  /* background-color: #fff; */
 }
 
 .dlt_btn {

@@ -11,6 +11,9 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MdCloudUpload } from "react-icons/md";
 import { RiAiGenerate2 } from "react-icons/ri";
 import { TbMatrix } from "react-icons/tb";
+import { BiImages } from "react-icons/bi";
+import { CiCirclePlus } from "react-icons/ci";
+import { AiOutlineQuestionCircle } from "react-icons/ai";
 
 // import fs from "fs";
 var mammoth = require("mammoth");
@@ -992,24 +995,30 @@ async function uploadImage(file, examPin, questionId) {
           onChange={(event) => setQuizTitle(event.target.value)}
         />
       </div>
-      <div className="flex gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-6">
         <button
           onClick={() => setShowExerciseModal(true)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow-lg transform transition hover:scale-105"
+          className="w-full sm:w-auto bg-blue-500 hover:bg-blue-700 text-white text-sm sm:text-base font-bold py-2 px-3 sm:px-4 rounded shadow-lg transform transition hover:scale-105 flex items-center justify-center"
         >
-          <MdCloudUpload className="inline mr-2"/>
-          Tải bài tập lên
+          <MdCloudUpload className="inline mr-1 sm:mr-2"/>
+          <span className="whitespace-nowrap">Tải bài tập lên</span>
         </button>
 
         <button
           onClick={() => setShowMatrixModal(true)}
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow-lg transform transition hover:scale-105"
+          className="w-full sm:w-auto bg-green-500 hover:bg-green-700 text-white text-sm sm:text-base font-bold py-2 px-3 sm:px-4 rounded shadow-lg transform transition hover:scale-105 flex items-center justify-center"
         >
-          <TbMatrix className="inline mr-2"/>
-          Tải ma trận/đặc tả
+          <TbMatrix className="inline mr-1 sm:mr-2"/>
+          <span className="whitespace-nowrap">Tải ma trận/đặc tả</span>
         </button>
 
-        {/* Exercise Upload Modal */}
+        <button
+          onClick={() => setShowModal(true)}
+          className="w-full sm:w-auto bg-purple-500 hover:bg-purple-700 text-white text-sm sm:text-base font-bold py-2 px-3 sm:px-4 rounded shadow-lg transform transition hover:scale-105 flex items-center justify-center"
+        >
+          <RiAiGenerate2 className="inline mr-1 sm:mr-2"/>
+          <span className="whitespace-nowrap">Tạo câu hỏi mới</span>
+        </button>
         {showExerciseModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
             <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-8 max-w-md w-full m-4">
@@ -1098,14 +1107,6 @@ async function uploadImage(file, examPin, questionId) {
             </div>
           </div>
         )}
-                <button
-          onClick={() => setShowModal(true)}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          <RiAiGenerate2 className="inline mr-2"/>
-          Tạo câu hỏi mới
-        </button>
-
         {showModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
             <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-8 max-w-md w-full m-4">
@@ -1188,50 +1189,40 @@ async function uploadImage(file, examPin, questionId) {
       </div>
         
       {list.map((soloList, index) => (
-        <div key={soloList.id} id="questionnaire" className="m-5">
-          <ul>
-          <li className="m-[5px] flex items-center ">
-            <div className="mr-3 border-r pr-3 border-black">Câu {index + 1}</div>
-            <div className="mr-3 border-r pr-3 border-black">Nhập điểm</div>
-            <select
-              value={soloList.type}
-              className="mr-3 border-r pr-3 border-black"
-              onChange={(event) => handleQuestionTypeChange(event, index)}
-            >
-              <option value="mcq">Trắc nghiệm</option>
-              <option value="truefalse">Đúng/Sai</option>
-              <option value="shortanswer">Trả lời ngắn</option>
-            </select>
-            <label className="cursor-pointer bg-blue-500 text-white px-3 py-1 rounded">
-              Thêm ảnh/audio
-              <input 
-                type="file" 
-                className="hidden"
-                data-index={index}
-                onChange={(event) => handleImageChange(event, index)}
-                accept="image/*, audio/*"
-              />            
-            </label>
-            {imagePreview[index] && (
-              <div className="ml-3">
-                <img src={imagePreview[index]} alt="Preview" className="h-20 w-20 object-cover" />
+        <div key={soloList.id} id="questionnaire" className="p-2 sm:p-5">
+          <ul className="w-full">
+            <li className="m-[5px] flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
+              <div className="flex items-center w-full sm:w-auto">
+                <div className="mr-2 sm:mr-3 border-r pr-2 sm:pr-3 border-black text-sm sm:text-base">
+                  Câu {index + 1}
+                </div>
+                <div className="mr-2 sm:mr-3 border-r pr-2 sm:pr-3 border-black text-sm sm:text-base">
+                  Nhập điểm
+                </div>
+                <select
+                  value={soloList.type}
+                  className="mr-2 sm:mr-3 border-r pr-2 sm:pr-3 border-black text-sm sm:text-base"
+                  onChange={(event) => handleQuestionTypeChange(event, index)}
+                >
+                  <option value="mcq">Trắc nghiệm</option>
+                  <option value="truefalse">Đúng/Sai</option>
+                  <option value="shortanswer">Trả lời ngắn</option>
+                </select>
               </div>
-            )}
-          </li>            
-            <li className="dlt_li">
+            </li>            
+
+            <li className="dlt_li flex flex-col sm:flex-row gap-2 sm:gap-0 mt-2">
               <input
                 type="text"
                 placeholder={`Câu hỏi ${index + 1}`}
-                className="questionBox faintShadow"
+                className="questionBox faintShadow w-full sm:w-[85%] p-2 sm:p-3 text-sm sm:text-base"
                 value={soloList.question}
-                onChange={(event) =>
-                  questChangeHandler(event, index, "question")
-                }
+                onChange={(event) => questChangeHandler(event, index, "question")}
               />
               {list.length > 1 && (
-                <button className="dlt_btn">
+                <button className="dlt_btn ml-0 sm:ml-2">
                   <img
-                    className="dlt_img faintShadow"
+                    className="dlt_img faintShadow w-8 h-8 sm:w-10 sm:h-10"
                     src={TrashBin}
                     alt="Delete"
                     onClick={() => handleRemoveQuest(index)}
@@ -1242,114 +1233,121 @@ async function uploadImage(file, examPin, questionId) {
 
             {soloList.type === "mcq" &&
               optionList[index].map((soloOption, ind) => (
-                <li key={soloOption.id} className="dlt_li">
+                <li key={soloOption.id} className="dlt_li flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-2">
                   <input
                     type="text"
-                    className="optionBox faintShadow"
+                    className="optionBox faintShadow w-full sm:w-[70%] p-2 text-sm sm:text-base"
                     placeholder={`Tùy chọn ${ind + 1}`}
                     value={soloOption.option}
-                    onChange={(event) =>
-                      optionChangeHandler(event, index, ind)
-                    }
+                    onChange={(event) => optionChangeHandler(event, index, ind)}
                   />
-                  <input
-                    type="radio"
-                    name={`correctOption-${index}`}
-                    checked={list[index].answer === ind}
-                    onChange={(event) =>
-                      handleCorrectOptionChange(event, index, ind)
-                    }
-                  />
-                  {optionList[index].length > 2 && (
-                    <button className="dlt_btn opt">
-                      <img
-                        className="dlt_img opt faintShadow"
-                        src={TrashBin}
-                        alt="Delete"
-                        onClick={() => handleRemoveOpt(index, ind)}
-                      />
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name={`correctOption-${index}`}
+                      checked={list[index].answer === ind}
+                      onChange={(event) => handleCorrectOptionChange(event, index, ind)}
+                      className="w-4 h-4"
+                    />
+                    {optionList[index].length > 2 && (
+                      <button className="dlt_btn">
+                        <img
+                          className="dlt_img faintShadow w-6 h-6 sm:w-8 sm:h-8"
+                          src={TrashBin}
+                          alt="Delete"
+                          onClick={() => handleRemoveOpt(index, ind)}
+                        />
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
 
             {soloList.type === "truefalse" &&
               optionList[index].map((soloOption, ind) => (
-                <li key={soloOption.id} className="dlt_li">
+                <li key={soloOption.id} className="dlt_li flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-2">
                   <input
                     type="text"
-                    className="optionBox faintShadow"
+                    className="optionBox faintShadow w-full sm:w-[70%] p-2 text-sm sm:text-base"
                     placeholder={`Tùy chọn ${ind + 1}`}
                     value={soloOption.option}
-                    onChange={(event) =>
-                      optionChangeHandler(event, index, ind)
-                    }
+                    onChange={(event) => optionChangeHandler(event, index, ind)}
                   />
-                  <select
-                    className="m-[7px] p-[7px]"
-                    value={soloOption.answer === null ? "" : soloOption.answer ? "true" : "false"}
-                    onChange={(event) =>
-                      handleCorrectOptionChange(event, index, ind)
-                    }
-                  >
-                    {/* <option value="">Lựa chọn</option> */}
-                    <option value="true">Đúng</option>
-                    <option value="false">Sai</option>
-                  </select>
-                  {optionList[index].length > 2 && (
-                    <button className="dlt_btn opt">
-                      <img
-                        className="dlt_img opt faintShadow"
-                        src={TrashBin}
-                        alt="Delete"
-                        onClick={() => handleRemoveOpt(index, ind)}
-                      />
-                    </button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <select
+                      className="p-2 rounded border text-sm sm:text-base"
+                      value={soloOption.answer === null ? "" : soloOption.answer ? "true" : "false"}
+                      onChange={(event) => handleCorrectOptionChange(event, index, ind)}
+                    >
+                      <option value="true">Đúng</option>
+                      <option value="false">Sai</option>
+                    </select>
+                    {optionList[index].length > 2 && (
+                      <button className="dlt_btn">
+                        <img
+                          className="dlt_img faintShadow w-6 h-6 sm:w-8 sm:h-8"
+                          src={TrashBin}
+                          alt="Delete"
+                          onClick={() => handleRemoveOpt(index, ind)}
+                        />
+                      </button>
+                    )}
+                  </div>
                 </li>
               ))}
 
             {soloList.type === "shortanswer" && (
-              <li className="dlt_li">
+              <li className="dlt_li flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2">
                 <input
                   type="text"
-                  className="shortAnswerBox faintShadow"
+                  className="shortAnswerBox faintShadow w-full sm:w-[70%] p-2 text-sm sm:text-base"
                   placeholder="Đáp án"
                   value={list[index].answer}
                   onChange={(event) => questChangeHandler(event, index, "answer")}
                 />
-                <button>
-                  {/* <img
-                    className="dlt_img faintShadow"
-                    src={require("../../images/trash_bin-100_copy.jpg")}
-                    alt="Delete"
-                  /> */}
-                  {/* <p>Tạo các câu trả lời đúng cùng ý nghĩa</p> */}
-                  Tạo các câu trả lời đúng cùng ý nghĩa
-                </button>
               </li>
             )}
 
-            <li>
-              {optionList[index].length < 6 && (
-                <input
-                  className="rounded-xl p-4 text-base m-2 bg-[#000137] shadow-slate-50 text-white hov"
-                  type="button"
-                  value="Thêm tùy chọn"
-                  onClick={() =>
-                    handleAddOpt(index, optionList[index].length + 1)
-                  }
-                />
-              )}
+            <li className="mt-4">
+              <div className="flex flex-wrap gap-2">
+                {optionList[index].length < 6 && (
+                  <button
+                    className="px-4 py-2 text-sm sm:text-base bg-[#000137] text-white rounded hover:bg-[#000160] transition-colors"
+                    onClick={() => handleAddOpt(index, optionList[index].length + 1)}
+                  >
+                    <CiCirclePlus className="inline mr-2"/>
+                    Thêm tùy chọn
+                  </button>
+                )}
+                {list.length - 1 === index && (
+                  <button
+                    className="px-4 py-2 text-sm sm:text-base bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                    onClick={() => handleAddQuest()}
+                  >
+                    <AiOutlineQuestionCircle className="inline mr-2"/>
+                    Thêm câu hỏi
+                  </button>
+                )}
+                {/* <div className="flex items-center gap-2 w-full sm:w-auto"> */}
+                  <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white rounded text-sm sm:text-base flex items-center py-2 px-3 sm:px-4">
+                    <BiImages className="mr-1"/>
+                    <span className="whitespace-nowrap">Thêm ảnh/audio</span>
+                    <input 
+                      type="file" 
+                      className="hidden"
+                      data-index={index}
+                      onChange={(event) => handleImageChange(event, index)}
+                      accept="image/*, audio/*"
+                    />            
+                  </label>
+                  {imagePreview[index] && (
+                    <div className="ml-2">
+                      <img src={imagePreview[index]} alt="Preview" className="h-16 w-16 sm:h-20 sm:w-20 object-cover rounded" />
+                    </div>
+                  )}
+                {/* </div> */}
+              </div>
             </li>
-            {list.length - 1 === index && (
-              <input
-                className="sub_btn_actual hov"
-                type="button"
-                value="Thêm câu hỏi"
-                onClick={() => handleAddQuest()}
-              />
-            )}
           </ul>
         </div>
       ))}
