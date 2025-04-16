@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { getDocs, collection, doc, setDoc, deleteDoc } from "firebase/firestore/lite";
 import db from "../../services/firebaseConfig";
 import { v4 as uuid } from "uuid";
@@ -173,8 +173,8 @@ function DisplayResponses() {
   }, [studInfo, score]);
 
   return (
-    <div>
-      <div className="flex flex-row flex-wrap gap-2 mb-3 mx-4 md:mx-10 lg:mx-14 mt-4 md:mt-10 lg:mt-14">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex flex-row flex-wrap gap-2 mb-3 mx-4 md:mx-10 lg:mx-14">
         <button
           onClick={() => navigate('/TestManagement')}
           className="sm:w-auto bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition duration-300"
@@ -230,36 +230,44 @@ function DisplayResponses() {
       </div>
       {studInfo.length !== 0 ? (
         studInfo[0] !== "Empty" ? (
-          studInfo.map((stu, index) => {
-            // console.log(studInfo[0]);
-            return (
-              <div className="mainForm mx-4 md:mx-10 lg:mx-14" key={uuid()} >
-                <p className="leftMargin">Danh sách học sinh đã thi ({studInfo.length}):</p>
-                <div className="centeredP">
-                  <table className="responsesTable">
-                    <tbody>
-                      <tr className="thRow">
-                        <th>Họ và tên</th>
-                        <th>Lớp</th>
-                        <th>Trường</th>
-                        <th>Email</th>
-                        <th>Điểm</th>
+          <>
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold mb-4">Danh sách học sinh đã làm bài</h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-white border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-100">
+                      <th className="py-2 px-4 border-b">Tên</th>
+                      <th className="py-2 px-4 border-b">Lớp</th>
+                      <th className="py-2 px-4 border-b">Trường</th>
+                      <th className="py-2 px-4 border-b">Email</th>
+                      <th className="py-2 px-4 border-b">Điểm</th>
+                      <th className="py-2 px-4 border-b">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {studInfo.map((student, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="py-2 px-4 border-b">{student.name}</td>
+                        <td className="py-2 px-4 border-b">{student.class}</td>
+                        <td className="py-2 px-4 border-b">{student.school}</td>
+                        <td className="py-2 px-4 border-b">{student.email}</td>
+                        <td className="py-2 px-4 border-b">{score[index]}</td>
+                        <td className="py-2 px-4 border-b">
+                          <Link
+                            to={`/ExamsCreated/ExamResults/${pin}/ViewStudentResponse/${student.email}`}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            Xem chi tiết
+                          </Link>
+                        </td>
                       </tr>
-                    </tbody>
-                    <tbody>
-                      <tr className="tdRow">
-                        <td>{stu["name"]}</td>
-                        <td>{stu["class"]}</td>
-                        <td>{stu["roll_no"]}</td>
-                        <td>{stu["email"]}</td>
-                        <td>{score[index]}</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            );
-          })
+            </div>
+          </>
         ) : (
           <>
             <div className="mainForm mx-4 md:mx-10 lg:mx-14">

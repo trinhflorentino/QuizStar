@@ -17,26 +17,147 @@ import { MathJaxContext, MathJax } from 'better-react-mathjax';
 
 function Form() {
   const [questions, setQuestions] = useState(() => []);
+  const [originalQuestions, setOriginalQuestions] = useState(() => []);
+  const [originalOrder, setOriginalOrder] = useState({});
   const [title, setTitle] = useState();
   const [selectedList, setSelectedList] = useState(() => [{}]);
-  const [studInfo, setStudInfo] = useState(() => {});
+  const [studInfo, setStudInfo] = useState(() => ({
+    name: "",
+    email: "",
+    roll_no: "",
+    class: ""
+  }));
   const [status, setStatus] = useState(() => "");
   const [duration, setDuration] = useState();
   const [isStudentInfoSubmitted, setIsStudentInfoSubmitted] = useState(false);
-  const [startTime, setStartTime] = useState(null);  // Add this line
+  const [startTime, setStartTime] = useState(null);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [remainingTime, setRemainingTime] = useState(null);
+  const [timerInterval, setTimerInterval] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   let { pin } = useParams();
   const navigate = useNavigate();
+
+  function shuffleArray(array) {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+  }
+
+  function shuffleQuestionsAndAnswers(questions) {
+    const newOrder = {};
+    
+    const shuffledQuestions = questions.map((question, originalQuestionIndex) => {
+      const newQuestion = { ...question };
+      
+      if (question.type === "mcq") {
+        const optionPairs = question.options.map((opt, idx) => ({ option: opt, originalIndex: idx }));
+        const shuffledPairs = shuffleArray([...optionPairs]);
+        
+        newOrder[originalQuestionIndex] = {
+          newIndex: originalQuestionIndex,
+          optionMapping: shuffledPairs.reduce((map, pair, newIndex) => {
+            map[newIndex] = pair.originalIndex;
+            return map;
+          }, {})
+        };
+
+        newQuestion.options = shuffledPairs.map(pair => pair.option);
+      }
+      
+      return newQuestion;
+    });
+
+    const shuffledWithIndices = shuffledQuestions.map((q, i) => ({ q, originalIndex: i }));
+    const finalShuffled = shuffleArray([...shuffledWithIndices]);
+    
+    finalShuffled.forEach((item, newIndex) => {
+      const originalIndex = item.originalIndex;
+      if (newOrder[originalIndex]) {
+        newOrder[originalIndex].newIndex = newIndex;
+      } else {
+        newOrder[originalIndex] = { newIndex: newIndex };
+      }
+    });
+
+    return {
+      shuffledQuestions: finalShuffled.map(item => item.q),
+      orderMapping: newOrder
+    };
+  }
+
   useEffect(() => {
-    async function f() {
-      if (selectedList.length > 0 && Object.keys(selectedList[0]).length !== 0) {
+    async function getQuestions() {
+      const settersCollectionRef = collection(
+        db,
+        "Paper_Setters",
+        pin.toString(),
+        "Question_Papers_MCQ"
+      );
+      const docos = await getDocs(settersCollectionRef);
+      if (docos.docs.length > 0) {
+        const attemptPromise = new Promise((res, rej) => {
+          getAuth().onAuthStateChanged(async function (user) {
+            if (user) {
+              const check = await getDoc(
+                doc(db, "Users", user.uid, "Exams_Attempted", pin)
+              );
+              if (check.data() === undefined) {
+                res(false);
+              } else {
+                res(true);
+              }
+            }
+          });
+        });
+
+        if (await attemptPromise) {
+          setQuestions("Already Attempted");
+          navigate('ResultFetch/'+getAuth().currentUser.email);
+        } else {
+          const docosData = docos.docs.map((doc) => doc.data());
+          if (docosData.length > 0 && docosData[0].question_question) {
+            setTitle(docos.docs[0].id);
+            const originalQuestions = docosData[0].question_question;
+            setOriginalQuestions(originalQuestions);
+            
+            const { shuffledQuestions, orderMapping } = shuffleQuestionsAndAnswers(originalQuestions);
+            setQuestions(shuffledQuestions);
+            setOriginalOrder(orderMapping);
+            
+            setStatus(docosData[0].status);
+            const examDuration = docosData[0].duration;
+            console.log("Setting duration:", examDuration);
+            setDuration(examDuration);
+          } else {
+            setQuestions("Sai mã pin");
+          }
+        }
+      } else {
+        setQuestions("Sai mã pin");
+      }
+    }
+
+    if (!isStudentInfoSubmitted) {
+      getQuestions();
+    }
+  }, []);
+
+  useEffect(() => {
+    async function submitExam() {
+      if (isSubmitting) {
         await setDoc(
           doc(
             db,
             "Paper_Setters",
             pin.toString(),
             "Responses",
-            studInfo["email"]
+            studInfo.email
           ),
           {
             stud_info: studInfo,
@@ -50,10 +171,10 @@ function Form() {
               doc(db, "Users", user.uid, "Exams_Attempted", pin),
               {
                 quiz_title: title,
-                name: studInfo["name"],
-                class: studInfo["class"],
-                roll_no: studInfo["roll_no"],
-                email_id: studInfo["email"],
+                name: studInfo.name,
+                class: studInfo.class,
+                roll_no: studInfo.roll_no,
+                email_id: studInfo.email,
               },
               { merge: true }
             );
@@ -61,70 +182,40 @@ function Form() {
             console.log("Something Went Wrong!");
           }
         });
-        // console.log(startTime);
-        navigate(`ResultFetch/${studInfo["email"]}`);
-      } else {
-        //console.log("Jhol");
+        navigate(`ResultFetch/${studInfo.email}`);
       }
-
-      const attemptPromise = new Promise((res, rej) => {
-        getAuth().onAuthStateChanged(async function (user) {
-          if (user) {
-            const check = await getDoc(
-              doc(db, "Users", user.uid, "Exams_Attempted", pin)
-            );
-            // console.log(check.data());
-            if (check.data() === undefined) {
-              res(false);
-            } else {
-              //console.log("Already Attempted");
-              res(true);
-            }
-          }
-        });
-      });
-
-      async function attemptChecker() {
-        let some = await Promise.resolve(attemptPromise);
-        //console.log(some);
-        return some;
-      }
-
-      const getQuestions = async () => {
-        //function to get Question Paper
-        const settersCollectionRef = collection(
-          db,
-          "Paper_Setters",
-          pin.toString(),
-          "Question_Papers_MCQ"
-        );
-        const docos = await getDocs(settersCollectionRef);
-        if (Object.keys(docos.docs).length !== 0) {
-          //checks whether the Question Papers collection is empty
-          // console.log(await attemptChecker());
-          if ((await attemptChecker()) === true) {
-            setQuestions("Already Attempted");
-            navigate('ResultFetch/'+getAuth().currentUser.email);
-          } else {
-            const docosData = docos.docs.map((docs, index) => {
-              if (index === 0) {
-                setTitle(docs.id);
-              }
-              return docs.data(); //returns question paper
-            });
-            setQuestions(docosData[0]["question_question"].map((doc) => doc));
-            setStatus(docosData[0]["status"]);
-            setDuration(docosData[0]["duration"]);
-          }
-        } else {
-          setQuestions("Sai mã pin");
-        }
-      };
-
-      getQuestions();
     }
-    f();
-  }, [selectedList, pin, studInfo]);
+
+    submitExam();
+  }, [isSubmitting]);
+
+  useEffect(() => {
+    console.log("Timer effect triggered:", { startTime, duration, remainingTime });
+    
+    if (startTime && duration) {
+      console.log("Setting up timer");
+      const interval = setInterval(() => {
+        const now = new Date();
+        const elapsedMs = now - startTime;
+        const elapsedMinutes = Math.floor(elapsedMs / 60000);
+        const remainingMinutes = duration - elapsedMinutes;
+        
+        console.log("Timer tick:", { elapsedMinutes, remainingMinutes });
+        
+        if (remainingMinutes <= 0) {
+          clearInterval(interval);
+          onSubmit();
+        } else {
+          setRemainingTime(remainingMinutes);
+        }
+      }, 1000);
+
+      return () => {
+        console.log("Cleaning up timer");
+        clearInterval(interval);
+      };
+    }
+  }, [startTime, duration]);
 
   useEffect(() => {
     //console.log(questions.length);
@@ -144,10 +235,28 @@ function Form() {
         class: className,
       });
       setIsStudentInfoSubmitted(true);
-      setStartTime(new Date());  // Add this line
+      const now = new Date();
+      console.log("Setting start time:", now);
+      setStartTime(now);
     } else {
       alert("Vui lòng điền đầy đủ thông tin học sinh.");
     }
+  }
+
+  function handleAnswerSelect(questionIndex, optionIndex) {
+    setSelectedAnswers(prev => ({
+      ...prev,
+      [questionIndex]: optionIndex
+    }));
+    
+    const originalQuestionIndex = Object.keys(originalOrder).find(
+      key => originalOrder[key].newIndex === questionIndex
+    );
+    const originalOptionIndex = originalOrder[originalQuestionIndex]?.optionMapping?.[optionIndex] ?? optionIndex;
+    
+    const newSelectedList = [...selectedList];
+    newSelectedList[originalQuestionIndex] = { selectedAnswer: originalOptionIndex };
+    setSelectedList(newSelectedList);
   }
 
   function StudentInfoForm() {
@@ -201,31 +310,22 @@ function Form() {
 
   function onSubmit() {
     let count = 0;
-    let infoBool = false;
-
-    // if (
-    //   // document.getElementById("studName").value !== "" &&
-    //   // document.getElementById("studRollNo").value !== "" &&
-    //   // document.getElementById("studClass").value !== ""
-    // ) {
-    //   infoBool = true;
-    // }
-    infoBool = true;
     let tempSelectedList = [];
-    for (let i = 0; i < questions.length; i++) {
+    
+    for (let i = 0; i < originalQuestions.length; i++) {
       let selectedAnswer = null;
-      if (questions[i].type === "mcq") {
-        const selectedRadio = document.querySelector(
-          `input[name="question_${i}"]:checked`
-        );
-        if (selectedRadio) {
-          selectedAnswer = parseInt(selectedRadio.value, 10) - 1;
+      const shuffledIndex = originalOrder[i].newIndex;
+      
+      if (originalQuestions[i].type === "mcq") {
+        const shuffledAnswer = selectedAnswers[shuffledIndex];
+        if (shuffledAnswer !== undefined) {
+          selectedAnswer = originalOrder[i].optionMapping[shuffledAnswer];
           count++;
         }
-      } else if (questions[i].type === "truefalse") {
-        selectedAnswer = questions[i].options.map((_, index) => {
+      } else if (originalQuestions[i].type === "truefalse") {
+        selectedAnswer = questions[shuffledIndex].options.map((_, index) => {
           const selected = document.querySelector(
-            `input[name="question_${i}_option${index}"]:checked`
+            `input[name="question_${shuffledIndex}_option${index}"]:checked`
           );
           if (selected) {
             return selected.value === "true";
@@ -236,8 +336,8 @@ function Form() {
         if (selectedAnswer.every((answer) => answer !== null)) {
           count++;
         }
-      } else if (questions[i].type === "shortanswer") {
-        selectedAnswer = document.getElementById(`shortAnswer${i}`).value;
+      } else if (originalQuestions[i].type === "shortanswer") {
+        selectedAnswer = document.getElementById(`shortAnswer${shuffledIndex}`).value;
         if (selectedAnswer.trim() !== "") {
           count++;
         }
@@ -245,25 +345,18 @@ function Form() {
 
       tempSelectedList.push({ selectedAnswer });
     }
+    
     console.log(tempSelectedList);
-    // if (count === questions.length && infoBool) {
-      const endTime = new Date();
-      const timeSpentMs = startTime ? endTime - startTime : 0;
-      const timeSpentMinutes = Math.floor(timeSpentMs / 60000);
-      console.log(timeSpentMinutes);
-      setSelectedList(tempSelectedList);
-      setStudInfo({
-        name: document.getElementById("studName").value,
-        email: getAuth().currentUser.email,
-        roll_no: document.getElementById("studRollNo").value,
-        class: document.getElementById("studClass").value,
-        timeSpent: timeSpentMinutes 
-      });
-      if (!infoBool) {
-        alert("Vui lòng điền thông tin học sinh.");
-      }
-    navigate(`ResultFetch/${studInfo["email"]}`);
-    // }
+    const endTime = new Date();
+    const timeSpentMs = startTime ? endTime - startTime : 0;
+    const timeSpentMinutes = Math.floor(timeSpentMs / 60000);
+    console.log(timeSpentMinutes);
+    setSelectedList(tempSelectedList);
+    setStudInfo(prev => ({
+      ...prev,
+      timeSpent: timeSpentMinutes 
+    }));
+    setIsSubmitting(true);
   }
 
   return (
@@ -277,10 +370,16 @@ function Form() {
               ) : (
                 <div className="max-w-4xl mx-auto">
                   <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-                    <h1 id="quiz_title" className="text-2xl font-bold text-gray-800 mb-4">
-                      {title}
-                    </h1>
-                    {/* <MathJax inline className="text-2xl">{"\\(5x * 10 \\approx 42\\)"}</MathJax> */}
+                    <div className="flex justify-between items-center">
+                      <h1 id="quiz_title" className="text-2xl font-bold text-gray-800">
+                        {title}
+                      </h1>
+                      {remainingTime !== null && (
+                        <div className="text-xl font-bold text-blue-600">
+                          Thời gian còn lại: {remainingTime} phút
+                        </div>
+                      )}
+                    </div>
                   </div>
                   {questions.map((question, questionIndex) => {
                     return (
@@ -295,16 +394,29 @@ function Form() {
                           question.options.map((option, optionIndex) => {
                             return (
                               <div key={uuid()} className="mb-3">
-                                <label className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                                  <input
-                                    id={`${questionIndex}-${optionIndex}`}
-                                    type="radio"
-                                    className="form-radio h-5 w-5 text-blue-600"
-                                    value={optionIndex + 1}
-                                    name={`question_${questionIndex}`}
-                                  />
+                                <button
+                                  id={`${questionIndex}-${optionIndex}`}
+                                  type="button"
+                                  className={`w-full p-3 rounded-lg border transition-colors flex items-center space-x-3 ${
+                                    selectedAnswers[questionIndex] === optionIndex
+                                      ? 'bg-blue-100 border-blue-500 text-blue-700'
+                                      : 'hover:bg-gray-50 border-gray-300 text-gray-700'
+                                  }`}
+                                  onClick={() => handleAnswerSelect(questionIndex, optionIndex)}
+                                >
+                                  <span className="w-8 h-8 flex items-center justify-center rounded-full border-2 font-medium text-lg">
+                                    {String.fromCharCode(65 + optionIndex)}
+                                  </span>
                                   <MathJax inline dynamic className="text-gray-700">{option.option}</MathJax>
-                                </label>
+                                </button>
+                                <input
+                                  type="radio"
+                                  className="hidden"
+                                  value={optionIndex + 1}
+                                  name={`question_${questionIndex}`}
+                                  checked={selectedAnswers[questionIndex] === optionIndex}
+                                  onChange={() => handleAnswerSelect(questionIndex, optionIndex)}
+                                />
                               </div>
                             );
                           })}
@@ -367,7 +479,6 @@ function Form() {
             )
           ) : (
             <p className="centeredP">Bạn đã làm bài kiểm tra này rồi.</p>
-            
           )
         ) : (
           <p className="centeredP">Bài thi không tồn tại hoặc người tạo đã xóa bài thi.</p>

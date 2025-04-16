@@ -5,73 +5,50 @@ import { v4 as uuid } from "uuid";
 import { getAuth } from "firebase/auth";
 import React from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { MathJaxContext, MathJax } from 'better-react-mathjax';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MdCloudUpload } from "react-icons/md";
 import { RiAiGenerate2 } from "react-icons/ri";
 import { TbMatrix } from "react-icons/tb";
-import { BiImages } from "react-icons/bi";
-import { CiCirclePlus } from "react-icons/ci";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
 import { useNavigate } from 'react-router-dom';
-import { FiTrash2, FiX } from "react-icons/fi";
-// import ConvertApi from 'convertapi-js'
-
-// import CloudConvert from 'cloudconvert';
-
-// import fs from "fs";
-var mammoth = require("mammoth");
-// const storage = getStorage();
+import mammoth from 'mammoth';
+import QuestionItem from './QuestionItem';
+import FileUploadModal from './FileUploadModal';
+import MatrixUploadModal from './MatrixUploadModal';
+import QuestionGeneratorModal from './QuestionGeneratorModal';
+import { extractQuestionsJSON, matrixQuestionsJSON, createQuestionsJSON } from '../AI/AIService';
 
 function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubmit }) {
-  // if(isEditing) {
-  //   // console.log(getAuth().currentUser.email);
-  //   if(getAuth().currentUser.email !== 
-  // }
   const [quizTitle, setQuizTitle] = useState("");
-  const [duration, setDuration] = useState(50); // Default 45 minutes
-  const [list, setList] = useState([
-    { id: uuid(), question: "", answer: undefined, type: "mcq", score: 0.25 },
-  ]);
-  const [optionList, setOptionList] = useState([
-    [
-      { id: uuid(), option: "", optionNo: 1, answer: true },
-      { id: uuid(), option: "", optionNo: 2, answer: true },
-      { id: uuid(), option: "", optionNo: 3, answer: true },
-      { id: uuid(), option: "", optionNo: 4, answer: true },
-    ],
-  ]);
+  const [duration, setDuration] = useState(45);
+  const [list, setList] = useState([]);
+  const [optionList, setOptionList] = useState([]);
+  const [scoreDistribution, setScoreDistribution] = useState({
+    mcq: { count: 0, totalScore: 1.0 },
+    truefalse: { count: 0, totalScore: 1.0 },
+    shortanswer: { count: 0, totalScore: 1.0 }
+  });
+  const [quickScore, setQuickScore] = useState({
+    mcq: 0.25,
+    truefalse: 0.5,
+    shortanswer: 1.0
+  });
   const navigate = useNavigate();
-  const [mathJaxInputActive, setMathJaxInputActive] = useState(false);
-  const [mathJaxQuestionIndex, setMathJaxQuestionIndex] = useState(null);
-  const [mathJaxInputValue, setMathJaxInputValue] = useState("");
-  const handleMathJaxInput = (index) => {
-    setMathJaxInputActive(true);
-    setMathJaxQuestionIndex(index);
-    setMathJaxInputValue(list[index].question);
-  };
-  const handleMathJaxInputChange = (value) => {
-    setMathJaxInputValue(value);
-  };
-  const saveMathJaxInput = () => {
-    if (mathJaxQuestionIndex !== null) {
-      const updatedList = [...list];
-      updatedList[mathJaxQuestionIndex].question = mathJaxInputValue;
-      setList(updatedList);
-      // ...reset state variables
-    }
-  };
-  const cancelMathJaxInput = () => {
-    setMathJaxInputActive(false);
-    setMathJaxQuestionIndex(null);
-    setMathJaxInputValue("");
-  };
+  const [isLoading, setIsLoading] = useState(false);
+  const [showExerciseModal, setShowExerciseModal] = useState(false);
+  const [showMatrixModal, setShowMatrixModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [imagePreview, setImagePreview] = useState(Array(list.length).fill(null));
+  const [fileInputKeys, setFileInputKeys] = useState(Array(list.length).fill(0));
+  const [showScoreModal, setShowScoreModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewQuestions, setPreviewQuestions] = useState([]);
+  const [previewOptions, setPreviewOptions] = useState([]);
 
   // Create refs for the number inputs
   const mcqRef = React.useRef(null);
   const trueFalseRef = React.useRef(null);
   const shortAnswerRef = React.useRef(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {}, [optionList]);
 
@@ -632,9 +609,16 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
 //   }
 // };
 
-  async function extractQuestionsJSON(file) {
-
-    const prompt = `
+  async function extractQuestions() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    if (file === undefined) {
+      alert("Vui lòng chọn file trước.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const prompt = `
 Hãy phân tích file được upload và trích xuất tất cả các câu hỏi thuộc các dạng "mcq", "truefalse", và "shortanswer" cùng với đáp án của chúng. Kết quả bắt buộc phải được định dạng JSON theo cấu trúc sau:
 
 [
@@ -672,78 +656,38 @@ Tuân thủ nghiêm ngặt định dạng JSON.
 Ưu tiên sử dụng mảng boolean [true, false] cho câu hỏi truefalse và shortanswer thay vì dạng chuỗi "Đáp án a [true, false]", trừ khi format của file input không cho phép.
 `;
 
-    console.time("Thời gian thực hiện"); 
-    if (!file) {
-      console.error("Please select a file first.");
-      return;
-    }
-    try {
-      let fileContent = await readFile(file);
-      let fileType = file.type;
-      // If it's a .docx file, convert it to HTML
-      if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-        const arrayBuffer = await readFileAsArrayBuffer(file);
-        const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-        fileContent = result.value; 
-        fileType = "text/html"; // Update the file type
-
-        // Auto download the converted HTML file
-        const blob = new Blob([fileContent], { type: "text/html" });
-        // const link = document.createElement("a");
-        // link.href = URL.createObjectURL(blob);
-        // link.download = "converted.html";
-        // document.body.appendChild(link);
-        // link.click();
-        // document.body.removeChild(link);
-      }
-      
-      // if (file.name.endsWith('.doc')) {
-      //   file = await convertDocToDocx(file);
-      // }
-      console.log(fileContent);
-      // Make a request to the media.upload endpoint 
-      const response = await fetch(
-        "https://generativelanguage.googleapis.com/upload/v1beta/files",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": fileType, 
-            "x-goog-api-key": apiKey,
-          },
-          body: fileContent, 
+      const ketQua = await extractQuestionsJSON(file, prompt);
+      console.log("Original Extracted Data:", ketQua);
+      if (ketQua) {
+        const parsedData = JSON.parse(ketQua);
+        validateQuestionsArray(parsedData);
+        const convertedData = convertAnswers(parsedData);
+        console.log("Converted Data:", convertedData);
+        addQuestionsFromJSON(convertedData);
+        // Thêm tên file vào tiêu đề nếu tiêu đề đang trống
+        if (!quizTitle.trim()) {
+          setQuizTitle(file.name.replace(/\.[^/.]+$/, "")); // Xóa phần mở rộng file
         }
-      );
-      // console.log(response);
-      const uploadResponse = await response.json();
-      const fileUri = uploadResponse.file.uri;
-      // console.log(uploadResponse);
-      console.log(fileUri);
-      const result = await model20flash.generateContent([
-        {
-          fileData: {
-            mimeType: fileType,
-            fileUri: fileUri,
-          },
-        },
-        { text: prompt },
-      ]);
-
-      console.timeEnd("Thời gian thực hiện");
-      // console.log(result.response.text()); 
-      
-      let responseText = result.response.text();
-      if (responseText.endsWith("]}]}]")) {
-        responseText = responseText.slice(0, -2);
       }
-      return responseText;
     } catch (error) {
-      console.error("Error uploading or summarizing:", error); 
+      console.error("Error extracting questions:", error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+      setShowExerciseModal(false);
     }
   }
 
-  async function matrixQuestionsJSON(file) {
-
-    const prompt = `
+  async function matrixQuestion() {
+    const fileInput = document.getElementById('matrixInput');
+    const file = fileInput.files[0];
+    if (file === undefined) {
+      alert("Vui lòng chọn file trước.");
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const prompt = `
 Hãy phân tích file được upload (ma trận/đặc tả/đề cương) và tạo ra các câu hỏi thuộc các dạng "mcq", "truefalse", và "shortanswer" cùng với đáp án của chúng dựa trên nội dung file. Kết quả bắt buộc phải được định dạng JSON theo cấu trúc sau:
 
 [
@@ -786,103 +730,34 @@ Tuân thủ nghiêm ngặt định dạng JSON.
 Số lượng và nội dung câu hỏi phải bám sát ma trận/đặc tả/đề cương trong file upload.
 `;
 
-    console.time("Thời gian thực hiện"); 
-    if (!file) {
-      console.error("Please select a file first.");
-      return;
-    }
-    try {
-      let fileContent = await readFile(file);
-      let fileType = file.type;
-      // If it's a .docx file, convert it to HTML
-      if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
-        const arrayBuffer = await readFileAsArrayBuffer(file);
-        const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-        fileContent = result.value; 
-        fileType = "text/html"; // Update the file type
-
-        // Auto download the converted HTML file
-        const blob = new Blob([fileContent], { type: "text/html" });
-        // const link = document.createElement("a");
-        // link.href = URL.createObjectURL(blob);
-        // link.download = "converted.html";
-        // document.body.appendChild(link);
-        // link.click();
-        // document.body.removeChild(link);
+      const ketQua = await matrixQuestionsJSON(file, prompt);
+      console.log("Original Extracted Data:", ketQua);
+      if (ketQua) {
+        const parsedData = JSON.parse(ketQua);
+        validateQuestionsArray(parsedData);
+        const convertedData = convertAnswers(parsedData);
+        console.log("Converted Data:", convertedData);
+        addQuestionsFromJSON(convertedData);
       }
-      console.log(fileContent);
-      // Make a request to the media.upload endpoint 
-      const response = await fetch(
-        "https://generativelanguage.googleapis.com/upload/v1beta/files",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": fileType, 
-            "x-goog-api-key": apiKey,
-          },
-          body: fileContent, 
-        }
-      );
-      // console.log(response);
-      const uploadResponse = await response.json();
-      const fileUri = uploadResponse.file.uri;
-      // console.log(uploadResponse);
-      console.log(fileUri);
-      const result = await model20flash.generateContent([
-        {
-          fileData: {
-            mimeType: fileType,
-            fileUri: fileUri,
-          },
-        },
-        { text: prompt },
-      ]);
-
-      console.timeEnd("Thời gian thực hiện");
-      // console.log(result.response.text()); 
-      
-      let responseText = result.response.text();
-      if (responseText.endsWith("]}]}]")) {
-        responseText = responseText.slice(0, -2);
-      }
-      return responseText;
     } catch (error) {
-      console.error("Error uploading or summarizing:", error); 
+      console.error("Error extracting questions:", error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+      setShowMatrixModal(false);
     }
   }
 
-  // Serialize current questions and options
-  const serializeCurrentQuestions = () => {
-    return list.map((question, index) => {
-      let serialized = `Câu hỏi ${index + 1}: ${question.question}`;
-      
-      if (question.type === "mcq" || question.type === "truefalse") {
-        const options = optionList[index].map(opt => `${opt.optionNo}. ${opt.option}`).join(", ");
-        serialized += `\nLựa chọn: ${options}`;
-      }
-      
-      if (question.type === "mcq") {
-        serialized += `\nĐáp án đúng: ${String.fromCharCode(65 + question.answer)}`; // Converts index to letter
-      } else if (question.type === "truefalse") {
-        const answers = optionList[index].map(opt => (opt.answer ? "True" : "False")).join(", ");
-        serialized += `\nĐáp án: ${answers}`;
-      } else if (question.type === "shortanswer") {
-        serialized += `\nĐáp án: ${question.answer}`;
-      }
-      
-      return serialized;
-    }).join("\n\n");
-  };
+  async function createQuestions() {
+    setIsLoading(true);
+    try {
+      const mcqCount = mcqRef.current.value || 0;
+      const trueFalseCount = trueFalseRef.current.value || 0;
+      const shortAnswerCount = shortAnswerRef.current.value || 0;
 
-  async function createQuestionsJSON() {
-    const mcqCount = mcqRef.current.value || 0;
-    const trueFalseCount = trueFalseRef.current.value || 0;
-    const shortAnswerCount = shortAnswerRef.current.value || 0;
+      const currentQuestions = serializeCurrentQuestions();
 
-    // Serialize current questions and options
-    const currentQuestions = serializeCurrentQuestions();
-
-    const prompt = `
+      const prompt = `
 Hãy phân tích đoạn JSON được upload và tạo ra các câu hỏi tương tự thuộc các dạng "mcq", "truefalse", và "shortanswer" cùng với đáp án của chúng. Kết quả bắt buộc phải được định dạng JSON theo cấu trúc sau:
 
 [
@@ -919,30 +794,15 @@ Với câu hỏi có công thức hãy viết dưới dạng Latex.
 - Tuân thủ nghiêm ngặt định dạng JSON.
 - Ưu tiên sử dụng mảng boolean [true, false] cho câu hỏi truefalse và shortanswer thay vì dạng chuỗi "Đáp án a [true, false]", trừ khi format của file input không cho phép.
 `;
-    console.log(prompt);
-    console.time("Thời gian thực hiện"); 
-    try {
-      const result = await model15pro.generateContent(prompt);
-    
-      console.timeEnd("Thời gian thực hiện");
-      // console.log(result.response.text()); 
-      return result.response.text();
-    } catch (error) {
-      console.error("Error uploading or summarizing:", error); 
-    }
-  }
 
-  async function createQuestions() {
-    setIsLoading(true);
-    try {
-      const ketQua = await createQuestionsJSON();
+      const ketQua = await createQuestionsJSON(prompt);
       console.log("Original Extracted Data:", ketQua);
       if (ketQua) {
-        const parsedData = JSON.parse(ketQua); // Ensure it's an array
+        const parsedData = JSON.parse(ketQua);
         validateQuestionsArray(parsedData);
-        const convertedData = convertAnswers(parsedData); // Convert answers
+        const convertedData = convertAnswers(parsedData);
         console.log("Converted Data:", convertedData);
-        addQuestionsFromJSON(convertedData); // Pass the array, not string
+        addQuestionsFromJSON(convertedData);
       }
     } catch (error) {
       console.error("Error extracting questions:", error);
@@ -970,65 +830,6 @@ Với câu hỏi có công thức hãy viết dưới dạng Latex.
       reader.onerror = reject;
       reader.readAsArrayBuffer(file); 
     });
-  }
-
-  async function extractQuestions() {
-    const fileInput = document.getElementById('fileInput');
-    const file = fileInput.files[0];
-    if (file === undefined) {
-      alert("Vui lòng chọn file trước.");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const ketQua = await extractQuestionsJSON(file);
-      console.log("Original Extracted Data:", ketQua);
-      if (ketQua) {
-        const parsedData = JSON.parse(ketQua); // Ensure it's an array
-        validateQuestionsArray(parsedData);
-        const convertedData = convertAnswers(parsedData); // Convert answers
-        console.log("Converted Data:", convertedData);
-        addQuestionsFromJSON(convertedData); // Pass the array, not string
-        // console.log(quizTitle);
-        // setQuizTitle(file.name);
-        // console.log(file.name);  
-        // console.log(quizTitle);
-        document.getElementById("quiz_title").value = file.name;
-      }
-    } catch (error) {
-      console.error("Error extracting questions:", error);
-      alert(`Error: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-      setShowExerciseModal(false);
-    }
-  }
-
-  async function matrixQuestion() {
-    const fileInput = document.getElementById('matrixInput');
-    const file = fileInput.files[0];
-    if (file === undefined) {
-      alert("Vui lòng chọn file trước.");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const ketQua = await matrixQuestionsJSON(file);
-      console.log("Original Extracted Data:", ketQua);
-      if (ketQua) {
-        const parsedData = JSON.parse(ketQua); // Ensure it's an array
-        validateQuestionsArray(parsedData);
-        const convertedData = convertAnswers(parsedData); // Convert answers
-        console.log("Converted Data:", convertedData);
-        addQuestionsFromJSON(convertedData); // Pass the array, not string
-      }
-    } catch (error) {
-      console.error("Error extracting questions:", error);
-      alert(`Error: ${error.message}`);
-    } finally {
-      setIsLoading(false);
-      setShowMatrixModal(false);
-    }
   }
 
   function convertAnswers(dataArray) {
@@ -1062,6 +863,29 @@ Với câu hỏi có công thức hãy viết dưới dạng Latex.
     });
 
     return convertedData;
+  }
+
+  // Serialize current questions and options
+  function serializeCurrentQuestions() {
+    return list.map((question, index) => {
+      let serialized = `Câu hỏi ${index + 1}: ${question.question}`;
+      
+      if (question.type === "mcq" || question.type === "truefalse") {
+        const options = optionList[index].map(opt => `${opt.optionNo}. ${opt.option}`).join(", ");
+        serialized += `\nLựa chọn: ${options}`;
+      }
+      
+      if (question.type === "mcq") {
+        serialized += `\nĐáp án đúng: ${String.fromCharCode(65 + question.answer)}`; // Converts index to letter
+      } else if (question.type === "truefalse") {
+        const answers = optionList[index].map(opt => (opt.answer ? "True" : "False")).join(", ");
+        serialized += `\nĐáp án: ${answers}`;
+      } else if (question.type === "shortanswer") {
+        serialized += `\nĐáp án: ${question.answer}`;
+      }
+      
+      return serialized;
+    }).join("\n\n");
   }
 
   function validateQuestionsArray(dataArray) {
@@ -1175,21 +999,26 @@ Với câu hỏi có công thức hãy viết dưới dạng Latex.
         }
       });
       
-      console.log("New Questions:", newQuestions);
-      console.log("New Options:", newOptions);
+      // Set preview data and show modal
+      setPreviewQuestions(newQuestions);
+      setPreviewOptions(newOptions);
+      setShowPreviewModal(true);
       
-      // Update the list and optionList states in one go
-      setList([...list, ...newQuestions]);
-      setOptionList((prevOptionList) => [...prevOptionList, ...newOptions]);
-
-      console.log("Questions and options successfully added from JSON.");
-      console.log("Updated List:", list);
-      console.log("Updated Option List:", optionList);
     } catch (error) {
       console.error("Error adding questions from JSON:", error);
       alert(`Failed to add questions from JSON: ${error.message}`);
     }
   }
+
+  const handleConfirmAddQuestions = () => {
+    setList([...list, ...previewQuestions]);
+    setOptionList([...optionList, ...previewOptions]);
+    setShowPreviewModal(false);
+  };
+
+  const handleCancelAddQuestions = () => {
+    setShowPreviewModal(false);
+  };
 
   const [mathJaxReady, setMathJaxReady] = useState(false);
 
@@ -1208,8 +1037,6 @@ Với câu hỏi có công thức hãy viết dưới dạng Latex.
     },
   };
   
-  const [imagePreview, setImagePreview] = useState(Array(list.length).fill(null));
-  const [fileInputKeys, setFileInputKeys] = useState(Array(list.length).fill(0));
   const handleRemoveImage = (index) => {
     setImagePreview(prev => {
       const newImagePreview = [...prev];
@@ -1260,18 +1087,6 @@ async function uploadImage(file, examPin, questionId) {
   return await getDownloadURL(storageRef);
 }
 
-  const [showModal, setShowModal] = useState(false);
-  const [showExerciseModal, setShowExerciseModal] = useState(false);
-  const [showMatrixModal, setShowMatrixModal] = useState(false);
-  // useEffect(() => {
-  //   console.log('QuizTitle changed:', quizTitle);
-  // }, [quizTitle]);
-  const handleTitleChange = (event) => {
-    const newTitle = event.target.value;
-    // console.log('Setting new title:', newTitle);
-    setQuizTitle(newTitle);
-  };
-
   // Add new handler for score changes
   function handleScoreChange(event, index) {
     let values = [...list];
@@ -1280,37 +1095,205 @@ async function uploadImage(file, examPin, questionId) {
     setList(values);
   };
   
+  // Thêm hàm tính toán phân bố điểm
+  const calculateScoreDistribution = (questions) => {
+    const distribution = {
+      mcq: { count: 0, totalScore: 0 },
+      truefalse: { count: 0, totalScore: 0 },
+      shortanswer: { count: 0, totalScore: 0 }
+    };
+
+    questions.forEach(question => {
+      distribution[question.type].count++;
+      distribution[question.type].totalScore += question.score || 0;
+    });
+
+    return distribution;
+  };
+
+  // Thêm hàm cập nhật điểm số
+  const updateQuestionScores = (questions, distribution) => {
+    return questions.map(question => {
+      const type = question.type;
+      const count = distribution[type].count;
+      const totalTypeScore = distribution[type].totalScore;
+      
+      // Tính điểm mới cho mỗi câu hỏi
+      const newScore = count > 0 ? (totalTypeScore / count) : 0;
+      
+      return {
+        ...question,
+        score: parseFloat(newScore.toFixed(2))
+      };
+    });
+  };
+
+  // Cập nhật useEffect để tính toán điểm số
+  useEffect(() => {
+    if (list.length > 0) {
+      const newDistribution = calculateScoreDistribution(list);
+      setScoreDistribution(newDistribution);
+      
+      // Cập nhật điểm số cho từng câu hỏi
+      const updatedQuestions = updateQuestionScores(list, newDistribution);
+      setList(updatedQuestions);
+    }
+  }, [list.length]);
+
+  // Thêm hàm xử lý thay đổi điểm cho từng loại câu hỏi
+  const handleTypeScoreChange = (type, event) => {
+    const newTotalScore = parseFloat(event.target.value) || 0;
+    const count = scoreDistribution[type].count;
+    
+    // Cập nhật tổng điểm cho loại câu hỏi
+    setScoreDistribution(prev => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        totalScore: newTotalScore
+      }
+    }));
+    
+    // Tính điểm cho mỗi câu hỏi
+    const scorePerQuestion = count > 0 ? (newTotalScore / count) : 0;
+    
+    // Cập nhật điểm cho tất cả câu hỏi cùng loại
+    const updatedQuestions = list.map(question => {
+      if (question.type === type) {
+        return {
+          ...question,
+          score: parseFloat(scorePerQuestion.toFixed(2))
+        };
+      }
+      return question;
+    });
+    
+    setList(updatedQuestions);
+  };
+
+  // Thêm hàm xử lý chia điểm nhanh
+  const handleQuickScoreChange = (type, event) => {
+    const newScore = parseFloat(event.target.value) || 0;
+    setQuickScore(prev => ({
+      ...prev,
+      [type]: newScore
+    }));
+    
+    // Cập nhật điểm số cho tất cả câu hỏi cùng loại
+    const updatedQuestions = list.map(question => {
+      if (question.type === type) {
+        return {
+          ...question,
+          score: newScore
+        };
+      }
+      return question;
+    });
+    
+    setList(updatedQuestions);
+    
+    // Cập nhật tổng điểm cho loại câu hỏi
+    const count = scoreDistribution[type].count;
+    setScoreDistribution(prev => ({
+      ...prev,
+      [type]: {
+        ...prev[type],
+        totalScore: newScore * count
+      }
+    }));
+  };
+
+  // Cập nhật lại UI hiển thị phân bố điểm
+  const renderScoreDistribution = () => (
+    <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+      <h3 className="text-lg font-semibold mb-2">Phân bố điểm</h3>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block mb-2">Trắc nghiệm ({scoreDistribution.mcq.count} câu):</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min="0"
+              step="0.25"
+              value={scoreDistribution.mcq.totalScore}
+              onChange={(e) => handleTypeScoreChange('mcq', e)}
+              className="w-24 px-2 py-1 border rounded"
+              placeholder="Tổng điểm"
+            />
+            <span className="text-sm text-gray-600">
+              {scoreDistribution.mcq.count > 0 ? 
+                `Điểm/câu: ${(scoreDistribution.mcq.totalScore / scoreDistribution.mcq.count).toFixed(2)}` 
+                : 'Chưa có câu hỏi'}
+            </span>
+          </div>
+        </div>
+        <div>
+          <label className="block mb-2">Đúng/Sai ({scoreDistribution.truefalse.count} câu):</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min="0"
+              step="0.25"
+              value={scoreDistribution.truefalse.totalScore}
+              onChange={(e) => handleTypeScoreChange('truefalse', e)}
+              className="w-24 px-2 py-1 border rounded"
+              placeholder="Tổng điểm"
+            />
+            <span className="text-sm text-gray-600">
+              {scoreDistribution.truefalse.count > 0 ? 
+                `Điểm/câu: ${(scoreDistribution.truefalse.totalScore / scoreDistribution.truefalse.count).toFixed(2)}` 
+                : 'Chưa có câu hỏi'}
+            </span>
+          </div>
+        </div>
+        <div>
+          <label className="block mb-2">Trả lời ngắn ({scoreDistribution.shortanswer.count} câu):</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              min="0"
+              step="0.25"
+              value={scoreDistribution.shortanswer.totalScore}
+              onChange={(e) => handleTypeScoreChange('shortanswer', e)}
+              className="w-24 px-2 py-1 border rounded"
+              placeholder="Tổng điểm"
+            />
+            <span className="text-sm text-gray-600">
+              {scoreDistribution.shortanswer.count > 0 ? 
+                `Điểm/câu: ${(scoreDistribution.shortanswer.totalScore / scoreDistribution.shortanswer.count).toFixed(2)}` 
+                : 'Chưa có câu hỏi'}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 text-right">
+        <span className="text-sm font-medium">
+          Tổng điểm: {
+            (scoreDistribution.mcq.totalScore +
+            scoreDistribution.truefalse.totalScore +
+            scoreDistribution.shortanswer.totalScore).toFixed(2)
+          }
+        </span>
+      </div>
+    </div>
+  );
+
   return (
-  // <MathJaxContext
-  //   version={3}
-  //   config={config}
-  //   onLoad={() => {
-  //     console.log("MathJax is loaded and ready!");
-  //     setMathJaxReady(true);
-  //   }}
-  //   onError={(error) => {
-  //     console.error("MathJax Load Error:", error);
-  //   }}
-  // >
-    <div id="mainForm" className="m-4 md:m-10 lg:m-12">
+    <div id="mainForm" className="m-4 md:m-10 lg:m-12 pb-24">
       <div className="quizBox">
         <input
-        type="text"
-        className="quiz_title shadow shadow-slate-300 mx-4 sm:mx-8 lg:mx-40 rounded-xl text-lg text-center p-3 sm:p-4 w-full"
-        name="quiz_title"
-        id="quiz_title"
-        placeholder="Hãy nhập tiêu đề bài thi..."
-        value={quizTitle || ''} // Ensure value is never undefined
-        onChange={handleTitleChange}
-      />      
+          type="text"
+          className="quiz_title shadow shadow-slate-300 mx-4 sm:mx-8 lg:mx-40 rounded-xl text-lg text-center p-3 sm:p-4 w-full"
+          name="quiz_title"
+          id="quiz_title"
+          placeholder="Hãy nhập tiêu đề bài thi..."
+          value={quizTitle || ''}
+          onChange={(event) => setQuizTitle(event.target.value)}
+        />      
       </div>
-      {/* <MathJax inline dynamic className="text-lg">
-      </MathJax> */}
-      {/* <MathJax dynamic inline>
-        {"\\[\\ce{C6H12O6 + 6O2 -> 6CO2 + 6H2O}\\]"} hi {"\\[\\ce{C6H12O6 + 6O2 -> 6CO2 + 6H2O}\\]"}
-      </MathJax> */}
+
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-6">
-      <button
+        <button
           onClick={() => setShowExerciseModal(true)}
           className="w-full sm:w-auto bg-blue-500 hover:bg-blue-700 text-white text-sm sm:text-base font-bold py-2 px-3 sm:px-4 rounded shadow-lg transform transition hover:scale-105 flex items-center justify-center"
         >
@@ -1333,435 +1316,29 @@ async function uploadImage(file, examPin, questionId) {
           <RiAiGenerate2 className="inline mr-1 sm:mr-2"/>
           <span className="whitespace-nowrap">Tạo câu hỏi mới</span>
         </button>
-        {showExerciseModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-4 sm:p-8 max-w-md w-full m-4">
-              <button
-                onClick={() => !isLoading && setShowExerciseModal(false)}
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                disabled={isLoading}
-              >
-                {/* <span className="text-2xl">&times;</span> */}
-              </button>
-              
-              <form className="bg-white rounded">
-                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Tải tệp đề thi lên</h2>
-                <div className="mb-6">
-                  <input
-                    type="file"
-                    id="fileInput"
-                    disabled={isLoading}
-                    className="block w-full text-gray-700 bg-white border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    accept=".docx, .pdf, image/*"
-                  />
-                </div>
-                <div className="flex justify-end gap-4">
-                  <button
-                    type="button"
-                    disabled={isLoading}
-                    onClick={() => {
-                      extractQuestions();
-                      // !isLoading && setShowExerciseModal(false);
-                    }}
-                    className={`${
-                      isLoading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-700'
-                    } text-white font-bold py-2 px-4 rounded flex items-center`}
-                  >
-                    {isLoading ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Đang xử lý...
-                      </>
-                    ) : (
-                      'Thêm câu hỏi'
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => !isLoading && setShowExerciseModal(false)}
-                    disabled={isLoading}
-                    className={`${
-                      isLoading ? 'bg-gray-300' : 'bg-gray-500 hover:bg-gray-700'
-                    } text-white font-bold py-2 px-4 rounded`}
-                  >
-                    Hủy
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {/* Matrix Upload Modal */}
-        {showMatrixModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-4 sm:p-8 max-w-md w-full m-4">
-              <button
-                onClick={() => !isLoading && setShowMatrixModal(false)}
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                disabled={isLoading}
-              >
-                {/* <span className="text-2xl">&times;</span> */}
-              </button>
-              
-              <form className="bg-white rounded">
-                <h2 className="text-2xl font-bold mb-6">Tải tệp ma trận/đặc tả</h2>
-                <div className="mb-6">
-                  <input
-                    type="file"
-                    id="matrixInput"
-                    disabled={isLoading}
-                    className="block w-full text-gray-700 bg-white border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    accept=".docx, .pdf, image/*"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mcq">
-                    Số lượng Trắc nghiệm:
-                  </label>
-                  <input
-                    type="number"
-                    id="mcq"
-                    name="mcq"
-                    min="0"
-                    defaultValue="3"
-                    ref={mcqRef}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="trueFalse">
-                    Số lượng Đúng/Sai:
-                  </label>
-                  <input
-                    type="number"
-                    id="trueFalse"
-                    name="trueFalse"
-                    min="0"
-                    defaultValue="2"
-                    ref={trueFalseRef}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="shortAnswer">
-                    Số lượng Trả Lời Ngắn:
-                  </label>
-                  <input
-                    type="number"
-                    id="shortAnswer"
-                    name="shortAnswer"
-                    min="0"
-                    defaultValue="1"
-                    ref={shortAnswerRef}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="flex justify-end gap-4">
-                  <button
-                    type="button"
-                    disabled={isLoading}
-                    onClick={() => {
-                      matrixQuestion();
-                    }}
-                    className={`${
-                      isLoading ? 'bg-green-300' : 'bg-green-500 hover:bg-green-700'
-                    } text-white font-bold py-2 px-4 rounded flex items-center`}
-                  >
-                    {isLoading ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Đang xử lý...
-                      </>
-                    ) : (
-                      'Tạo câu hỏi'
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => !isLoading && setShowMatrixModal(false)}
-                    disabled={isLoading}
-                    className={`${
-                      isLoading ? 'bg-gray-300' : 'bg-gray-500 hover:bg-gray-700'
-                    } text-white font-bold py-2 px-4 rounded`}
-                  >
-                    Hủy
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-        {showModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-4 sm:p-8 max-w-md w-full m-4">
-              <button
-                onClick={() => !isLoading && setShowModal(false)}
-                className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-                disabled={isLoading}
-              >
-                {/* <span className="text-2xl">&times;</span> */}
-              </button>
-              
-              <form className="bg-white rounded">
-                <h2 className="text-2xl font-bold mb-6 text-center">Tạo các câu hỏi mới</h2>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mcq">
-                    Số lượng Trắc nghiệm:
-                  </label>
-                  <input
-                    type="number"
-                    id="mcq"
-                    name="mcq"
-                    min="0"
-                    defaultValue="3"
-                    ref={mcqRef}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="trueFalse">
-                    Số lượng Đúng/Sai:
-                  </label>
-                  <input
-                    type="number"
-                    id="trueFalse"
-                    name="trueFalse"
-                    min="0"
-                    defaultValue="2"
-                    ref={trueFalseRef}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="shortAnswer">
-                    Số lượng Trả Lời Ngắn:
-                  </label>
-                  <input
-                    type="number"
-                    id="shortAnswer"
-                    name="shortAnswer"
-                    min="0"
-                    defaultValue="1"
-                    ref={shortAnswerRef}
-                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <button
-                    className={`${
-                      isLoading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-700'
-                    } text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center`}
-                    type="button"
-                    disabled={isLoading}
-                    onClick={() => {
-                      createQuestions();
-                    }}
-                  >
-                    {isLoading ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Đang xử lý...
-                      </>
-                    ) : (
-                      'Tạo câu hỏi'
-                    )}
-                  </button>
-                  <button
-                    className={`${
-                      isLoading ? 'bg-gray-300' : 'bg-gray-500 hover:bg-gray-700'
-                    } text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
-                    type="button"
-                    onClick={() => !isLoading && setShowModal(false)}
-                    disabled={isLoading}
-                  >
-                    Hủy
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}      
-        </div>
-      <div>
       </div>
-        
+
       {list.map((soloList, index) => (
-        <div key={soloList.id} id="questionnaire" className="w-full max-w-4xl mx-auto p-3 md:p-6 bg-white rounded-lg shadow-sm mb-4">
-          <ul className="space-y-4">
-            <li className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 pb-3 border-b">
-              <div className="flex flex-1 items-center gap-3">
-                <div className="text-sm md:text-base font-medium">
-                  Câu {index + 1}
-                </div>
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium text-gray-600">Điểm:</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.5"
-                    className="w-20 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={soloList.score || 0}
-                    onChange={(event) => handleScoreChange(event, index)}
-                  />
-                </div>
-                <select
-                  value={soloList.type}
-                  className="px-3 py-1.5 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={(event) => handleQuestionTypeChange(event, index)}
-                >
-                  <option value="mcq">Trắc nghiệm</option>
-                  <option value="truefalse">Đúng/Sai</option>
-                  <option value="shortanswer">Trả lời ngắn</option>
-                </select>
-                <button 
-                  className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-red-500"
-                  onClick={() => handleRemoveQuest(index)}
-                >
-                  <FiTrash2 className="w-5 h-5" />
-                </button>
-              </div>
-            </li>            
-
-            <li className="flex flex-row md:flex-row gap-3">
-              <input
-                type="text"
-                placeholder={`Câu hỏi ${index + 1}`}
-                className="flex-1 px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={soloList.question}
-                onChange={(event) => questChangeHandler(event, index, "question")}
-              />
-            </li>
-
-            {soloList.type === "mcq" && (
-              <li className="space-y-3">
-                {optionList[index].map((soloOption, ind) => (
-                  <div key={soloOption.id} className="flex flex-row md:flex-row items-start md:items-center gap-2">
-                    <div className="flex-1 flex items-center gap-3">
-                      <input
-                        type="text"
-                        className="flex-1 px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder={`Phương án ${String.fromCharCode(65 + ind)}`}
-                        value={soloOption.option}
-                        onChange={(event) => optionChangeHandler(event, index, ind)}
-                      />
-                      <input
-                        type="radio"
-                        name={`correctOption-${index}`}
-                        checked={list[index].answer === ind}
-                        onChange={(event) => handleCorrectOptionChange(event, index, ind)}
-                        className="w-5 h-5 cursor-pointer"
-                      />
-                      {optionList[index].length > 2 && (
-                        <button 
-                        className="p-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors  "
-                        onClick={() => handleRemoveOpt(index, ind)}
-                      >
-                        <FiTrash2 className="w-5 h-5" />
-                      </button>
-                    )}
-                    </div>
-                  </div>
-                ))}
-              </li>
-        )}
-
-          {soloList.type === "truefalse" &&
-            optionList[index].map((soloOption, ind) => (
-              <li key={soloOption.id} className="flex flex-row md:flex-row items-start md:items-center gap-3 md:gap-4">
-                <input
-                  type="text"
-                  className="flex-1 px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder={`Ý kiến ${String.fromCharCode(97 + ind)}`}
-                  value={soloOption.option}
-                  onChange={(event) => optionChangeHandler(event, index, ind)}
-                />
-                <div className="flex items-center gap-3">
-                  <select
-                    className="px-3 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={soloOption.answer === null ? "" : soloOption.answer ? "true" : "false"}
-                    onChange={(event) => handleCorrectOptionChange(event, index, ind)}
-                  >
-                    <option value="true">Đúng</option>
-                    <option value="false">Sai</option>
-                  </select>
-                  {optionList[index].length > 2 && (
-                        <button 
-                        className="p-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors  "
-                        onClick={() => handleRemoveOpt(index, ind)}
-                      >
-                        <FiTrash2 className="w-5 h-5" />
-                      </button>
-                    )}
-                </div>
-              </li>
-            ))}
-            {soloList.type === "shortanswer" && (
-              <li className="flex flex-col gap-2">
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Nhập đáp án..."
-                  value={list[index].answer}
-                  onChange={(event) => questChangeHandler(event, index, "answer")}
-                />
-              </li>
-            )}
-            <li className="pt-3">
-              <div className="flex flex-wrap gap-3">
-                {(optionList[index].length < 6 && soloList.type !== "shortanswer") && (
-                  <button
-                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                    onClick={() => handleAddOpt(index, optionList[index].length + 1)}
-                  >
-                    <CiCirclePlus className="mr-2 text-lg"/>
-                    Thêm tùy chọn
-                  </button>
-                )}
-                  <label className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg cursor-pointer transition-colors">
-                    <BiImages className="mr-2 text-lg"/>
-                    <span className="whitespace-nowrap">Chọn ảnh</span>
-                    <input 
-                      type="file" 
-                      className="hidden"
-                      key={fileInputKeys[index]}
-                      data-index={index}
-                      onChange={(event) => handleImageChange(event, index)}
-                      accept="image/*"
-                    />
-                  </label>
-              </div>
-              {imagePreview[index] && (
-                <div className="mt-4 md:mt-6">
-                  <div className="relative group">
-                    <img 
-                      src={imagePreview[index]} 
-                      alt="Preview" 
-                      className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg shadow-md border border-gray-200 transition-transform duration-300 hover:scale-105" 
-                    />
-                    <button
-                      onClick={() => handleRemoveImage(index)}
-                      className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full transition-opacity duration-200 hover:bg-red-600 z-10"
-                    >
-                      <FiX className="w-4 h-4" />
-                    </button>
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300 rounded-lg" />
-                  </div>
-                </div>
-              )}              
-              </li>
-          </ul>
-        </div>
+        <QuestionItem
+          key={soloList.id}
+          index={index}
+          question={soloList}
+          options={optionList[index]}
+          onQuestionChange={questChangeHandler}
+          onOptionChange={optionChangeHandler}
+          onCorrectOptionChange={handleCorrectOptionChange}
+          onRemoveQuestion={handleRemoveQuest}
+          onAddOption={handleAddOpt}
+          onRemoveOption={handleRemoveOpt}
+          onImageChange={handleImageChange}
+          onRemoveImage={handleRemoveImage}
+          imagePreview={imagePreview[index]}
+          fileInputKey={fileInputKeys[index]}
+          onScoreChange={handleScoreChange}
+          onTypeChange={handleQuestionTypeChange}
+        />
       ))}
+
       <button
         className="mx-5 mb-2 px-4 py-2 text-sm sm:text-base bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
         onClick={() => handleAddQuest()}
@@ -1769,34 +1346,143 @@ async function uploadImage(file, examPin, questionId) {
         <AiOutlineQuestionCircle className="inline mr-2"/>
         Thêm câu hỏi
       </button>
-      <div className="mt-4 flex items-center justify-center">
-        <label className="mr-2">Thời gian làm bài (phút):</label>
-        <input 
-          type="number"
-          min="1"
-          // max="180"
-          value={duration}
-          onChange={(e) => setDuration(parseInt(e.target.value))}
-          className="w-20 px-2 py-1 border rounded"
-        />
+
+      <div className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-sm shadow-lg p-4 flex justify-between items-center z-10">
+        <div>
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            onClick={() => setShowScoreModal(true)}
+          >
+            Cấu hình bài thi
+          </button>
+        </div>
+        <div className="flex gap-2">
+          <button
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            onClick={resetForm}
+          >
+            Xóa dữ liệu
+          </button>
+          <button
+            className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+            onClick={onSubmit}
+          >
+            Tạo đề thi
+          </button>
+        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 justify-center">
-        <input
-          className="sub_btn_actual hov"
-          type="button"
-          value="Tạo đề thi"
-          onClick={() => onSubmit()}
-        />
-        <input
-          className="sub_btn_actual hov"
-          type="reset"
-          value="Xóa dữ liệu đã nhập"
-          onClick={() => resetForm()}
-        />
+      <FileUploadModal
+        isOpen={showExerciseModal}
+        onClose={() => setShowExerciseModal(false)}
+        isLoading={isLoading}
+        onUpload={extractQuestions}
+        title="Tải tệp đề thi lên"
+        accept=".docx, .pdf, image/*"
+        buttonText="Thêm câu hỏi"
+        buttonClass="bg-blue-500 hover:bg-blue-700"
+      />
+
+      <MatrixUploadModal
+        isOpen={showMatrixModal}
+        onClose={() => setShowMatrixModal(false)}
+        isLoading={isLoading}
+        onUpload={matrixQuestion}
+        mcqRef={mcqRef}
+        trueFalseRef={trueFalseRef}
+        shortAnswerRef={shortAnswerRef}
+      />
+
+      <QuestionGeneratorModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        isLoading={isLoading}
+        onGenerate={createQuestions}
+        mcqRef={mcqRef}
+        trueFalseRef={trueFalseRef}
+        shortAnswerRef={shortAnswerRef}
+      />
+
+      <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center ${showScoreModal ? 'block' : 'hidden'}`}>
+        <div className="bg-white p-6 rounded-lg w-full max-w-2xl">
+          <h2 className="text-xl font-bold mb-4">Cấu hình bài thi</h2>
+          <div className="mb-4">
+            <label className="block mb-2">Thời gian làm bài (phút):</label>
+            <input 
+              type="number"
+              min="1"
+              value={duration}
+              onChange={(e) => setDuration(parseInt(e.target.value))}
+              className="w-24 px-2 py-1 border rounded"
+            />
+          </div>
+          {renderScoreDistribution()}
+          <div className="mt-4 flex justify-end">
+            <button
+              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors mr-2"
+              onClick={() => setShowScoreModal(false)}
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center ${showPreviewModal ? 'block' : 'hidden'}`}>
+        <div className="bg-white p-6 rounded-lg w-full max-w-4xl max-h-[80vh] overflow-y-auto">
+          <h2 className="text-xl font-bold mb-4">Xem trước câu hỏi</h2>
+          <div className="space-y-4">
+            {previewQuestions.map((question, index) => (
+              <div key={question.id} className="border rounded-lg p-4">
+                <div className="flex justify-between items-start mb-2">
+                  <span className="font-medium">Câu {index + 1}</span>
+                  <span className="text-sm text-gray-500">
+                    {question.type === 'mcq' ? 'Trắc nghiệm' : 
+                     question.type === 'truefalse' ? 'Đúng/Sai' : 'Trả lời ngắn'}
+                  </span>
+                </div>
+                <div className="mb-2">{question.question}</div>
+                {question.type !== 'shortanswer' && (
+                  <div className="ml-4 space-y-1">
+                    {previewOptions[index].map((option, optIndex) => (
+                      <div key={option.id} className="flex items-center gap-2">
+                        <span className="font-medium">{option.optionNo}.</span>
+                        <span>{option.option}</span>
+                        {question.type === 'mcq' && question.answer === optIndex && (
+                          <span className="text-green-500">(Đáp án đúng)</span>
+                        )}
+                        {question.type === 'truefalse' && option.answer && (
+                          <span className="text-green-500">(Đúng)</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {question.type === 'shortanswer' && (
+                  <div className="ml-4">
+                    <span className="text-gray-600">Đáp án: {question.answer}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 flex justify-end gap-2">
+            <button
+              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+              onClick={handleCancelAddQuestions}
+            >
+              Hủy
+            </button>
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              onClick={handleConfirmAddQuestions}
+            >
+              Thêm câu hỏi
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  // </MathJaxContext>
   );
 }
 
