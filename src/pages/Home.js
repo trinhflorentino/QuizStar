@@ -24,7 +24,7 @@ function Home() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
-      <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 px-4 bg-gradient-to-br from-white/60 to-white/20 rounded-2xl">
+      <div className="w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center lg:gap-12 p-4 bg-gradient-to-br from-white/60 to-white/20 rounded-2xl">
         {/* Left Content */}
         <div className="flex-1 text-center md:text-left space-y-8 p-3">
           <div className="space-y-4">

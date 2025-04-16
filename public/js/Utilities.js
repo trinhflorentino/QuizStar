@@ -67,28 +67,28 @@ function changeMode(_0x1ed99e) {
               _0x29c512.classList.remove("bg-gradient-to-r", 'from-cyan-500', 'to-blue-500');
               break;
             case 'theme':
-              _0x2576ed.src = _0x1902ae ? "img/appLogo-white.png" : "./img/appLogo-black.png";
+              _0x2576ed.src = _0x1902ae ? "img/appLogo-white.png" : "img/appLogo-black.png";
               _0x1b9606.classList.remove("border-4", "border-blue-500");
               _0x3a9e7c.classList.add("bg-gradient-to-r", "from-cyan-500", 'to-blue-500');
               _0x320ecd.classList.remove("bg-gradient-to-r", "from-cyan-500", "to-blue-500");
               _0x29c512.classList.remove("bg-gradient-to-r", 'from-cyan-500', "to-blue-500");
               break;
             case 'matches':
-              _0x2576ed.src = _0x1902ae ? "img/appLogo-white.png" : "./img/appLogo-black.png";
+              _0x2576ed.src = _0x1902ae ? "img/appLogo-white.png" : "img/appLogo-black.png";
               _0x1b9606.classList.remove("border-4", "border-blue-500");
               _0x3a9e7c.classList.remove("bg-gradient-to-r", "from-cyan-500", "to-blue-500");
               _0x320ecd.classList.add("bg-gradient-to-r", "from-cyan-500", "to-blue-500");
               _0x29c512.classList.remove("bg-gradient-to-r", "from-cyan-500", "to-blue-500");
               break;
             case "profile":
-              _0x2576ed.src = _0x1902ae ? "img/appLogo-white.png" : "./img/appLogo-black.png";
+              _0x2576ed.src = _0x1902ae ? "img/appLogo-white.png" : "img/appLogo-black.png";
               _0x1b9606.classList.add("border-4", "border-blue-500");
               _0x3a9e7c.classList.remove("bg-gradient-to-r", "from-cyan-500", "to-blue-500");
               _0x320ecd.classList.remove("bg-gradient-to-r", "from-cyan-500", 'to-blue-500');
               _0x29c512.classList.remove("bg-gradient-to-r", "from-cyan-500", "to-blue-500");
               break;
             case "video":
-              _0x2576ed.src = _0x1902ae ? "img/appLogo-white.png" : './img/appLogo-black.png';
+              _0x2576ed.src = _0x1902ae ? "img/appLogo-white.png" : 'img/appLogo-black.png';
               _0x1b9606.classList.remove("border-4", "border-blue-500");
               _0x3a9e7c.classList.remove("bg-gradient-to-r", 'from-cyan-500', "to-blue-500");
               _0x320ecd.classList.remove('bg-gradient-to-r', "from-cyan-500", "to-blue-500");

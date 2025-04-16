@@ -5,6 +5,7 @@ import {
   doc,
   setDoc,
   addDoc,
+  deleteDoc,  // Add this import
 } from "firebase/firestore/lite";
 import { useEffect, useState } from "react";
 import db from "../services/firebaseConfig";
@@ -13,6 +14,8 @@ import { v4 as uuid } from "uuid";
 import { FaSearch, FaPlus, FaRegFolderOpen } from "react-icons/fa";
 import { PiBankBold } from "react-icons/pi";
 import { useNavigate } from "react-router-dom";
+import { IoMdInformationCircle } from "react-icons/io";
+import { MdDeleteForever } from "react-icons/md";
 
 function TestManagement() {
   const [createdExams, setCreatedExams] = useState(() => []);
@@ -51,7 +54,7 @@ function TestManagement() {
   }
 
   async function checkResponses(index) {
-    navigate(`/ExamsCreated/DisplayResponses/${examPins[index]}`);
+    navigate(`/ExamsCreated/ExamResults/${examPins[index]}`);
   }
 
   async function handleResponseStatus(soloStatus, index) {
@@ -153,19 +156,68 @@ function TestManagement() {
       )
     : createdExams;
 
+    async function handleDelete(index) {
+      if (window.confirm("Bạn có chắc chắn muốn xóa bài thi này?")) {
+        try {
+          const auth = getAuth();
+          const user = auth.currentUser;
+          const pin = examPins[index];
+          
+          if (user) {
+            // Delete exam content
+            const paperSetterRef = doc(db, "Paper_Setters", pin);
+            
+            // Delete responses
+            const responsesRef = collection(paperSetterRef, "Responses");
+            const responsesDocs = await getDocs(responsesRef);
+            responsesDocs.forEach(async (responseDoc) => {
+              await deleteDoc(responseDoc.ref);
+            });
+  
+            // Delete questions
+            const questionsRef = collection(paperSetterRef, "Question_Papers_MCQ");
+            const questionsDocs = await getDocs(questionsRef);
+            questionsDocs.forEach(async (questionDoc) => {
+              await deleteDoc(questionDoc.ref);
+            });
+  
+            // Delete exam from user's created exams
+            await deleteDoc(doc(db, "Users", user.uid, "Exams_Created", pin));
+            
+            // Delete main exam document
+            await deleteDoc(paperSetterRef);
+  
+            // Update local state
+            const newCreatedExams = createdExams.filter((_, i) => i !== index);
+            const newExamPins = examPins.filter((_, i) => i !== index);
+            const newStatus = status.filter((_, i) => i !== index);
+            
+            setCreatedExams(newCreatedExams);
+            setExamPins(newExamPins);
+            setStatus(newStatus);
+  
+            alert("Đã xóa bài thi thành công!");
+          }
+        } catch (error) {
+          console.error("Error deleting exam:", error);
+          alert("Có lỗi xảy ra khi xóa bài thi!");
+        }
+      }
+    }
+  
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 m-5">
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={() => window.history.back()}
+            onClick={() => navigate("/Dashboard")}
             className="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300"
           >
             Quay lại
           </button>
           <button
             onClick={() => navigate("/FormMaker")}
-            className="bg-green-600			 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors duration-300"
+            className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors duration-300"
           >
             <FaPlus className='inline mr-2'/>Tạo đề thi
           </button>
@@ -175,12 +227,12 @@ function TestManagement() {
           >
             <PiBankBold className='inline mr-2'/> Tạo ngân hàng câu hỏi
           </button>
-          <button
+          {/* <button
             onClick={() => createFolder()}
             className="bg-blue-800 text-white px-6 py-2 rounded-md hover:bg-blue-950 transition-colors duration-300"
           >
             <FaRegFolderOpen className='inline mr-2'/>Tạo thư mục
-          </button>
+          </button> */}
         </div>
         <div className="relative w-full md:w-64 group">
           <input
@@ -207,7 +259,7 @@ function TestManagement() {
 
       {createdExams.length != 0 ? (
         createdExams[0] != "Empty" ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredExams.map((exam, index) => (
               <div
                 key={uuid()}
@@ -226,9 +278,9 @@ function TestManagement() {
                     onClick={() => checkResponses(index)} //    window.location = `ExamsCreated/DisplayResponses/${examPins[index]}`;
                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300"
                   >
-                    Xem các câu trả lời
-                  </button>
-                  <button
+                    <IoMdInformationCircle className='inline mr-1'/> Xem chi tiết
+                  </button> 
+                  {/* <button
                     onClick={() => handleResponseStatus(status[index], index)}
                     className={`px-4 py-2 rounded-md transition-colors duration-300 ${
                       status[index] === "active"
@@ -237,6 +289,12 @@ function TestManagement() {
                     }`}
                   >
                     {status[index] === "active" ? "Khóa đề thi" : "Mở đề thi"}
+                  </button> */}
+                  <button
+                    onClick={() => handleDelete(index)}
+                    className={`px-4 py-2 rounded-md transition-colors duration-300 bg-red-600 hover:bg-red-700 text-white`}
+                  >
+                    <MdDeleteForever className='inline mr-1'/>Xóa đề thi
                   </button>
                 </div>
               </div>

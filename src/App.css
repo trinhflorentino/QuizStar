@@ -16,13 +16,18 @@
   margin: 0;
   box-sizing: border-box;
   font-family: "Montserrat";
-  font-size: 14px;
+  /* font-size: 14px; */
 }
 
 html {
   background: linear-gradient(to left top, #2641c2, #adf7f2) no-repeat center
     fixed;
   min-height: 100vh;
+}
+
+.MathJax {
+  /* font-family: "Montserrat"; */
+  font-weight: 800!important;
 }
 
 a {
@@ -38,7 +43,7 @@ input {
   border-radius: 8px;
   padding: 15px;
   font-size: 1em;
-  margin: 7px;
+  /* margin: 7px; */
   border: 0px solid;
 }
 
@@ -470,8 +475,8 @@ table {
 @media screen and (max-width: 768px) {
   .mainForm {
     margin: 2vh;
-    height: auto;
-    min-height: 90vh;
+    /* height: auto; */
+    /* min-height: 90vh; */
   }
 
   .hero {

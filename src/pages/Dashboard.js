@@ -24,7 +24,7 @@ function Dashboard() {
   useEffect(() => {}, [user]);
 
   const menuItems = [
-    { title: "Quản lý bài thi", icon: RiFileTextLine, path: "/TestManagement" },
+    { title: "Quản lý đề thi", icon: RiFileTextLine, path: "/TestManagement" },
     { title: "Tham gia bài thi", icon: RiBookOpenLine, path: "/pinverify" },
     { title: "Tạo và tham gia trò chơi", icon: RiGameLine, path: "/Main" }
   ];

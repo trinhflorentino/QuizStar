@@ -234,7 +234,7 @@ const Profile = () => {
                                 type="submit"
                                 className="w-full bg-slate-800 text-white py-2 px-4 rounded-md hover:bg-slate-700"
                             >
-                                Confirm Password Change
+                                Đổi mật khẩu
                             </button>
                         </div>
                     </form>

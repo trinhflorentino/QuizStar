@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-  <title>Tạo trò chơi | QuizStar</title>
+  <title>Tạo trò chơi | SmartTest</title>
   <link href="./dist/output.css" rel="stylesheet">
   <!-- Material Icons Link -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -21,7 +21,7 @@
     integrity="sha512-UtLOu9C7NuThQhuXXrGwx9Jb/z9zPQJctuAgNUBK3Z6kkSYT9wJ+2+dh6klS+TDBCV9kNPBbAxbVD+vCcfGPaA=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
@@ -30,92 +30,43 @@
     gtag('config', 'G-9BZ1P9KSJR');
   </script>
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7312982440694951"
-    crossorigin="anonymous"></script> -->
+    crossorigin="anonymous"></script>
 </head>
 
 <body class="dark:bg-neutral-900">
-  <!-- New Navigation Bar -->
-  <div class="Nav sticky top-0 w-full shadow-md z-0">
-    <div class="mx-auto px-4">
-      <div class="flex justify-between items-center h-16">
-        <!-- Left section with menu button and logo -->
-        <div class="flex items-center space-x-4">
-          <!-- Mobile menu button -->
-          <button 
-            class="lg:hidden p-2 rounded-md hover:bg-gray-100 z-50"
-            id="mobileMenuButton"
-          >
-            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          
-          <!-- Logo and Product Name - Visible on mobile -->
-          <!-- <div class="flex items-center md:hidden">
-            <img 
-              src="img/appLogo.png"
-              alt="Logo" 
-              class="h-10 w-10"
-            />
-            <span class="ml-2 text-xl font-semibold text-gray-900 dark:text-white">
-              QuizStar
-            </span>
-          </div>
-        </div> -->
+  <!-- Modified Sidebar Section -->
+  <aside
+    class="fixed top-0 left-0 z-40 w-32 h-screen transition-transform -translate-x-full sm:translate-x-0 border-r-2 border-neutral-100 dark:border-gray-500 flex flex-col justify-between items-center">
+    
+    <!-- App Logo (Static, No Redirect) -->
+    <div class="mt-6">
+      <img id="appLogoImage" src="img/appLogo.png" class="rounded-full w-16 h-16 cursor-default" alt="appLogo">
+      <!-- <div data-tooltip="appLogoToolTip" data-tooltip-placement="right-end"
+        class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+        Logo Ứng Dụng
+      </div> -->
+    </div>
 
-        <!-- Desktop Navigation -->
-        <ul class="navUl hidden lg:flex flex-1 items-center space-x-4">
-          <li class="NavLink">
-            <a href="/" class="inline-block px-4 py-2">Trang chủ</a>
-          </li>
-          <li class="NavLink logged">
-            <a href="/FormMaker" class="inline-block px-4 py-2">Tạo bài thi mới</a>
-          </li>
-          <li class="NavLink logged">
-            <a href="/pinverify" class="inline-block px-4 py-2">Tham gia bài thi</a>
-          </li>
-          <li class="NavLink logged">
-            <a href="/Main" class="inline-block px-4 py-2">Tạo và tham gia trò chơi</a>
-          </li>
-        </ul>
-
-        <!-- Profile Dropdown -->
-        <select
-          class="profile logged hidden lg:block bg-transparent border-none cursor-pointer dark:text-white"
-          id="profileDropdown"
-        >
-          <option class="logOptions" value="DEFAULT" id="displayName"></option>
-          <option class="logOptions" value="previousExams">Bài thi đã tham gia</option>
-          <option class="logOptions" value="conductedExams">Bài thi đã tạo</option>
-          <option class="logOptions" value="Logout">Đăng xuất</option>
-        </select>
+    <!-- Back Button -->
+    <div class="my-4">
+      <button onclick="window.location.href='./'"
+        class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
+        data-ripple-light="true" data-tooltip-target="backToolTip" id="backButton">
+        <span class="material-symbols-outlined">
+          arrow_back
+        </span>
+      </button>
+      <div data-tooltip="backToolTip" data-tooltip-placement="right-end"
+        class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+        Quay lại Trang Chủ
       </div>
     </div>
-  </div>
 
-  <!-- Mobile Menu Backdrop -->
-  <div id="mobileMenuBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
-
-  <!-- Existing Sidebar with responsive classes -->
-  <aside
-    class="fixed top-0 left-0 z-40 w-32 h-screen transition-transform -translate-x-full sm:translate-x-0 border-r-2 border-neutral-100 dark:border-gray-500 flex flex-col justify-center items-center bg-white dark:bg-neutral-900"
-    id="sidebar">
-    
     <!-- Icon List (Center) -->
-    <div class="flex flex-col items-center space-y-6">
-      <!-- Back Button -->
-      <div class="w-full flex justify-center">
-        <button onclick="window.location.href='./'"
-          class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
-          data-ripple-light="true" data-tooltip-target="backToolTip" id="backButton">
-          <span class="material-symbols-outlined">
-            arrow_back
-          </span>
-        </button>
-      </div>
-  
-      <!-- Play Button -->
-      <div>
+    <div class="flex flex-col items-center">
+      
+      <!-- Play Icon (Replaces Home Icon) -->
+      <div class="my-4">
         <button data-tab-target="#home"
           class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
           data-ripple-light="true" data-tooltip-target="playToolTip" id="playButton">
@@ -125,12 +76,12 @@
         </button>
         <div data-tooltip="playToolTip" data-tooltip-placement="right-end"
           class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
-          Tham gia trò chơi
+          Chơi trò chơi
         </div>
       </div>
 
-      <!-- Match List Button -->
-      <div>
+      <!-- Existing Match List Icon -->
+      <div class="my-4">
         <button data-tab-target="#matches"
           class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
           data-ripple-light="true" data-tooltip-target="matchListToolTip" id="matchListButton">
@@ -140,12 +91,12 @@
         </button>
         <div data-tooltip="matchListToolTip" data-tooltip-placement="right-end"
           class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
-          Danh sách trò chơi
+          Danh sách phòng trò chơi
         </div>
       </div>
 
-      <!-- Video Setup Button -->
-      <!-- <div>
+      <!-- Existing Video Setup Icon -->
+      <div class="my-4">
         <button data-tab-target="#video"
           class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
           data-ripple-light="true" data-tooltip-target="videoToolTip" id="videoButton">
@@ -157,10 +108,10 @@
           class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
           Thiết lập Video giới thiệu
         </div>
-      </div> -->
+      </div>
 
-      <!-- Theme Customization Button -->
-      <div>
+      <!-- Existing Theme Customization Icon -->
+      <div class="my-4">
         <button data-tab-target="#theme"
           class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
           data-ripple-light="true" data-tooltip-target="themeCustomizationToolTip" id="themeCustomizationButton">
@@ -174,9 +125,22 @@
         </div>
       </div>
     </div>
-</aside>
 
-  <!-- <div class="absolute right-0 p-6">
+    <!-- Avatar -->
+    <div class="mb-4">
+      <button data-tab-target="#profile" class="tab-button" data-ripple-light="true"
+        data-tooltip-target="profileToolTip">
+        <img id="userAvatar" src="img/userAvatar.png" alt="avatar"
+          class="relative inline-block h-14 w-14 rounded-full object-cover object-center">
+      </button>
+      <div data-tooltip="profileToolTip" data-tooltip-placement="right-end"
+        class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+        Trang cá nhân
+      </div>
+    </div>
+  </aside>
+
+  <div class="absolute right-0 p-6">
     <button id="themeToggleButton" type="button" onclick="toggleTheme()"
       class="text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white tab-button">
       <span id="themeIcon" class="material-icons">
@@ -184,10 +148,10 @@
       </span>
       <span class="sr-only">Toggle theme</span>
     </button>
-  </div> -->
+  </div>
 
   <!-- Main Content -->
-  <div class="sm:ml-32 mt-16">
+  <div class="sm:ml-32">
     <!-- Home Page -->
     <div id="home" class="tab-content block">
       <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
@@ -220,7 +184,7 @@
         <div class="p-8">
           <h5 class="block mb-2 text-xl antialiased font-semibold leading-snug tracking-normal"
             id="joinAnotherMatchTitle">
-            Chào mừng bạn đến với QuizStar
+            Chào mừng bạn đến với SmartTest
           </h5>
           <p class="block text-base antialiased font-light leading-relaxed text-inherit">
             Tham gia trò chơi bằng cách nhập mã trận và mật khẩu
@@ -339,7 +303,7 @@
         <img src="img/appLogo.png" alt="Designing" class="mb-4 w-24 h-24 rounded-full">
         <p class="text-lg font-semibold dark:text-white">
           Tính năng này đang được thiết kế cho giao diện mới. Để chỉnh sửa giao diện, truy cập tại <a
-            href="./ThemeCustomization.html" target="" class="text-blue-800">đây</a> bạn nhé.
+            href="./ThemeCustomization.html" target="_blank" class="text-blue-800">đây</a> bạn nhé.
         </p>
       </div>
     </div>
@@ -979,7 +943,7 @@
           <input type="text" id="matchfullname" name="matchfullname"
             class="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300 dark:bg-neutral-900 dark:text-white">
         </div>
-        <div></div>
+        <div>
           <label for="matchpassword" class="block text-sm font-medium text-gray-700">Mât khẩu</label>
           <input type="text" id="matchpassword" name="matchpassword"
             class="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300 dark:bg-neutral-900 dark:text-white">
@@ -1028,27 +992,5 @@
 <script src="js/main/intro.js"></script>
 <script src="js/blockConsole.js"></script>
 <script src="js/Theme.js"></script>
-
-<script>
-  // Mobile menu functionality
-  const mobileMenuButton = document.getElementById('mobileMenuButton');
-  const sidebar = document.getElementById('sidebar');
-  const mobileMenuBackdrop = document.getElementById('mobileMenuBackdrop');
-
-  function toggleMobileMenu() {
-    sidebar.classList.toggle('-translate-x-full');
-    mobileMenuBackdrop.classList.toggle('hidden');
-  }
-
-  mobileMenuButton.addEventListener('click', toggleMobileMenu);
-  mobileMenuBackdrop.addEventListener('click', toggleMobileMenu);
-
-  // Close menu on window resize if open
-  window.addEventListener('resize', () => {
-    if (window.innerWidth >= 1024 && !sidebar.classList.contains('-translate-x-full')) {
-      toggleMobileMenu();
-    }
-  });
-</script>
 
 </html>

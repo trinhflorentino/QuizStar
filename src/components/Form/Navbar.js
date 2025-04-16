@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Stater } from "../../services/firebaseConfig";
-import { useLocation, useNavigate, NavLink } from "react-router-dom";
+import { useLocation, useNavigate, NavLink, Link } from "react-router-dom";
 import { TbLogout } from "react-icons/tb";
 import { CgProfile } from "react-icons/cg";
 const Logo = require("../../images/Logo.jpg");
@@ -57,7 +57,7 @@ const Navbar = () => {
     setIsOpen(false); // Close sidebar
     navigate(path);
   };
-
+  if(location.pathname.includes('ExportExam')) return null;
   return (
     <>
       <div className="Nav sticky top-0 w-full shadow-md z-50">
@@ -89,14 +89,16 @@ const Navbar = () => {
               
               {/* Logo and Product Name - Visible on mobile */}
               <div className="flex items-center lg:hidden">
-                <img 
-                  src={Logo}
-                  alt="Logo" 
-                  className="h-10 w-10"
-                />
-                <span className="ml-2 text-xl font-semibold text-gray-900">
-                  QuizStar
-                </span>
+                <Link to="/" className="flex items-center">
+                  <img 
+                    src={Logo}
+                    alt="Logo" 
+                    className="h-10 w-10"
+                  />
+                  <span className="ml-2 text-xl font-semibold text-gray-900">
+                    QuizStar
+                  </span>
+                </Link>
               </div>
             </div>
 
@@ -116,14 +118,14 @@ const Navbar = () => {
               </li>
               <li className="NavLink logged">
                 <NavLink 
-                  to="/FormMaker"
+                  to="/TestManagement"
                   className={({ isActive }) => 
                     isActive 
                       ? "inline-block px-4 py-2 cursor-pointer text-blue-600 border-b-2 border-blue-600"
                       : "inline-block px-4 py-2 cursor-pointer hover:text-blue-600"
                   }
                 >
-                  Tạo bài thi mới
+                  Quản lý đề thi
                 </NavLink>
               </li>
               <li className="NavLink logged">
@@ -139,16 +141,17 @@ const Navbar = () => {
                 </NavLink>
               </li>
               <li className="NavLink logged">
-                <NavLink 
-                  to="/Main"
-                  className={({ isActive }) => 
-                    isActive 
-                      ? "inline-block px-4 py-2 cursor-pointer text-blue-600 border-b-2 border-blue-600"
-                      : "inline-block px-4 py-2 cursor-pointer hover:text-blue-600"
-                  }
+                <a 
+                  href="/Main.html"
+                  // className={({ isActive }) => 
+                  //   isActive 
+                  //     ? "inline-block px-4 py-2 cursor-pointer text-blue-600 border-b-2 border-blue-600"
+                  //     : "inline-block px-4 py-2 cursor-pointer hover:text-blue-600"
+                  // }
+                  className="inline-block px-4 py-2 cursor-pointer hover:text-blue-600"
                 >
                   Tạo và tham gia trò chơi
-                </NavLink>
+                </a>
               </li>
             </ul>
             {/* Profile Dropdown */}
@@ -156,7 +159,7 @@ const Navbar = () => {
               <div className="sign" style={{display: "none"}}>
                 <button 
                   className="px-4 py-2 text-black hover:bg-blue-50"
-                  onClick={() => navigate('/Login')}
+                  onClick={() => window.location.href = "/Login.html"}
                 >
                   Đăng nhập
                 </button>
@@ -237,13 +240,13 @@ const Navbar = () => {
                   <a onClick={() => handleNavigation('/')} className="block px-4 py-2 rounded-md hover:bg-gray-100">Trang chủ</a>
                 </li>
                 <li className="NavLink logged">
-                  <a onClick={() => handleNavigation('/FormMaker')} className="block px-4 py-2 rounded-md hover:bg-gray-100">Tạo bài thi mới</a>
+                  <a onClick={() => handleNavigation('/TestManagement')} className="block px-4 py-2 rounded-md hover:bg-gray-100">Quản lý đề thi</a>
                 </li>
                 <li className="NavLink logged">
                   <a onClick={() => handleNavigation('/pinverify')} className="block px-4 py-2 rounded-md hover:bg-gray-100">Tham gia bài thi</a>
                 </li>
                 <li className="NavLink logged">
-                  <a onClick={() => handleNavigation('/Main')} className="block px-4 py-2 rounded-md hover:bg-gray-100">Tạo và tham gia trò chơi</a>
+                  <a onClick={() => window.location.href = "/Main.html"} className="block px-4 py-2 rounded-md hover:bg-gray-100">Tạo và tham gia trò chơi</a>
                 </li>
               </ul>
             </nav>

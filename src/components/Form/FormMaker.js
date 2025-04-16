@@ -4,7 +4,6 @@ import { doc, setDoc } from "firebase/firestore/lite";
 import { v4 as uuid } from "uuid";
 import { getAuth } from "firebase/auth";
 import React from 'react';
-import TrashBin from "../../images/trash_bin-100_copy.jpg";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { MathJaxContext, MathJax } from 'better-react-mathjax';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -14,23 +13,35 @@ import { TbMatrix } from "react-icons/tb";
 import { BiImages } from "react-icons/bi";
 import { CiCirclePlus } from "react-icons/ci";
 import { AiOutlineQuestionCircle } from "react-icons/ai";
+import { useNavigate } from 'react-router-dom';
+import { FiTrash2, FiX } from "react-icons/fi";
+// import ConvertApi from 'convertapi-js'
+
+// import CloudConvert from 'cloudconvert';
 
 // import fs from "fs";
 var mammoth = require("mammoth");
 // const storage = getStorage();
 
-function FormMaker() {
+function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubmit }) {
+  // if(isEditing) {
+  //   // console.log(getAuth().currentUser.email);
+  //   if(getAuth().currentUser.email !== 
+  // }
   const [quizTitle, setQuizTitle] = useState("");
+  const [duration, setDuration] = useState(50); // Default 45 minutes
   const [list, setList] = useState([
-    { id: uuid(), question: "", answer: null, type: "mcq" },
+    { id: uuid(), question: "", answer: undefined, type: "mcq", score: 0.25 },
   ]);
   const [optionList, setOptionList] = useState([
     [
       { id: uuid(), option: "", optionNo: 1, answer: true },
       { id: uuid(), option: "", optionNo: 2, answer: true },
+      { id: uuid(), option: "", optionNo: 3, answer: true },
+      { id: uuid(), option: "", optionNo: 4, answer: true },
     ],
   ]);
-  
+  const navigate = useNavigate();
   const [mathJaxInputActive, setMathJaxInputActive] = useState(false);
   const [mathJaxQuestionIndex, setMathJaxQuestionIndex] = useState(null);
   const [mathJaxInputValue, setMathJaxInputValue] = useState("");
@@ -60,8 +71,69 @@ function FormMaker() {
   const mcqRef = React.useRef(null);
   const trueFalseRef = React.useRef(null);
   const shortAnswerRef = React.useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {}, [optionList]);
+
+  useEffect(() => {
+    if (isEditing && initialData) {
+      // Set initial quiz title
+      
+      setQuizTitle(initialData.title);
+
+      // Convert questions and answers to the format expected by the form
+      const convertedQuestions = initialData.questions.map((q, index) => {
+        let answer = null;
+        
+        // Handle different question types
+        if (q.type === "mcq") {
+          // Subtract 1 since we store MCQ answers as 1-based but use 0-based internally
+          answer = initialData.answers[index]?.answer ? initialData.answers[index].answer : 0;
+        } else if (q.type === "truefalse") {
+          answer = initialData.answers[index]?.answer || [];
+        } else if (q.type === "shortanswer") {
+          answer = initialData.answers[index]?.answer || "";
+        }
+
+        return {
+          id: uuid(),
+          question: q.question || "",
+          answer: answer,
+          type: q.type || "mcq",
+          score: q.score || 0.25
+        };
+      });
+
+      // Convert options with proper defaults
+      const convertedOptions = initialData.questions.map((q, index) => {
+        if (q.type === "mcq") {
+          return (q.options || []).map((opt, i) => ({
+            id: uuid(),
+            option: opt.option || "",
+            optionNo: i + 1,
+            answer: false
+          }));
+        } else if (q.type === "truefalse") {
+          return (q.options || []).map((opt, i) => ({
+            id: uuid(),
+            option: opt.option || "",
+            optionNo: i + 1,
+            answer: initialData.answers[index]?.answer?.[i] || false
+          }));
+        }
+        return []; // For shortanswer questions
+      });
+
+      // Set initial image previews if they exist
+      if (initialData.questions) {
+        const initialPreviews = initialData.questions.map(q => q.imageUrl || null);
+        setImagePreview(initialPreviews);
+      }
+      
+      setList(convertedQuestions);
+      setOptionList(convertedOptions);
+    }
+  }, [isEditing, initialData]);
 
   function numHandler(event, index) {
     let pattern = new RegExp("[^0-" + optionList[index].length + "]");
@@ -77,9 +149,12 @@ function FormMaker() {
     values.push([
       { id: uuid(), option: "", optionNo: 1, answer: true },
       { id: uuid(), option: "", optionNo: 2, answer: true },
+      { id: uuid(), option: "", optionNo: 3, answer: true },
+      { id: uuid(), option: "", optionNo: 4, answer: true },
     ]);
     setOptionList(values);
-    setList([...list, { id: uuid(), question: "", answer: null, type: "mcq" }]);
+    // Set default score based on type when adding new question
+    setList([...list, { id: uuid(), question: "", answer: '', type: "mcq", score: 0.25 }]);
   }
 
   function handleRemoveQuest(index) {
@@ -131,9 +206,23 @@ function FormMaker() {
     let values = [...list];
     let options = [...optionList];
     
-    // Preserve existing question
+    // Set default score based on question type
+    let defaultScore;
+    switch(newType) {
+      case 'truefalse':
+        defaultScore = 1.0;
+        break;
+      case 'shortanswer':
+        defaultScore = 0.5;
+        break;
+      default:
+        defaultScore = 0.25; // mcq
+    }
+
+    // Preserve existing question and update type and score
     const currentQuestion = { ...values[index] };
     currentQuestion.type = newType;
+    currentQuestion.score = defaultScore;
     values[index] = currentQuestion;
 
     // Create default options if none exist
@@ -173,10 +262,13 @@ function FormMaker() {
   function validator() {
     // Validate quiz title
     if (quizTitle.trim() === "") {
-      alert("Quiz title cannot be empty.");
+      alert("Tiêu đề bài thi không được để trống.");
       return false;
     }
-
+    if(list.length === 0) { 
+      alert("Vui lòng thêm ít nhất một câu hỏi vào bài thi.");
+      return false;
+    }
     // Validate each question and its options
     for (let i = 0; i < list.length; i++) {
       const question = list[i];
@@ -184,7 +276,7 @@ function FormMaker() {
 
       // Check if the question text is not empty
       if (question.question.trim() === "") {
-        alert(`Question ${i + 1} cannot be empty.`);
+        alert(`Câu hỏi ${i + 1} không được để trống.`);
         return false;
       }
 
@@ -205,14 +297,14 @@ function FormMaker() {
       if (question.type === "mcq") {
         // Ensure there are at least two options for MCQ
         if (options.length < 2) {
-          alert(`Question ${i + 1} must have at least two options.`);
+          alert(`Câu hỏi ${i + 1} phải có ít nhất hai lựa chọn.`);
           return false;
         }
 
         // Check that each option text is not empty
         for (let j = 0; j < options.length; j++) {
           if (options[j].option.trim() === "") {
-            alert(`Option ${j + 1} for question ${i + 1} cannot be empty.`);
+            alert(`Lựa chọn ${j + 1} của câu hỏi ${i + 1} không được để trống.`);
             return false;
           }
         }
@@ -220,7 +312,7 @@ function FormMaker() {
         // Ensure exactly one correct answer is selected
         const correctAnswers = question.answer;
         if (correctAnswers === null) {
-          alert(`Please select a correct answer for question ${i + 1}.`);
+          alert(`Vui lòng chọn đáp án đúng cho câu hỏi ${i + 1}.`);
           return false;
         }
       } else if (question.type === "truefalse") {
@@ -233,25 +325,31 @@ function FormMaker() {
         // Check that each option text is not empty
         for (let j = 0; j < options.length; j++) {
           if (options[j].option.trim() === "") {
-            alert(`Option ${j + 1} for question ${i + 1} cannot be empty.`);
+            alert(`Ý kiến ${j + 1} của câu hỏi ${i + 1} không được để trống.`);
             return false;
           }
 
           // Ensure answer is either true or false
           if (typeof options[j].answer !== "boolean") {
-            alert(`Please select True or False for option ${j + 1} of question ${i + 1}.`);
+            alert(`Vui lòng chọn đáp án cho ý kiến ${j + 1} của câu hỏi ${i + 1}.`);
             return false;
           }
         }
       } else if (question.type === "shortanswer") {
         if (question.answer.trim() === "" || question.answer === null) {
-          alert(`Answer for question ${i + 1} cannot be empty.`);
+          alert(`Đáp án của câu hỏi ${i + 1} không được để trống.`);
           return false;
         }
       } else {
-        alert(`Invalid question type for question ${i + 1}.`);
+        alert(` ${i + 1}.`);
         return false;
       }
+
+      // Check if score is set and is a positive number
+      // if (!question.score || question.score <= 0) {
+      //   alert(`Câu hỏi ${i + 1} cần có điểm số lớn hơn 0.`);
+      //   return false;
+      // }
     }
     
     // All validations passed
@@ -274,9 +372,13 @@ function FormMaker() {
       ),
       //Data format for setting question paper
       {
-        question_question: question_question,
+        question_question: question_question.map(q => ({
+          ...q,
+          score: q.score || 0.25 // Ensure score is included
+        })),
         creator: getAuth().currentUser.email,
         status: "active",
+        duration: duration // Add duration to the document
       }
 
     );
@@ -323,23 +425,56 @@ function FormMaker() {
 
   async function onSubmit() {
     if (!validator()) {
-      alert("Please fill all the textfields to proceed");
+      // alert("Please fill all the textfields to proceed");
+      return;
+    }
+
+    if (isEditing && customSubmit) {
+      // Handle edit mode submission
+      const questionQuestions = list.map((question, index) => ({
+        question: question.question.trim(),
+        options: optionList[index].map(option => ({
+          option: option.option.trim(),
+          optionNo: option.optionNo
+        })),
+        type: question.type,
+        score: question.score || 0.25
+      }));
+
+      const answerAnswers = list.map((question, index) => ({
+        answer: question.type === "mcq" ? question.answer 
+          : question.type === "truefalse" ? optionList[index].map(opt => opt.answer)
+          : question.answer.trim()
+      }));
+
+      await customSubmit({
+        questions: questionQuestions,
+        answers: answerAnswers
+      });
       return;
     }
   
     try {
       const examPin = Math.floor(100000 + Math.random() * 900000);
       
-      // Upload images first and get URLs
-      const uploadPromises = list.map(async (question, index) => {
-        const imageFile = document.querySelector(`input[type="file"][data-index="${index}"]`)?.files[0];
-        if (imageFile) {
-          return await uploadImage(imageFile, examPin, question.id);
-        }
-        return null;
-      });
-  
-      const imageUrls = await Promise.all(uploadPromises);
+      // Upload images and get URLs
+      const imageUploads = await Promise.all(
+        list.map(async (question, index) => {
+          // If editing and image hasn't changed, use existing URL
+          if (isEditing && imagePreview[index] && imagePreview[index].startsWith('http')) {
+            return imagePreview[index];
+          }
+          
+          // Otherwise handle new image upload
+          if (imagePreview[index]) {
+            const response = await fetch(imagePreview[index]);
+            const blob = await response.blob();
+            const file = new File([blob], `image-${index}.jpg`, { type: 'image/jpeg' });
+            return await uploadImage(file, examPin, question.id);
+          }
+          return null;
+        })
+      );
   
       // Add image URLs to questions
       const questionQuestions = list.map((question, index) => {
@@ -352,13 +487,14 @@ function FormMaker() {
           question: question.question.trim(),
           options: options.map(option => ({ option: option.option.trim(), optionNo: option.optionNo })),
           type: question.type,
-          imageUrl: imageUrls[index] // Add image URL to question data
+          imageUrl: imageUploads[index], // Add image URL to question data
+          score: question.score || 0.25
         };
       });
   
       const answerAnswers = list.map((question, index) => {
         if (question.type === "mcq") {
-          return { answer: question.answer + 1 };
+          return { answer: question.answer };
         } else if (question.type === "truefalse") {
           return { answer: optionList[index].map(option => option.answer) };
         } else if (question.type === "shortanswer") {
@@ -374,7 +510,7 @@ function FormMaker() {
         setResponseStatus(examPin, quizTitle),
       ]);
   
-      window.location.href += `/DisplayPin/${examPin}`;
+      navigate(`/FormMaker/DisplayPin/${examPin}`);
     } catch (error) {
       console.error("Error submitting the form:", error);
       alert("There was an error submitting the form. Please try again.");
@@ -384,9 +520,9 @@ function FormMaker() {
 
 
   function resetForm() {
-    if (window.confirm("Are you sure you want to clear the form ?") == true) {
+    if (window.confirm("Bạn có chắc muốn xóa toàn bộ dữ liệu đã nhập?") == true) {
       document.getElementById("quiz_title").value = "";
-      setList([{ id: uuid(), question: "", answer: null, type: "mcq" }]);
+      setList([]);
       setOptionList([
         [
           { id: uuid(), option: "", optionNo: 1, answer: null },
@@ -420,7 +556,81 @@ function FormMaker() {
       maxOutputTokens: 8192,    
     },
   });
+  const model15pro = genAI.getGenerativeModel({
+    model: "gemini-1.5-pro", 
+    generationConfig: {
+      "responseMimeType": "application/json",
+      // responseSchema: schema,
+      temperature: 0.6,
+      topP: 0.95,
+      topK: 40,
+      maxOutputTokens: 8192,    
+    },
+  });
+  // const cloudconvertkey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiODgyYjQ3MTc0NDU0ODE3NzMxM2EwZDk4N2E4N2FlODM2OWI3NWQ3ZjI5ZDhkZmU4MTExMjdkNmY4MWY2ZWU0YjVhMzA3YjlhZjdhZGM2ODMiLCJpYXQiOjE3MzU3NTE1NDEuOTczNTUyLCJuYmYiOjE3MzU3NTE1NDEuOTczNTUzLCJleHAiOjQ4OTE0MjUxNDEuOTY3OTU1LCJzdWIiOiI3MDYzNDI4MyIsInNjb3BlcyI6WyJ0YXNrLnJlYWQiLCJ0YXNrLndyaXRlIiwid2ViaG9vay53cml0ZSIsIndlYmhvb2sucmVhZCIsInByZXNldC5yZWFkIiwicHJlc2V0LndyaXRlIl19.mx2PCiBI8WR9sd8z5QEo4P7D8CUuajOy37Bx68lM9h1xCQwpO326cCQqZO5nzJx4R_c5hnr4bBLOPejdzL8LcJkpYjEFYdSzurxumSOQW_HaFsxgHizhc8TyRwwW7hvusCkeJ8BlV6zOAfakB4do4EzNT6NImlpKiHpCVdr3oinTquBHOu2RnKe_ZbwlFkqygFjFFMesp7Pdt2MC7sPNAtpowKtlvUPjBCuzNP1H_vRveqBY4WNfox4jaszbkXDWH4-BqV9iVDvkNnh9LOrpOgIEIGY7_lFhsswvGU2tG8TXYFvZRR3RaRs5Jc_N09jn9GWFO9mdPVfVV-G_HcSl4T39Mfttp_geCShsRbeTiO__kC_XFqQtI1-8sM10emkbYF2DbXpqKt2Jz6_oDSf77x86t8Sp3FSPBzUNgMvFb1yWPJbyNu5_VbdZtwa63fVcthElRL4bgEjsZb6fIuMJQTb4hB7qj5ZuAnYiYvE6TpFVGUmyxi7HyxCCJNTiTDzFmhYBevTFsQKyyQc2cMeTrI4gvBHZt9D_PeI1TVpejRacRDyFMpjQNgSb1Jk2x-vNvFmMHnKAPm_CBsApuz6PRR--1wxRgvQdG1_cGP1tcXEPzpo3cjk6iQ3cX2ookdRu5PUAxR6Vc-Y-lB0VamJlaK41H-L2tXUT95dU0iLIg-Q";
+  // // const cloudConvert = new CloudConvert(cloudconvertkey);
+  // // import axios from 'axios';
 
+  // const CLOUDCONVERT_API_KEY = cloudconvertkey;
+  
+  //   if (file.name.endsWith('.doc')) {
+  //     file = await convertDocToDocx(file);
+  //   }
+  //   // Continue with existing mammoth processing
+  //   ...existing code...
+  // }; 
+/**
+ * Converts DOC to DOCX and downloads the result
+//  */
+/**
+ * Converts DOC to DOCX and downloads the result
+ * @param {File|string} file - Input file or URL
+ * @returns {Promise<{url: string, file: File}>}
+ */
+
+// const convertDocToDocx = async (file) => {
+//   if (!file) {
+//     throw new Error('File parameter is required');
+//   }
+
+//   try {
+//     // Initialize API
+//     const convertApi = ConvertApi.auth('secret_zN5nFvlkAgV3OAq9');
+//     const params = convertApi.createParams();
+
+//     // Handle file input
+//     if (typeof file === 'string') {
+//       params.add('File', new URL(file));
+//     } else {
+//       params.add('File', file);
+//     }
+
+//     // Convert file
+//     const result = await convertApi.convert('doc', 'docx', params);
+    
+//     if (!result?.files?.[0]) {
+//       throw new Error('Conversion failed');
+//     }
+
+//     // Download converted file
+//     const response = await fetch(result.files[0].Url);
+//     const blob = await response.blob();
+//     const convertedFile = new File(
+//       [blob], 
+//       result.files[0].FileName,
+//       { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' }
+//     );
+
+//     return {
+//       url: result.files[0].Url,
+//       file: convertedFile
+//     };
+
+//   } catch (error) {
+//     console.error('Conversion failed:', error);
+//     throw error;
+//   }
+// };
 
   async function extractQuestionsJSON(file) {
 
@@ -446,7 +656,9 @@ truefalse: "question" chứa nội dung câu hỏi. "options" chứa mảng các
 shortanswer: "answer" chứa đáp án ngắn gọn dưới dạng chuỗi. Nếu câu hỏi yêu cầu đánh giá đúng/sai nhiều mệnh đề, "answer" sẽ là mảng các giá trị boolean (true/false). Ưu tiên sử dụng mảng boolean [true, false, ...] nếu có thể.
 
 Lưu ý:
-
+Phải tạo các câu hỏi tiếng Việt rõ ràng, dễ hiểu.
+Nếu file có định dạng HTML không được thêm các thẻ có định dạng HTML vào câu hỏi.
+Với câu hỏi có công thức hãy viết dưới dạng Latex.
 Chỉ trích xuất câu hỏi thuộc ba dạng trên. Bỏ qua các câu hỏi khác.
 
 Mỗi câu hỏi phải rõ ràng, dễ hiểu và có đáp án duy nhất.
@@ -484,6 +696,10 @@ Tuân thủ nghiêm ngặt định dạng JSON.
         // link.click();
         // document.body.removeChild(link);
       }
+      
+      // if (file.name.endsWith('.doc')) {
+      //   file = await convertDocToDocx(file);
+      // }
       console.log(fileContent);
       // Make a request to the media.upload endpoint 
       const response = await fetch(
@@ -541,24 +757,27 @@ Hãy phân tích file được upload (ma trận/đặc tả/đề cương) và 
 ]
 
 Yêu cầu cụ thể:
+Dựa vào nội dung được cung cấp trong file để tạo ra các câu hỏi phù hợp, ưu tiên tạo các bài toán thực tế.
 
-Dựa vào nội dung được cung cấp trong file để tạo ra các câu hỏi phù hợp.
-
-mcq: "answer" chứa ký tự đại diện cho đáp án đúng (A, B, C, hoặc D). "options" chứa mảng các lựa chọn.
+mcq: "answer" chứa ký tự đại diện cho đáp án đúng (A, B, C, D). "options" chứa mảng các lựa chọn. Yêu cầu bắt buộc phải có 4 options.
 
 truefalse: "question" chứa nội dung câu hỏi. "options" chứa mảng các mệnh đề cần đánh giá. "answer" là mảng các giá trị boolean (true/false) tương ứng với từng mệnh đề trong "options". Ưu tiên sử dụng mảng boolean [true, false, ...] thay vì dạng chuỗi "Đáp án a [true, false]".
 
 shortanswer: "answer" chứa đáp án ngắn gọn dưới dạng chuỗi. Nếu câu hỏi yêu cầu đánh giá đúng/sai nhiều mệnh đề, "answer" sẽ là mảng các giá trị boolean (true/false). Ưu tiên sử dụng mảng boolean [true, false, ...] nếu có thể.
 
 Lưu ý:
+Nếu file có định dạng HTML không được thêm các thẻ có định dạng HTML vào câu hỏi.
+Với câu hỏi có công thức hãy viết dưới dạng Latex.
 
+Nếu file có định dạng HTML không được thêm các thẻ có định dạng HTML vào câu hỏi.
+Với câu hỏi có công thức hãy viết dưới dạng Latex.
 Chỉ tạo câu hỏi thuộc ba dạng trên.
 
 Mỗi câu hỏi phải rõ ràng, dễ hiểu và có đáp án duy nhất.
 
-Đối với câu hỏi truefalse, mỗi mệnh đề phải có giá trị đúng hoặc sai rõ ràng, các mệnh đề phải nằm trong mảng options, không để trên question.
+Đối với câu hỏi truefalse, mỗi mệnh đề phải có giá trị đúng hoặc sai rõ ràng, các mệnh đề phải nằm trong mảng options, không để trên question. Mỗi câu hỏi truefalse phải có 4 options.
 
-Đối với câu hỏi shortanswer, đáp án cần ngắn gọn, súc tích và chính xác.
+Đối với câu hỏi shortanswer, đáp án cần phải súc tích và chính xác, chỉ chứa 4 kí tự là một số có nghĩa, có thể chứa 2 kí tự số âm("-") và dấu phẩy(",").
 
 Tuân thủ nghiêm ngặt định dạng JSON.
 
@@ -609,7 +828,7 @@ Số lượng và nội dung câu hỏi phải bám sát ma trận/đặc tả/�
       const fileUri = uploadResponse.file.uri;
       // console.log(uploadResponse);
       console.log(fileUri);
-      const result = await model1206.generateContent([
+      const result = await model20flash.generateContent([
         {
           fileData: {
             mimeType: fileType,
@@ -689,7 +908,10 @@ Yêu cầu cụ thể:
 - **shortanswer**: "answer" chứa đáp án ngắn gọn dưới dạng chuỗi. Nếu câu hỏi yêu cầu đánh giá đúng/sai nhiều mệnh đề, "answer" sẽ là mảng các giá trị boolean (true/false). Ưu tiên sử dụng mảng boolean [true, false, ...] nếu có thể.
 
 Lưu ý:
-
+Phải tạo các câu hỏi tiếng Việt dễ hiểu, rõ ràng và chính xác.
+Nếu file có định dạng HTML không được thêm các thẻ có định dạng HTML vào câu hỏi.
+Với câu hỏi có công thức hãy viết dưới dạng Latex.
+- Không trả về các câu hỏi giống với câu hỏi đã có.
 - Chỉ trích xuất câu hỏi thuộc ba dạng trên. Bỏ qua các câu hỏi khác.
 - Mỗi câu hỏi phải rõ ràng, dễ hiểu và có đáp án duy nhất.
 - Đối với câu hỏi truefalse, mỗi mệnh đề phải có giá trị đúng hoặc sai rõ ràng, các mệnh đề phải nằm trong mảng options, không để trên question.
@@ -700,7 +922,7 @@ Lưu ý:
     console.log(prompt);
     console.time("Thời gian thực hiện"); 
     try {
-      const result = await model1206.generateContent(prompt);
+      const result = await model15pro.generateContent(prompt);
     
       console.timeEnd("Thời gian thực hiện");
       // console.log(result.response.text()); 
@@ -711,13 +933,7 @@ Lưu ý:
   }
 
   async function createQuestions() {
-    // const fileInput = document.getElementById('fileInput');
-    // const file = fileInput.files[0];
-    // if (file === undefined) {
-    //   alert("Vui lòng chọn file trước.");
-    //   return;
-    // }
-    // console.log(file);
+    setIsLoading(true);
     try {
       const ketQua = await createQuestionsJSON();
       console.log("Original Extracted Data:", ketQua);
@@ -731,6 +947,9 @@ Lưu ý:
     } catch (error) {
       console.error("Error extracting questions:", error);
       alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+      setShowModal(false);
     }
   }
 
@@ -760,7 +979,7 @@ Lưu ý:
       alert("Vui lòng chọn file trước.");
       return;
     }
-    // console.log(file);
+    setIsLoading(true);
     try {
       const ketQua = await extractQuestionsJSON(file);
       console.log("Original Extracted Data:", ketQua);
@@ -770,10 +989,18 @@ Lưu ý:
         const convertedData = convertAnswers(parsedData); // Convert answers
         console.log("Converted Data:", convertedData);
         addQuestionsFromJSON(convertedData); // Pass the array, not string
+        // console.log(quizTitle);
+        // setQuizTitle(file.name);
+        // console.log(file.name);  
+        // console.log(quizTitle);
+        document.getElementById("quiz_title").value = file.name;
       }
     } catch (error) {
       console.error("Error extracting questions:", error);
       alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+      setShowExerciseModal(false);
     }
   }
 
@@ -784,7 +1011,7 @@ Lưu ý:
       alert("Vui lòng chọn file trước.");
       return;
     }
-    // console.log(file);
+    setIsLoading(true);
     try {
       const ketQua = await matrixQuestionsJSON(file);
       console.log("Original Extracted Data:", ketQua);
@@ -798,6 +1025,9 @@ Lưu ý:
     } catch (error) {
       console.error("Error extracting questions:", error);
       alert(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+      setShowMatrixModal(false);
     }
   }
 
@@ -894,12 +1124,26 @@ Lưu ý:
           throw new Error(`Unsupported question type "${q.type}" at index ${qIndex}.`);
         }
 
-        // Push new question to the array
+        // Set default score based on type
+        let defaultScore;
+        switch(q.type) {
+          case 'truefalse':
+            defaultScore = 1.0;
+            break;
+          case 'shortanswer':
+            defaultScore = 0.5;
+            break;
+          default:
+            defaultScore = 0.25; // mcq
+        }
+
+        // Push new question to the array with default score
         newQuestions.push({
           id: uuid(),
           question: q.question.trim(),
           answer: processedAnswer,
           type: q.type,
+          score: defaultScore
         });
 
         if (q.type === "mcq") {
@@ -964,65 +1208,114 @@ Lưu ý:
     },
   };
   
-  const [imagePreview, setImagePreview] = useState({});
+  const [imagePreview, setImagePreview] = useState(Array(list.length).fill(null));
+  const [fileInputKeys, setFileInputKeys] = useState(Array(list.length).fill(0));
+  const handleRemoveImage = (index) => {
+    setImagePreview(prev => {
+      const newImagePreview = [...prev];
+      newImagePreview[index] = null;
+      return newImagePreview;
+    });
+    // Update key to force input reset
+    setFileInputKeys(prev => {
+      const newKeys = [...prev];
+      newKeys[index] = prev[index] + 1;
+      return newKeys;
+    });
+  };
+      
 
 // Add handler function
+// const MAX_FILE_SIZE = 35 * 1024 * 1024; // 35MB in bytes
+
 const handleImageChange = (event, index) => {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
     reader.onloadend = () => {
-      setImagePreview(prev => ({
-        ...prev,
-        [index]: reader.result
-      }));
+      setImagePreview(prev => {
+        const newImagePreview = [...prev];
+        newImagePreview[index] = reader.result;
+        return newImagePreview;
+      });
     };
     reader.readAsDataURL(file);
   }
+  // Reset file input
+  event.target.value = '';
 };
 
 async function uploadImage(file, examPin, questionId) {
+  // If file is a URL string (existing image), return it as is
+  if (typeof file === 'string' && file.startsWith('http')) {
+    return file;
+  }
+  
+  // Otherwise upload the new file
   if (!file) return null;
   
   const storageRef = ref(storage, `question_images/${examPin}/${questionId}`);
   await uploadBytes(storageRef, file);
+  console.log('Image uploaded successfully:', storageRef);
   return await getDownloadURL(storageRef);
 }
 
   const [showModal, setShowModal] = useState(false);
   const [showExerciseModal, setShowExerciseModal] = useState(false);
   const [showMatrixModal, setShowMatrixModal] = useState(false);
+  // useEffect(() => {
+  //   console.log('QuizTitle changed:', quizTitle);
+  // }, [quizTitle]);
+  const handleTitleChange = (event) => {
+    const newTitle = event.target.value;
+    // console.log('Setting new title:', newTitle);
+    setQuizTitle(newTitle);
+  };
 
+  // Add new handler for score changes
+  function handleScoreChange(event, index) {
+    let values = [...list];
+    const score = parseFloat(event.target.value) || 0;
+    values[index].score = score;
+    setList(values);
+  };
+  
   return (
-  <MathJaxContext
-    version={3}
-    config={config}
-    onLoad={() => {
-      console.log("MathJax is loaded and ready!");
-      setMathJaxReady(true);
-    }}
-    onError={(error) => {
-      console.error("MathJax Load Error:", error);
-    }}
-  >
-    <div id="mainForm" className="m-7">
+  // <MathJaxContext
+  //   version={3}
+  //   config={config}
+  //   onLoad={() => {
+  //     console.log("MathJax is loaded and ready!");
+  //     setMathJaxReady(true);
+  //   }}
+  //   onError={(error) => {
+  //     console.error("MathJax Load Error:", error);
+  //   }}
+  // >
+    <div id="mainForm" className="m-4 md:m-10 lg:m-12">
       <div className="quizBox">
         <input
-          type="text"
-          className="shadow shadow-slate-300 mx-8 my-4 lg:mx-40 rounded-xl text-lg text-center p-4 w-full"
-          name="quiz_title"
-          id="quiz_title"
-          placeholder="Nhập tiêu đề bài thi..."
-          onChange={(event) => setQuizTitle(event.target.value)}
-        />
+        type="text"
+        className="quiz_title shadow shadow-slate-300 mx-4 sm:mx-8 lg:mx-40 rounded-xl text-lg text-center p-3 sm:p-4 w-full"
+        name="quiz_title"
+        id="quiz_title"
+        placeholder="Hãy nhập tiêu đề bài thi..."
+        value={quizTitle || ''} // Ensure value is never undefined
+        onChange={handleTitleChange}
+      />      
       </div>
+      {/* <MathJax inline dynamic className="text-lg">
+      </MathJax> */}
+      {/* <MathJax dynamic inline>
+        {"\\[\\ce{C6H12O6 + 6O2 -> 6CO2 + 6H2O}\\]"} hi {"\\[\\ce{C6H12O6 + 6O2 -> 6CO2 + 6H2O}\\]"}
+      </MathJax> */}
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-6">
-        <button
+      <button
           onClick={() => setShowExerciseModal(true)}
           className="w-full sm:w-auto bg-blue-500 hover:bg-blue-700 text-white text-sm sm:text-base font-bold py-2 px-3 sm:px-4 rounded shadow-lg transform transition hover:scale-105 flex items-center justify-center"
         >
           <MdCloudUpload className="inline mr-1 sm:mr-2"/>
-          <span className="whitespace-nowrap">Tải bài tập lên</span>
+          <span className="whitespace-nowrap">Tải đề thi lên</span>
         </button>
 
         <button
@@ -1042,20 +1335,22 @@ async function uploadImage(file, examPin, questionId) {
         </button>
         {showExerciseModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-8 max-w-md w-full m-4">
+            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-4 sm:p-8 max-w-md w-full m-4">
               <button
-                onClick={() => setShowExerciseModal(false)}
+                onClick={() => !isLoading && setShowExerciseModal(false)}
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                disabled={isLoading}
               >
-                <span className="text-2xl">&times;</span>
+                {/* <span className="text-2xl">&times;</span> */}
               </button>
               
               <form className="bg-white rounded">
-                <h2 className="text-2xl font-bold mb-6">Tải tệp bài tập lên</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Tải tệp đề thi lên</h2>
                 <div className="mb-6">
                   <input
                     type="file"
                     id="fileInput"
+                    disabled={isLoading}
                     className="block w-full text-gray-700 bg-white border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     accept=".docx, .pdf, image/*"
                   />
@@ -1063,18 +1358,34 @@ async function uploadImage(file, examPin, questionId) {
                 <div className="flex justify-end gap-4">
                   <button
                     type="button"
+                    disabled={isLoading}
                     onClick={() => {
                       extractQuestions();
-                      setShowExerciseModal(false);
+                      // !isLoading && setShowExerciseModal(false);
                     }}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                    className={`${
+                      isLoading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-700'
+                    } text-white font-bold py-2 px-4 rounded flex items-center`}
                   >
-                    Thêm câu hỏi
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Đang xử lý...
+                      </>
+                    ) : (
+                      'Thêm câu hỏi'
+                    )}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowExerciseModal(false)}
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={() => !isLoading && setShowExerciseModal(false)}
+                    disabled={isLoading}
+                    className={`${
+                      isLoading ? 'bg-gray-300' : 'bg-gray-500 hover:bg-gray-700'
+                    } text-white font-bold py-2 px-4 rounded`}
                   >
                     Hủy
                   </button>
@@ -1087,12 +1398,13 @@ async function uploadImage(file, examPin, questionId) {
         {/* Matrix Upload Modal */}
         {showMatrixModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-8 max-w-md w-full m-4">
+            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-4 sm:p-8 max-w-md w-full m-4">
               <button
-                onClick={() => setShowMatrixModal(false)}
+                onClick={() => !isLoading && setShowMatrixModal(false)}
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                disabled={isLoading}
               >
-                <span className="text-2xl">&times;</span>
+                {/* <span className="text-2xl">&times;</span> */}
               </button>
               
               <form className="bg-white rounded">
@@ -1101,25 +1413,83 @@ async function uploadImage(file, examPin, questionId) {
                   <input
                     type="file"
                     id="matrixInput"
+                    disabled={isLoading}
                     className="block w-full text-gray-700 bg-white border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     accept=".docx, .pdf, image/*"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mcq">
+                    Số lượng Trắc nghiệm:
+                  </label>
+                  <input
+                    type="number"
+                    id="mcq"
+                    name="mcq"
+                    min="0"
+                    defaultValue="3"
+                    ref={mcqRef}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="trueFalse">
+                    Số lượng Đúng/Sai:
+                  </label>
+                  <input
+                    type="number"
+                    id="trueFalse"
+                    name="trueFalse"
+                    min="0"
+                    defaultValue="2"
+                    ref={trueFalseRef}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </div>
+                <div className="mb-6">
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="shortAnswer">
+                    Số lượng Trả Lời Ngắn:
+                  </label>
+                  <input
+                    type="number"
+                    id="shortAnswer"
+                    name="shortAnswer"
+                    min="0"
+                    defaultValue="1"
+                    ref={shortAnswerRef}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                   />
                 </div>
                 <div className="flex justify-end gap-4">
                   <button
                     type="button"
+                    disabled={isLoading}
                     onClick={() => {
                       matrixQuestion();
-                      setShowMatrixModal(false);
                     }}
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                    className={`${
+                      isLoading ? 'bg-green-300' : 'bg-green-500 hover:bg-green-700'
+                    } text-white font-bold py-2 px-4 rounded flex items-center`}
                   >
-                    Tạo câu hỏi
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Đang xử lý...
+                      </>
+                    ) : (
+                      'Tạo câu hỏi'
+                    )}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowMatrixModal(false)}
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+                    onClick={() => !isLoading && setShowMatrixModal(false)}
+                    disabled={isLoading}
+                    className={`${
+                      isLoading ? 'bg-gray-300' : 'bg-gray-500 hover:bg-gray-700'
+                    } text-white font-bold py-2 px-4 rounded`}
                   >
                     Hủy
                   </button>
@@ -1130,12 +1500,13 @@ async function uploadImage(file, examPin, questionId) {
         )}
         {showModal && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center">
-            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-8 max-w-md w-full m-4">
+            <div className="relative animate-slideDown bg-white rounded-lg shadow-xl p-4 sm:p-8 max-w-md w-full m-4">
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() => !isLoading && setShowModal(false)}
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+                disabled={isLoading}
               >
-                <span className="text-2xl">&times;</span>
+                {/* <span className="text-2xl">&times;</span> */}
               </button>
               
               <form className="bg-white rounded">
@@ -1184,19 +1555,34 @@ async function uploadImage(file, examPin, questionId) {
                 </div>
                 <div className="flex items-center justify-between">
                   <button
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className={`${
+                      isLoading ? 'bg-blue-300' : 'bg-blue-500 hover:bg-blue-700'
+                    } text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center`}
                     type="button"
+                    disabled={isLoading}
                     onClick={() => {
                       createQuestions();
-                      setShowModal(false);
                     }}
                   >
-                    Tạo câu hỏi
+                    {isLoading ? (
+                      <>
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Đang xử lý...
+                      </>
+                    ) : (
+                      'Tạo câu hỏi'
+                    )}
                   </button>
                   <button
-                    className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    className={`${
+                      isLoading ? 'bg-gray-300' : 'bg-gray-500 hover:bg-gray-700'
+                    } text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline`}
                     type="button"
-                    onClick={() => setShowModal(false)}
+                    onClick={() => !isLoading && setShowModal(false)}
+                    disabled={isLoading}
                   >
                     Hủy
                   </button>
@@ -1204,175 +1590,198 @@ async function uploadImage(file, examPin, questionId) {
               </form>
             </div>
           </div>
-        )}
-      </div>
+        )}      
+        </div>
       <div>
       </div>
         
       {list.map((soloList, index) => (
-        <div key={soloList.id} id="questionnaire" className="p-2 sm:p-5">
-          <ul className="w-full">
-            <li className="m-[5px] flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-0">
-              <div className="flex items-center w-full sm:w-auto">
-                <div className="mr-2 sm:mr-3 border-r pr-2 sm:pr-3 border-black text-sm sm:text-base">
+        <div key={soloList.id} id="questionnaire" className="w-full max-w-4xl mx-auto p-3 md:p-6 bg-white rounded-lg shadow-sm mb-4">
+          <ul className="space-y-4">
+            <li className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 pb-3 border-b">
+              <div className="flex flex-1 items-center gap-3">
+                <div className="text-sm md:text-base font-medium">
                   Câu {index + 1}
                 </div>
-                <div className="mr-2 sm:mr-3 border-r pr-2 sm:pr-3 border-black text-sm sm:text-base">
-                  Nhập điểm
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium text-gray-600">Điểm:</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    className="w-20 px-2 py-1 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={soloList.score || 0}
+                    onChange={(event) => handleScoreChange(event, index)}
+                  />
                 </div>
                 <select
                   value={soloList.type}
-                  className="mr-2 sm:mr-3 border-r pr-2 sm:pr-3 border-black text-sm sm:text-base"
+                  className="px-3 py-1.5 text-sm md:text-base border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   onChange={(event) => handleQuestionTypeChange(event, index)}
                 >
                   <option value="mcq">Trắc nghiệm</option>
                   <option value="truefalse">Đúng/Sai</option>
                   <option value="shortanswer">Trả lời ngắn</option>
                 </select>
+                <button 
+                  className="inline-flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-red-50 hover:bg-red-100 rounded-lg transition-colors text-red-500"
+                  onClick={() => handleRemoveQuest(index)}
+                >
+                  <FiTrash2 className="w-5 h-5" />
+                </button>
               </div>
             </li>            
 
-            <li className="dlt_li flex flex-col sm:flex-row gap-2 sm:gap-0 mt-2">
+            <li className="flex flex-row md:flex-row gap-3">
               <input
                 type="text"
                 placeholder={`Câu hỏi ${index + 1}`}
-                className="questionBox faintShadow w-full sm:w-[85%] p-2 sm:p-3 text-sm sm:text-base"
+                className="flex-1 px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={soloList.question}
                 onChange={(event) => questChangeHandler(event, index, "question")}
               />
-              {list.length > 1 && (
-                <button className="dlt_btn ml-0 sm:ml-2">
-                  <img
-                    className="dlt_img faintShadow w-8 h-8 sm:w-10 sm:h-10"
-                    src={TrashBin}
-                    alt="Delete"
-                    onClick={() => handleRemoveQuest(index)}
-                  />
-                </button>
-              )}
             </li>
 
-            {soloList.type === "mcq" &&
-              optionList[index].map((soloOption, ind) => (
-                <li key={soloOption.id} className="dlt_li flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-2">
-                  <div className="flex items-center gap-2">
-                  <input
-                    type="text"
-                    className="optionBox faintShadow w-[50%] sm:w-[70%] p-2 text-sm sm:text-base"
-                    placeholder={`Tùy chọn ${ind + 1}`}
-                    value={soloOption.option}
-                    onChange={(event) => optionChangeHandler(event, index, ind)}
-                  />
-                    <input
-                      type="radio"
-                      name={`correctOption-${index}`}
-                      checked={list[index].answer === ind}
-                      onChange={(event) => handleCorrectOptionChange(event, index, ind)}
-                      className="w-5 h-5"
-                    />
-                    {optionList[index].length > 2 && (
-                      <button className="dlt_btn">
-                        <img
-                          className="dlt_img faintShadow w-6 h-6 sm:w-8 sm:h-8"
-                          src={TrashBin}
-                          alt="Delete"
-                          onClick={() => handleRemoveOpt(index, ind)}
-                        />
+            {soloList.type === "mcq" && (
+              <li className="space-y-3">
+                {optionList[index].map((soloOption, ind) => (
+                  <div key={soloOption.id} className="flex flex-row md:flex-row items-start md:items-center gap-2">
+                    <div className="flex-1 flex items-center gap-3">
+                      <input
+                        type="text"
+                        className="flex-1 px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder={`Phương án ${String.fromCharCode(65 + ind)}`}
+                        value={soloOption.option}
+                        onChange={(event) => optionChangeHandler(event, index, ind)}
+                      />
+                      <input
+                        type="radio"
+                        name={`correctOption-${index}`}
+                        checked={list[index].answer === ind}
+                        onChange={(event) => handleCorrectOptionChange(event, index, ind)}
+                        className="w-5 h-5 cursor-pointer"
+                      />
+                      {optionList[index].length > 2 && (
+                        <button 
+                        className="p-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors  "
+                        onClick={() => handleRemoveOpt(index, ind)}
+                      >
+                        <FiTrash2 className="w-5 h-5" />
                       </button>
                     )}
+                    </div>
                   </div>
-                </li>
-              ))}
+                ))}
+              </li>
+        )}
 
-            {soloList.type === "truefalse" &&
-              optionList[index].map((soloOption, ind) => (
-                <li key={soloOption.id} className="dlt_li flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-2">
-                  <input
-                    type="text"
-                    className="optionBox faintShadow w-full sm:w-[70%] p-2 text-sm sm:text-base"
-                    placeholder={`Tùy chọn ${ind + 1}`}
-                    value={soloOption.option}
-                    onChange={(event) => optionChangeHandler(event, index, ind)}
-                  />
-                  <div className="flex items-center gap-2">
-                    <select
-                      className="p-2 rounded border text-sm sm:text-base"
-                      value={soloOption.answer === null ? "" : soloOption.answer ? "true" : "false"}
-                      onChange={(event) => handleCorrectOptionChange(event, index, ind)}
-                    >
-                      <option value="true">Đúng</option>
-                      <option value="false">Sai</option>
-                    </select>
-                    {optionList[index].length > 2 && (
-                      <button className="dlt_btn">
-                        <img
-                          className="dlt_img faintShadow w-6 h-6 sm:w-8 sm:h-8"
-                          src={TrashBin}
-                          alt="Delete"
-                          onClick={() => handleRemoveOpt(index, ind)}
-                        />
-                      </button>
-                    )}
-                  </div>
-                </li>
-              ))}
-
-            {soloList.type === "shortanswer" && (
-              <li className="dlt_li flex flex-col sm:flex-row items-start sm:items-center gap-2 mt-2">
+          {soloList.type === "truefalse" &&
+            optionList[index].map((soloOption, ind) => (
+              <li key={soloOption.id} className="flex flex-row md:flex-row items-start md:items-center gap-3 md:gap-4">
                 <input
                   type="text"
-                  className="shortAnswerBox faintShadow w-full sm:w-[70%] p-2 text-sm sm:text-base"
-                  placeholder="Đáp án"
+                  className="flex-1 px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder={`Ý kiến ${String.fromCharCode(97 + ind)}`}
+                  value={soloOption.option}
+                  onChange={(event) => optionChangeHandler(event, index, ind)}
+                />
+                <div className="flex items-center gap-3">
+                  <select
+                    className="px-3 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    value={soloOption.answer === null ? "" : soloOption.answer ? "true" : "false"}
+                    onChange={(event) => handleCorrectOptionChange(event, index, ind)}
+                  >
+                    <option value="true">Đúng</option>
+                    <option value="false">Sai</option>
+                  </select>
+                  {optionList[index].length > 2 && (
+                        <button 
+                        className="p-1.5 bg-red-50 hover:bg-red-100 rounded-lg transition-colors  "
+                        onClick={() => handleRemoveOpt(index, ind)}
+                      >
+                        <FiTrash2 className="w-5 h-5" />
+                      </button>
+                    )}
+                </div>
+              </li>
+            ))}
+            {soloList.type === "shortanswer" && (
+              <li className="flex flex-col gap-2">
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Nhập đáp án..."
                   value={list[index].answer}
                   onChange={(event) => questChangeHandler(event, index, "answer")}
                 />
               </li>
             )}
-
-            <li className="mt-4">
-              <div className="flex flex-wrap gap-2">
-                {optionList[index].length < 6 && (
+            <li className="pt-3">
+              <div className="flex flex-wrap gap-3">
+                {(optionList[index].length < 6 && soloList.type !== "shortanswer") && (
                   <button
-                    className="px-4 py-2 text-sm sm:text-base bg-[#000137] text-white rounded hover:bg-[#000160] transition-colors"
+                    className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                     onClick={() => handleAddOpt(index, optionList[index].length + 1)}
                   >
-                    <CiCirclePlus className="inline mr-2"/>
+                    <CiCirclePlus className="mr-2 text-lg"/>
                     Thêm tùy chọn
                   </button>
                 )}
-                {list.length - 1 === index && (
-                  <button
-                    className="px-4 py-2 text-sm sm:text-base bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                    onClick={() => handleAddQuest()}
-                  >
-                    <AiOutlineQuestionCircle className="inline mr-2"/>
-                    Thêm câu hỏi
-                  </button>
-                )}
-                {/* <div className="flex items-center gap-2 w-full sm:w-auto"> */}
-                  <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white rounded text-sm sm:text-base flex items-center py-2 px-3 sm:px-4">
-                    <BiImages className="mr-1"/>
-                    <span className="whitespace-nowrap">Thêm ảnh/audio</span>
+                  <label className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg cursor-pointer transition-colors">
+                    <BiImages className="mr-2 text-lg"/>
+                    <span className="whitespace-nowrap">Chọn ảnh</span>
                     <input 
                       type="file" 
                       className="hidden"
+                      key={fileInputKeys[index]}
                       data-index={index}
                       onChange={(event) => handleImageChange(event, index)}
-                      accept="image/*, audio/*"
-                    />            
+                      accept="image/*"
+                    />
                   </label>
-                  {imagePreview[index] && (
-                    <div className="ml-2">
-                      <img src={imagePreview[index]} alt="Preview" className="h-16 w-16 sm:h-20 sm:w-20 object-cover rounded" />
-                    </div>
-                  )}
-                {/* </div> */}
               </div>
-            </li>
+              {imagePreview[index] && (
+                <div className="mt-4 md:mt-6">
+                  <div className="relative group">
+                    <img 
+                      src={imagePreview[index]} 
+                      alt="Preview" 
+                      className="w-24 h-24 md:w-32 md:h-32 object-cover rounded-lg shadow-md border border-gray-200 transition-transform duration-300 hover:scale-105" 
+                    />
+                    <button
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full transition-opacity duration-200 hover:bg-red-600 z-10"
+                    >
+                      <FiX className="w-4 h-4" />
+                    </button>
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300 rounded-lg" />
+                  </div>
+                </div>
+              )}              
+              </li>
           </ul>
         </div>
       ))}
-      <div className="sub_btn">
+      <button
+        className="mx-5 mb-2 px-4 py-2 text-sm sm:text-base bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+        onClick={() => handleAddQuest()}
+      >
+        <AiOutlineQuestionCircle className="inline mr-2"/>
+        Thêm câu hỏi
+      </button>
+      <div className="mt-4 flex items-center justify-center">
+        <label className="mr-2">Thời gian làm bài (phút):</label>
+        <input 
+          type="number"
+          min="1"
+          // max="180"
+          value={duration}
+          onChange={(e) => setDuration(parseInt(e.target.value))}
+          className="w-20 px-2 py-1 border rounded"
+        />
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mt-4 justify-center">
         <input
           className="sub_btn_actual hov"
           type="button"
@@ -1387,7 +1796,7 @@ async function uploadImage(file, examPin, questionId) {
         />
       </div>
     </div>
-  </MathJaxContext>
+  // </MathJaxContext>
   );
 }
 
