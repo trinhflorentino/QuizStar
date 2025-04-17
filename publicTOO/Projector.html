@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Projector | The Olympus Online</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    <link href="./dist/output.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <script src="https://unpkg.com/@tailwindcss/browser@4"></script> -->
+    <link href="css/Ingame.css" rel="stylesheet">
+
+    <link href="css/Projector.css" rel="stylesheet">
+    <!-- Material Icons Link -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+
+<body class="">
+    <!-- Fixed Header -->
+    <header class="fixed top-0 left-0 w-full p-8 flex justify-between items-center bg-neutral-800 z-50 hidden">
+        <div class="flex items-center gap-4">
+            <img src="img/logo.png" alt="logo" class="w-20 h-20" />
+            <h1 class="font-extrabold text-3xl text-white">The Olympus Online - Trận 1</h1>
+        </div>
+        <div class="text-right">
+            <p class="font-bold text-2xl text-defaultColor">Trương Anh Khoa</p>
+        </div>
+    </header>
+
+
+    <!-- Main Content -->
+    <main>
+        <!-- Player List -->
+        <section class="flex flex-col min-h-screen hidden" id="Banner">
+            <div class="w-full text-center p-4 pt-12 absolute left-1/2 transform -translate-x-1/2">
+                <span class="text-6xl text-white font-black">ĐIỂM SỐ THÍ SINH</span>
+            </div>
+            <div class="flex items-center justify-center flex-wrap gap-6 p-6 rounded-lg flex-grow"
+                id="playerListContainer">
+            </div>
+        </section>
+        <!--Competition Title-->
+        <section class="flex flex-col items-center justify-center min-h-screen hidden" id="Waiting">
+            <div class="w-full flex flex-col items-center">
+                <!-- <div class="w-full h-2 bg-defaultColor mb-4"></div> -->
+                <h1 class="text-[11rem] font-black text-center bg-gradient-to-b from-gray-200 to-white bg-clip-text text-transparent drop-shadow-xl px-12"
+                    id="CompetitionTitle">
+
+                </h1>
+                <!-- <div class="w-full h-2 bg-defaultColor mt-4"></div> -->
+            </div>
+        </section>
+        <!--Start I-->
+        <section
+            class="container min-w-full flex justify-center px-16 py-8 min-h-screen questionAppearAnimation hidden" style="align-items: end;"
+            id="StartI">
+            <!-- Question & Answers -->
+            <section class="mt-6 flex flex-col md:flex-row justify-between gap-6">
+                <!-- Question Area -->
+                <div class="relative min-h-[9vh] min-w-[67vw] max-w-[67vw] w-full md:w-3/4" 
+                    style="background-image: linear-gradient(to right, rgba(11, 35, 79, 1) 0%, 12.36291155219078%, rgba(14, 38, 82, 1) 24.72582310438156%, 26.91924199461937%, rgba(14, 37, 87, 1) 29.112660884857178%, 32.502491772174835%, rgba(13, 40, 95, 1) 35.89232265949249%, 37.63708919286728%, rgba(17, 44, 99, 1) 39.381855726242065%, 41.37587249279022%, rgba(16, 48, 105, 1) 43.36988925933838%, 46.111664175987244%, rgba(19, 51, 108, 1) 48.85343909263611%, 52.79162526130676%, rgba(19, 51, 112, 1) 56.72981142997742%, 58.97307991981506%, rgba(14, 46, 107, 1) 61.21634840965271%, 67.84645915031433%, rgba(17, 48, 113, 1) 74.47656989097595%, 76.81954205036163%, rgba(18, 49, 116, 1) 79.16251420974731%, 81.40578269958496%, rgba(17, 54, 124, 1) 83.64905118942261%, 84.6460610628128%, rgba(18, 55, 126, 1) 85.643070936203%, 88.98304998874664%, rgba(22, 62, 132, 1) 92.32302904129028%, 96.16151452064514%, rgba(25, 64, 139, 1) 100%);
+                        clip-path: polygon(
+                            0 0,        
+                            calc(100% - 25px) 0, 
+                            100% 25px,         
+                            100% 100%,       
+                            25px 100%,      
+                            0 calc(100% - 25px) 
+                        );"
+                >
+                <section>
+                        <div class="inline-block min-w-[4vw] bg-white p-4 border-r-2 border-white rounded-md hidden">
+                            <p class="text-defaultColor font-bold text-xl" id="StartIQuestionNumber"></p>
+                        </div>
+                    </section>
+                    <p class="text-white text-2xl px-5 pt-4 font-stretch-condensed font-semibold leading-normal"
+                        id="StartIQuestion">
+                        <!-- Your content here -->
+                    </p>
+                    <p class="absolute inset-0 flex items-center justify-center text-center text-[14rem] text-white font-bold opacity-50"
+                        id="StartICountdown">
+                        <!-- Countdown content here -->
+                    </p>
+                </div>
+
+                <aside class="flex flex-col w-full min-w-[20vw] md:w-1/4 gap-8">
+                    <div id="startPlayerContainer" class="flex flex-col gap-3">
+
+                    </div>
+                </aside>
+            </section>
+        </section>
+
+        <!--Start II-->
+        <section
+            class="container min-w-full flex  justify-center px-16 py-8 min-h-screen questionAppearAnimation hidden" style="align-items: end;"
+            id="StartII">
+            <!-- Question & Answers -->
+            <section class="mt-6 flex flex-col md:flex-row justify-between gap-6">
+                <!-- Question Area -->
+                <div class="relative min-h-[9vh] min-w-[67vw] max-w-[67vw] w-full md:w-3/4" 
+                    style="background-image: linear-gradient(to right, rgba(11, 35, 79, 1) 0%, 12.36291155219078%, rgba(14, 38, 82, 1) 24.72582310438156%, 26.91924199461937%, rgba(14, 37, 87, 1) 29.112660884857178%, 32.502491772174835%, rgba(13, 40, 95, 1) 35.89232265949249%, 37.63708919286728%, rgba(17, 44, 99, 1) 39.381855726242065%, 41.37587249279022%, rgba(16, 48, 105, 1) 43.36988925933838%, 46.111664175987244%, rgba(19, 51, 108, 1) 48.85343909263611%, 52.79162526130676%, rgba(19, 51, 112, 1) 56.72981142997742%, 58.97307991981506%, rgba(14, 46, 107, 1) 61.21634840965271%, 67.84645915031433%, rgba(17, 48, 113, 1) 74.47656989097595%, 76.81954205036163%, rgba(18, 49, 116, 1) 79.16251420974731%, 81.40578269958496%, rgba(17, 54, 124, 1) 83.64905118942261%, 84.6460610628128%, rgba(18, 55, 126, 1) 85.643070936203%, 88.98304998874664%, rgba(22, 62, 132, 1) 92.32302904129028%, 96.16151452064514%, rgba(25, 64, 139, 1) 100%);
+                        clip-path: polygon(
+                            0 0,        
+                            calc(100% - 25px) 0, 
+                            100% 25px,         
+                            100% 100%,       
+                            25px 100%,      
+                            0 calc(100% - 25px) 
+                        );"
+                >
+                    <section>
+                        <div class="inline-block min-w-[4vw] bg-white p-4 border-r-2 border-white rounded-lg hidden">
+                            <p class="text-defaultColor font-bold text-xl" id="StartIIQuestionNumber"></p>
+                        </div>
+                    </section>
+                    <p class="text-white text-2xl px-5 pt-4 font-stretch-condensed font-semibold leading-normal"
+                        id="StartIIQuestion">
+                        <!-- Your content here -->
+                    </p>
+                    <p class="text-white text-2xl px-6 pt-3 font-stretch-condensed font-semibold leading-normal"
+                        id="StartIICountdown">
+                        <!-- Countdown content here -->
+                    </p>
+                </div>
+
+                <aside class="flex flex-col w-full min-w-[20vw] md:w-1/4 gap-8">
+                    <div id="startIIPlayerContainer" class="flex flex-col gap-3">
+
+                    </div>
+                </aside>
+            </section>
+        </section>
+
+        <!--Obstacle-->
+        <section class="hidden" id="Obstacle" style="background-image: url(/img/NewBackground.jpg);">
+            <section class="container min-w-full flex flex-col justify-between px-20 py-16 min-h-screen hidden"
+                id="ObstacleMainUI">
+                <div class="w-full flex flex-col min-h-[45vh] sm:flex-row gap-5">
+                    <div class="w-full sm:w-1/2 mb-4 sm:mb-0 flex justify-center relative">
+                        <img id="ObstacleImage" class="w-auto h-auto object-fill shadow-lg" />
+                        <div class="ObstacleImageOverlay">
+                            <div class="absolute top-0 left-0 w-1/2 h-1/2 bg-gray-200 rounded-tl-lg"
+                                style="
+                                clip-path: polygon(0% 0%, 101% 0%, 101% 67%, 67% 67%, 67% 100%, 0% 100%);
+                                background-image: linear-gradient(to right, #04274F 0%, 50%, #0F3586 100%);">
+                            </div>
+                            <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-gray-200 rounded-tr-lg"
+                                style="clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 33.01% 100%, 33.01% 67%, 0% 67%);
+                                background-image: linear-gradient(to right, #04284C 0%, 29.86111044883728%, #072E65 59.72222089767456%, 79.86111044883728%, #0A3278 100%);">
+                            </div>
+                            <div class="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gray-200 rounded-br-lg"
+                                style="clip-path: polygon(33% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 33.01%, 33% 33.01%);
+                                background-image: linear-gradient(to right, #0A3278 0%, 20.23809552192688%, #072E65 40.47619104385376%, 70.23809552192688%, #042750 100%);">
+                            </div>
+                            <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gray-200 rounded-bl-lg"
+                                style="clip-path: polygon(0% 0%, 67% 0%, 67% 33.01%, 101% 33.01%, 101% 100%, 0% 100%);
+                                background-image: linear-gradient(to right, #0A3278 0%, 20.23809552192688%, #072E65 40.47619104385376%, 70.23809552192688%, #042750 100%);;">
+                            </div>
+                            <div class="absolute inset-0 m-auto w-1/2 h-1/2"
+                            style="background-image: linear-gradient(to right, #04274F 0%, 5.278310924768448%, #052850 10.556621849536896%, 14.29942399263382%, #072957 18.042226135730743%, 20.63339725136757%, #072957 23.224568367004395%, 25.719769299030304%, #052959 28.214970231056213%, 30.422264337539673%, #01295C 32.62955844402313%, 36.660268902778625%, #042C5F 40.69097936153412%, 45.68138271570206%, #042B62 50.671786069869995%, 53.93474102020264%, #062D64 57.19769597053528%, 60.07677614688873%, #062D66 62.95585632324219%, 65.06718099117279%, #062E69 67.1785056591034%, 71.49712145328522%, #052F6B 75.81573724746704%, 77.3512452840805%, #07306E 78.88675332069397%, 82.72552490234375%, #073070 86.56429648399353%, 93.28214824199677%, #072F75 100%);;"></div>
+                        </div>
+                    </div>
+                    <div class="w-full sm:w-2/3 flex flex-col items-center rounded-sm border-2 border-cyan-500"
+                    style="background-image: linear-gradient(to right, #073159 0%, 2.6745913550257683%, #0B244C 5.349182710051537%, 12.109955213963985%, #08264C 18.870727717876434%, 25.854382663965225%, #08254F 32.838037610054016%, 35.066863894462585%, #0B2756 37.295690178871155%, 39.004456996917725%, #072959 40.713223814964294%, 41.97622537612915%, #07285D 43.239226937294006%, 45.39375901222229%, #092A5F 47.548291087150574%, 52.08023637533188%, #072A62 56.612181663513184%, 58.76671373844147%, #042B62 60.92124581336975%, 62.25854158401489%, #052C63 63.595837354660034%, 66.56760573387146%, #042A68 69.53937411308289%, 71.5453177690506%, #052F6B 73.55126142501831%, 77.7117371559143%, #073070 81.8722128868103%, 90.93610644340515%, #0B3A88 100%);                    ;
+                        clip-path: polygon(
+                            0 0,        
+                            calc(100% - 25px) 0, 
+                            100% 25px,         
+                            100% 100%,       
+                            25px 100%,      
+                            0 calc(100% - 25px) 
+                        );"
+                    >
+                        <p class="rounded-md p-4 text-3xl font-bold text-white"
+                            style="background-image: linear-gradient(to right, #04B1F5 0%, 0%, #04B1F5 0%, 0%, #04B1F5 0%, 12.096773833036423%, #04B1F5 24.193547666072845%, 44.35483738780022%, #02B1F4 64.51612710952759%, 67.74193346500397%, #03B0F4 70.96773982048035%, 71.77419364452362%, #03B0F4 72.5806474685669%, 75%, #02ADF3 77.4193525314331%, 78.22580635547638%, #02ADF3 79.03226017951965%, 79.83871102333069%, #0EADE5 80.64516186714172%, 85.48386991024017%, #0EADE5 90.32257795333862%, 91.93548262119293%, #0EADE5 93.54838728904724%, 94.35483813285828%, #0EADE5 95.16128897666931%, 95.96773982048035%, #0EADE5 96.77419066429138%, 98.38709533214569%, #0EADE5 100%);
+                        clip-path: polygon(
+                            0 0,        
+                            calc(100% - 25px) 0, 
+                            100% 25px,         
+                            100% 100%,       
+                            25px 100%,      
+                            0 calc(100% - 25px) 
+                        );"
+                        >
+                            <span id="ObstacleCharacterCount"></span>
+                        </p>
+                        <div class="flex flex-col items-start" id="obstacleContainer">
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="relative min-h-[35vh]">
+                    <div class="flex flex-row gap-4 w-full">
+                        <div class="rounded-lg min-h-[35vh] relative w-[60%]"
+                            id="ObstacleQuestionContainer" 
+                            style="background-image: linear-gradient(to right, #07396C 0%, 1.6837481409311295%, #063E6F 3.367496281862259%, 4.758418723940849%, #063E6F 6.14934116601944%, 11.713030934333801%, #073364 17.276720702648163%, 19.472913444042206%, #07305C 21.66910618543625%, 26.500732451677322%, #092B59 31.332358717918396%, 35.50512492656708%, #072957 39.67789113521576%, 45.607613027095795%, #072B5F 51.53733491897583%, 53.5871148109436%, #092962 55.63689470291138%, 58.6383581161499%, #042B62 61.63982152938843%, 63.54319155216217%, #072E65 65.44656157493591%, 68.96046996116638%, #032B68 72.47437834739685%, 74.52415823936462%, #052F6B 76.5739381313324%, 84.33382213115692%, #072F75 92.09370613098145%, 96.04685306549072%, #0A3278 100%);">
+                            <p class="text-white text-2xl px-4 pt-4 font-stretch-condensed font-semibold leading-normal"
+                                id="ObstacleQuestion">
+                            </p>
+                            <input type="range" min="0" max="100" value="0" step="0.01"
+                                class="w-full absolute bottom-0 left-0 slider accent-red-500" id="ObstacleSlider">
+                        </div>
+                        <div class="min-h-[35vh] w-[40%] bg-[#00ff00] aspect-video"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!--Obstacle Answer-->
+            <section class="container min-w-full flex justify-center min-h-screen relative hidden"
+                id="ObstacleAnswerUI">
+                <!-- Vertical Line -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 h-screen w-2 verticalLineAppear"
+                style="background-color: #04B2F3;">
+                </div>
+
+                <div class="w-2/3 space-y-16 flex flex-col justify-between max-h-screen my-14" id="ObstacleAnswers">
+                    <!-- Box 1: aligned right -->
+                    <div class="flex justify-end flex-col">
+                        <div class="bg-defaultColor p-2 shadow-md max-w-xs mr-auto w-1/4 rounded-tl-md rounded-tr-md obstacleAnswerName leftName"
+                            style="animation-delay: 0.3s; background-image: linear-gradient(to right, #054390 0%, 4.676258936524391%, #02489D 9.352517873048782%, 13.309352472424507%, #0250A5 17.266187071800232%, 19.064748287200928%, #0254A6 20.863309502601624%, 21.942446380853653%, #0355A9 23.021583259105682%, 30.215827375650406%, #0261B3 37.41007149219513%, 38.84892016649246%, #0463B5 40.287768840789795%, 46.40287756919861%, #036EBE 52.51798629760742%, 55.39568364620209%, #0175C0 58.27338099479675%, 63.3093535900116%, #027EC8 68.34532618522644%, 70.14388740062714%, #0383CA 71.94244861602783%, 73.38129580020905%, #0484CD 74.82014298439026%, 76.61870419979095%, #0288CF 78.41726541519165%, 84.89208519458771%, #0392D6 91.36690497398376%, 95.68345248699188%, #0695DB 100%);">
+                            <p class="text-lg font-semibold text-white text-center" id="ObstacleAnswerPlayerName1"></p>
+                        </div>
+                        <div class="bg-white text-white p-6 min-h-20 shadow-lg max-w-md mr-auto w-1/2 rounded-bl-md rounded-tr-md rounded-br-md obstacleAnswer leftAnswer"
+                            style="animation-delay: 0.55s; background-image: linear-gradient(to right, #07399A 0%, 1.9011406227946281%, #083696 3.8022812455892563%, 5.133079923689365%, #083694 6.4638786017894745%, 8.74524712562561%, #073690 11.026615649461746%, 13.878326490521431%, #053589 16.730037331581116%, 19.58174854516983%, #053283 22.433459758758545%, 26.045627892017365%, #082F7E 29.657796025276184%, 32.129278779029846%, #082F7A 34.60076153278351%, 38.97338509559631%, #052E6E 43.34600865840912%, 46.76806181669235%, #042B66 50.190114974975586%, 55.51330745220184%, #07285E 60.8364999294281%, 64.63878154754639%, #072756 68.44106316566467%, 69.39163506031036%, #082454 70.34220695495605%, 74.33460056781769%, #07254B 78.32699418067932%, 89.16349709033966%, #082545 100%);">
+                            <p class="text-3xl font-bold text-end" id="ObstacleAnswerPlayer1"></p>
+                        </div>
+                    </div>
+
+                    <!-- Box 2: aligned left -->
+                    <div class="flex justify-start flex-col">
+                        <div class="bg-defaultColor p-2 shadow-md max-w-xs ml-auto w-1/4 rounded-tl-md rounded-tr-md obstacleAnswerName rightName"
+                            style="animation-delay: 0.8s; background-image: linear-gradient(to right, #1890CD 0%, 4.642857238650322%, #0E8AD0 9.285714477300644%, 15.714285895228386%, #0786CB 22.142857313156128%, 23.571428656578064%, #0783CB 25%, 28.214286267757416%, #097DC8 31.42857253551483%, 36.42857223749161%, #0874BF 41.428571939468384%, 43.57142895460129%, #0672BD 45.71428596973419%, 51.07142776250839%, #0569B5 56.42856955528259%, 57.499998807907104%, #0667B4 58.571428060531616%, 59.64285731315613%, #0566B3 60.71428656578064%, 67.5000011920929%, #045BAA 74.28571581840515%, 75%, #0557A9 75.71428418159485%, 80.35714328289032%, #0450A4 85.00000238418579%, 86.42857372760773%, #034DA2 87.85714507102966%, 93.92857253551483%, #034498 100%);">
+                            <p class="text-lg font-semibold text-white text-center" id="ObstacleAnswerPlayerName2"></p>
+                        </div>
+                        <div class="bg-white text-white p-6 min-h-20 shadow-lg max-w-md ml-auto w-1/2 rounded-tl-md rounded-bl-md rounded-br-md obstacleAnswer rightAnswer"
+                            style="animation-delay: 1.05s; background-image: linear-gradient(to right, #08264A 0%, 6.593406945466995%, #082648 13.18681389093399%, 19.0476194024086%, #08254D 24.90842491388321%, 28.937729448080063%, #072758 32.96703398227692%, 35.71428656578064%, #062A5C 38.46153914928436%, 41.208791732788086%, #062B62 43.95604431629181%, 44.32234466075897%, #062B62 44.688645005226135%, 49.450550973415375%, #052C6D 54.212456941604614%, 58.42491090297699%, #082E77 62.637364864349365%, 68.49817037582397%, #073281 74.35897588729858%, 77.65567898750305%, #06348A 80.95238208770752%, 84.79853570461273%, #073692 88.64468932151794%, 89.01098966598511%, #083793 89.37729001045227%, 92.85714328289032%, #07399A 96.33699655532837%, 98.16849827766418%, #063A9D 100%);">
+                            <p class="text-3xl font-bold" id="ObstacleAnswerPlayer2"></p>
+                        </div>
+                    </div>
+
+                    <!-- Box 3: aligned right -->
+                    <div class="flex justify-end flex-col">
+                        <div class="bg-defaultColor p-2 shadow-md max-w-xs mr-auto w-1/4 rounded-tl-md rounded-tr-md obstacleAnswerName leftName"
+                            style="animation-delay: 1.3s; background-image: linear-gradient(to right, #054390 0%, 4.676258936524391%, #02489D 9.352517873048782%, 13.309352472424507%, #0250A5 17.266187071800232%, 19.064748287200928%, #0254A6 20.863309502601624%, 21.942446380853653%, #0355A9 23.021583259105682%, 30.215827375650406%, #0261B3 37.41007149219513%, 38.84892016649246%, #0463B5 40.287768840789795%, 46.40287756919861%, #036EBE 52.51798629760742%, 55.39568364620209%, #0175C0 58.27338099479675%, 63.3093535900116%, #027EC8 68.34532618522644%, 70.14388740062714%, #0383CA 71.94244861602783%, 73.38129580020905%, #0484CD 74.82014298439026%, 76.61870419979095%, #0288CF 78.41726541519165%, 84.89208519458771%, #0392D6 91.36690497398376%, 95.68345248699188%, #0695DB 100%);">
+                            <p class="text-lg font-semibold text-white text-center" id="ObstacleAnswerPlayerName3"></p>
+                        </div>
+                        <div class="bg-white text-white p-6 min-h-20 shadow-lg max-w-md mr-auto w-1/2 rounded-bl-md rounded-tr-md rounded-br-md obstacleAnswer leftAnswer"
+                            style="animation-delay: 1.55s; background-image: linear-gradient(to right, #07399A 0%, 1.9011406227946281%, #083696 3.8022812455892563%, 5.133079923689365%, #083694 6.4638786017894745%, 8.74524712562561%, #073690 11.026615649461746%, 13.878326490521431%, #053589 16.730037331581116%, 19.58174854516983%, #053283 22.433459758758545%, 26.045627892017365%, #082F7E 29.657796025276184%, 32.129278779029846%, #082F7A 34.60076153278351%, 38.97338509559631%, #052E6E 43.34600865840912%, 46.76806181669235%, #042B66 50.190114974975586%, 55.51330745220184%, #07285E 60.8364999294281%, 64.63878154754639%, #072756 68.44106316566467%, 69.39163506031036%, #082454 70.34220695495605%, 74.33460056781769%, #07254B 78.32699418067932%, 89.16349709033966%, #082545 100%);">
+                            <p class="text-3xl font-bold text-end" id="ObstacleAnswerPlayer3"></p>
+                        </div>
+                    </div>
+
+                    <!-- Box 4: aligned left -->
+                    <div class="flex justify-start flex-col">
+                        <div class="bg-defaultColor p-2 shadow-md max-w-xs ml-auto w-1/4 rounded-tl-md rounded-tr-md obstacleAnswerName rightName"
+                            style="animation-delay: 1.8s; background-image: linear-gradient(to right, #1890CD 0%, 4.642857238650322%, #0E8AD0 9.285714477300644%, 15.714285895228386%, #0786CB 22.142857313156128%, 23.571428656578064%, #0783CB 25%, 28.214286267757416%, #097DC8 31.42857253551483%, 36.42857223749161%, #0874BF 41.428571939468384%, 43.57142895460129%, #0672BD 45.71428596973419%, 51.07142776250839%, #0569B5 56.42856955528259%, 57.499998807907104%, #0667B4 58.571428060531616%, 59.64285731315613%, #0566B3 60.71428656578064%, 67.5000011920929%, #045BAA 74.28571581840515%, 75%, #0557A9 75.71428418159485%, 80.35714328289032%, #0450A4 85.00000238418579%, 86.42857372760773%, #034DA2 87.85714507102966%, 93.92857253551483%, #034498 100%);">
+                            <p class="text-lg font-semibold text-white text-center" id="ObstacleAnswerPlayerName4"></p>
+                        </div>
+                        <div class="bg-white text-white p-6 min-h-20 shadow-lg max-w-md ml-auto w-1/2 rounded-tl-md rounded-bl-md rounded-br-md obstacleAnswer rightAnswer"
+                            style="animation-delay: 2.05s; background-image: linear-gradient(to right, #08264A 0%, 6.593406945466995%, #082648 13.18681389093399%, 19.0476194024086%, #08254D 24.90842491388321%, 28.937729448080063%, #072758 32.96703398227692%, 35.71428656578064%, #062A5C 38.46153914928436%, 41.208791732788086%, #062B62 43.95604431629181%, 44.32234466075897%, #062B62 44.688645005226135%, 49.450550973415375%, #052C6D 54.212456941604614%, 58.42491090297699%, #082E77 62.637364864349365%, 68.49817037582397%, #073281 74.35897588729858%, 77.65567898750305%, #06348A 80.95238208770752%, 84.79853570461273%, #073692 88.64468932151794%, 89.01098966598511%, #083793 89.37729001045227%, 92.85714328289032%, #07399A 96.33699655532837%, 98.16849827766418%, #063A9D 100%);">
+                            <p class="text-3xl font-bold" id="ObstacleAnswerPlayer4"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute bottom-3 left-3">
+                    <div class="flex flex-row gap-4" id="ObstacleBuzzerList2">
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Acceleration-->
+        <section class="hidden" id="Acceleration" style="background-image: url(/img/NewBackground.jpg);"> 
+            <section class="w-full justify-center flex flex-col gap-4 px-0 md:px-32 py-4 min-h-screen hidden"
+                id="AccelerationMainUI">
+                <div class="flex flex-row gap-4">
+                    <div class="w-[70%]">
+                        <div class="bg-defaultColor w-full h-fit text-center p-5 rounded-md accelerationQuestion"
+                        style="background-image: linear-gradient(to right, #0B2546 0%, 10.357142984867096%, #0B244C 20.714285969734192%, 23.988094925880432%, #0E274F 27.261903882026672%, 32.380951941013336%, #0E2652 37.5%, 39.46428596973419%, #0D2958 41.428571939468384%, 45.773810148239136%, #0D285F 50.11904835700989%, 52.97619104385376%, #0D2959 55.83333373069763%, 57.97618925571442%, #0D295B 60.1190447807312%, 65.05952179431915%, #102B62 69.9999988079071%, 72.08333313465118%, #103069 74.16666746139526%, 75.29762089252472%, #12326B 76.42857432365417%, 78.92857193946838%, #133273 81.42856955528259%, 83.63095223903656%, #13397A 85.83333492279053%, 88.63095343112946%, #163C7D 91.42857193946838%, 95.71428596973419%, #194186 100%);">
+                            <p class="text-white font-bold text-xl opacityAnimation" id="AccelerationQuestion"></p>
+                        </div>
+                        <div class="bg-defaultColor w-full text-center max-h-screen rounded-md relative mt-4 accelerationMedia"
+                        style="background-image: linear-gradient(to right, #1B4A90 0%, 2.5406504049897194%, #1B4389 5.081300809979439%, 7.926829345524311%, #153C7D 10.772357881069183%, 12.601625919342041%, #113778 14.430893957614899%, 16.158536076545715%, #133273 17.886178195476532%, 20.73170691728592%, #0F2F68 23.577235639095306%, 25.711382180452347%, #0E2B65 27.845528721809387%, 39.53251987695694%, #0D2958 51.21951103210449%, 56.40243887901306%, #0E2750 61.58536672592163%, 65.24390280246735%, #0B244C 68.90243887901306%, 73.57723712921143%, #0B2546 78.25203537940979%, 82.21544921398163%, #102A4B 86.17886304855347%, 88.31300735473633%, #0E2A51 90.44715166091919%, 93.5975581407547%, #113358 96.74796462059021%, 98.3739823102951%, #13365C 100%);">
+                        <video
+                            class="object-center w-full h-[83vh] pb-3 rounded-lg shadow-blue-gray-900/50 shadow-t shadow-l shadow-r shadow-b opacityAnimation"
+                            id="AccelerationMedia" muted></video>
+                        <input type="range" min="0" max="100" value="0" step="0.01"
+                            class="w-full absolute bottom-0 left-0 slider accent-red-500" id="AccelerationSlider">
+                        </div>
+                    </div>
+                    <div class="w-[30%] relative">
+                    <div class="w-[100%] bg-[#00ff00] aspect-video h-auto bottom-0 absolute"></div>
+                </div>
+                </div>
+            </section>
+
+            <section class="container min-w-full flex justify-center min-h-screen relative hidden"
+                id="AccelerationAnswerUI">
+                <!-- Vertical Line on the left -->
+                <div class=" h-screen w-2 bg-white verticalLineAppear"></div>
+
+                <div class="w-2/5 flex flex-col max-h-screen justify-between my-20 pl-8" id="AccelerationAnswers">
+                    <!-- Box 1 -->
+                    <div class="flex flex-col">
+                        <div class="bg-defaultColor p-2 shadow-md w-1/2 rounded-tl-md rounded-tr-md leftName"
+                            style="animation-delay: 0.3s;">
+                            <p class="text-xl font-semibold text-white text-center" id="AccelerationAnswerPlayerName1">
+                            </p>
+                        </div>
+                        <div class="bg-white text-defaultColor flex flex-row justify-between p-6 min-h-20 shadow-lg min-w-48 rounded-bl-md rounded-tr-md rounded-br-md obstacleAnswer leftAnswer"
+                            style="animation-delay: 0.55s;">
+                            <p class="text-2xl font-bold text-start" id="AccelerationAnswerPlayer1"></p>
+                            <p class="text-2xl font-semibold text-end" id="AccelerationAnswerTimestampPlayer1"></p>
+                        </div>
+                    </div>
+
+                    <!-- Box 2 -->
+                    <div class="flex flex-col">
+                        <div class="bg-defaultColor p-2 shadow-md w-1/2 rounded-tl-md rounded-tr-md leftName"
+                            style="animation-delay: 0.8s;">
+                            <p class="text-xl font-semibold text-white text-center" id="AccelerationAnswerPlayerName2">
+                            </p>
+                        </div>
+                        <div class="bg-white text-defaultColor flex flex-row justify-between p-6 min-h-20 shadow-lg min-w-48 rounded-bl-md rounded-tr-md rounded-br-md obstacleAnswer leftAnswer"
+                            style="animation-delay: 1.05s;">
+                            <p class="text-2xl font-bold text-start" id="AccelerationAnswerPlayer2"></p>
+                            <p class="text-2xl font-semibold text-end" id="AccelerationAnswerTimestampPlayer2"></p>
+                        </div>
+                    </div>
+
+                    <!-- Box 3 -->
+                    <div class="flex flex-col">
+                        <div class="bg-defaultColor p-2 shadow-md w-1/2 rounded-tl-md rounded-tr-md leftName"
+                            style="animation-delay: 1.3s;">
+                            <p class="text-xl font-semibold text-white text-center" id="AccelerationAnswerPlayerName3">
+                            </p>
+                        </div>
+                        <div class="bg-white text-defaultColor flex flex-row justify-between p-6 min-h-20 shadow-lg min-w-48 rounded-bl-md rounded-tr-md rounded-br-md obstacleAnswer leftAnswer"
+                            style="animation-delay: 1.55s;">
+                            <p class="text-2xl font-bold text-start" id="AccelerationAnswerPlayer3"></p>
+                            <p class="text-2xl font-semibold text-end" id="AccelerationAnswerTimestampPlayer3"></p>
+                        </div>
+                    </div>
+
+                    <!-- Box 4 -->
+                    <div class="flex flex-col">
+                        <div class="bg-defaultColor p-2 shadow-md w-1/2 rounded-tl-md rounded-tr-md leftName"
+                            style="animation-delay: 1.8s;">
+                            <p class="text-xl font-semibold text-white text-center" id="AccelerationAnswerPlayerName4">
+                            </p>
+                        </div>
+                        <div class="bg-white text-defaultColor flex flex-row justify-between p-6 min-h-20 shadow-lg min-w-48 rounded-bl-md rounded-tr-md rounded-br-md obstacleAnswer leftAnswer"
+                            style="animation-delay: 2.05s;">
+                            <p class="text-2xl font-bold text-start" id="AccelerationAnswerPlayer4"></p>
+                            <p class="text-2xl font-semibold text-end" id="AccelerationAnswerTimestampPlayer4"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Finish-->
+        <section class="hidden" id="Finish">
+            <section
+                class="container min-w-full flex flex-col justify-end gap-4 items-center px-24 py-16 min-h-screen hidden"
+                id="FinishQuestionPackSelectionContainer">
+                <div class="w-1/3 min-h-36 flex items-center justify-between bg-defaultColor p-8 rounded-md fly-in hidden"
+                    style="animation-delay: 0.3s;" id="FinishQuestionPack10">
+                    <p class="text-center font-extrabold text-5xl text-white">10 ĐIỂM</p>
+                    <div class="flex gap-2 accent-black finish-question-pack-10">
+                        <input type="checkbox" class="bg-white h-10 w-10 border-none" />
+                        <input type="checkbox" class="bg-white h-10 w-10 border-none" />
+                        <input type="checkbox" class="bg-white h-10 w-10 border-none" />
+                    </div>
+                </div>
+                <div class="w-1/3 min-h-36 flex items-center justify-between bg-defaultColor p-8 rounded-md fly-in"
+                    style="animation-delay: 0.6s; background-image: linear-gradient(to right, #05274C 0%, 1.3054830022156239%, #072A52 2.6109660044312477%, 15.600521583110094%, #042B56 28.59007716178894%, 32.57180154323578%, #032E5B 36.55352592468262%, 42.62402206659317%, #073267 48.69451820850372%, 53.98172289133072%, #05376A 59.268927574157715%, 61.16187870502472%, #053670 63.054829835891724%, 65.99216759204865%, #063D76 68.92950534820557%, 70.49608528614044%, #04407C 72.06266522407532%, 74.34726059436798%, #05468A 76.63185596466064%, 78.45953106880188%, #054A8F 80.28720617294312%, 81.78851306438446%, #044F93 83.2898199558258%, 85.90078353881836%, #03559E 88.51174712181091%, 90.40469825267792%, #035BA2 92.29764938354492%, 96.14882469177246%, #0365AC 100%);">
+                    <p class="text-center font-extrabold text-5xl text-white">20 ĐIỂM</p>
+                    <div class="flex gap-2 accent-black finish-question-pack-20">
+                        <input type="checkbox" class="bg-white h-10 w-10 border-none" />
+                        <input type="checkbox" class="bg-white h-10 w-10 border-none" />
+                        <input type="checkbox" class="bg-white h-10 w-10 border-none" />
+                    </div>
+                </div>
+                <div class="w-1/3 min-h-36 flex items-center justify-between bg-defaultColor p-8 rounded-md fly-in"
+                    style="animation-delay: 0.9s; background-image: linear-gradient(to right, #05274C 0%, 1.3054830022156239%, #072A52 2.6109660044312477%, 15.600521583110094%, #042B56 28.59007716178894%, 32.57180154323578%, #032E5B 36.55352592468262%, 42.62402206659317%, #073267 48.69451820850372%, 53.98172289133072%, #05376A 59.268927574157715%, 61.16187870502472%, #053670 63.054829835891724%, 65.99216759204865%, #063D76 68.92950534820557%, 70.49608528614044%, #04407C 72.06266522407532%, 74.34726059436798%, #05468A 76.63185596466064%, 78.45953106880188%, #054A8F 80.28720617294312%, 81.78851306438446%, #044F93 83.2898199558258%, 85.90078353881836%, #03559E 88.51174712181091%, 90.40469825267792%, #035BA2 92.29764938354492%, 96.14882469177246%, #0365AC 100%);">
+                    <p class="text-center font-extrabold text-5xl text-white">30 ĐIỂM</p>
+                    <div class="flex gap-2 accent-black finish-question-pack-30">
+                        <input type="checkbox" class="bg-white h-10 w-10 border-none" />
+                        <input type="checkbox" class="bg-white h-10 w-10 border-none" />
+                        <input type="checkbox" class="bg-white h-10 w-10 border-none" />
+                    </div>
+                </div>
+            </section>
+
+            <section
+                class="container min-w-full flex justify-between items-end px-16 py-8 min-h-screen questionAppearAnimation hidden"
+                id="FinishMainUI">
+                
+                <!-- Question Area - Left Side -->
+                <div class="relative w-[78%] h-[30vh] bg-defaultColor rounded-lg mr-4">
+                    <section class="w-full flex items-stretch" id="FinishPlayerLists">
+                        <!-- ...existing code... -->
+                    </section>
+                    <p class="text-white text-2xl px-4 pt-4 font-stretch-condensed font-semibold leading-normal"
+                        id="FinishQuestion">
+                        <!-- Your content here -->
+                    </p>
+                    <p class="absolute inset-0 flex items-center justify-center text-center text-[14rem] text-white font-bold opacity-50"
+                        id="">
+                        <!-- Countdown content here -->
+                    </p>
+                    <input type="range" min="0" max="100" value="0" step="0.01"
+                        class="w-full absolute bottom-0 left-0 slider accent-red-500" id="FinishSlider">
+                    <img src="img/Star.gif" class="w-[15vh] h-[15vh] hidden absolute bottom-4 right-4 object-none" id="FinishStar" />
+                </div>
+
+                <!-- Info Area - Right Side -->
+                <div class="w-[20%] h-[30vh] bg-defaultColor rounded-lg flex flex-col">
+                    <div class="w-full bg-white p-2 rounded-t-lg">
+                        <p class="text-defaultColor font-bold text-xl text-center invisible" id="FinishQuestionPackSelectingText">CÂU <span id="FinishQuestionPackSelecting"></span> ĐIỂM</p>
+                    </div>
+                    <div class="flex-1 flex items-center justify-center">
+                        <p class="text-center text-8xl text-white font-bold" id="FinishPlayerSelectingPoint"></p>
+                    </div>
+                </div>
+            </section>
+        </section>
+        <!-- Additional-->
+        <section class="hidden" id="Additional">
+            <section class="container min-w-full flex justify-center px-16 py-8 min-h-screen questionAppearAnimation"
+                id="AdditionalMainUI">
+                <!-- Question & Answers -->
+                <section class="mt-6 flex flex-col md:flex-row justify-between gap-8">
+                    <!-- Question Area -->
+                    <div
+                        class="relative min-h-[85vh] min-w-[67vw] max-w-[67vw] w-full md:w-3/4 bg-defaultColor rounded-lg">
+                        <section class="w-full flex items-stretch" id="AdditionalPlayerList">
+                            <!-- <div
+                    class="flex-1 bg-defaultColor p-4 rounded-tl-lg rounded-tr-lg transform -translate-y-2 transition-all duration-200">
+                    <p class="text-white font-bold text-xl text-center">ANH KHOA</p>
+                </div>
+                <div class="w-px bg-defaultColor"></div>
+                <div class="flex-1 bg-white p-4">
+                    <p class="text-defaultColor font-bold text-xl text-center">ANH KHOA</p>
+                </div>
+                <div class="w-px bg-defaultColor"></div>
+                <div class="flex-1 bg-white p-4">
+                    <p class="text-defaultColor font-bold text-xl text-center">ANH KHOA</p>
+                </div>
+                <div class="w-px bg-defaultColor"></div>
+                <div class="flex-1 bg-white p-4 rounded-tr-lg">
+                    <p class="text-defaultColor font-bold text-xl text-center">ANH KHOA</p>
+                </div> -->
+                        </section>
+                        <p class="text-white text-4xl px-4 pt-4 font-stretch-condensed font-semibold leading-normal"
+                            id="AdditionalQuestion">
+                            <!-- Your content here -->
+                        </p>
+                        <p class="absolute inset-0 flex items-center justify-center text-center text-[14rem] text-white font-bold opacity-50"
+                            id="">
+                            <!-- Countdown content here -->
+                        </p>
+                    </div>
+
+                    <aside class="flex flex-col max-w-[32vh] md:w-1/4 gap-8">
+                        <div class="w-[30vh] h-[24vh] bg-defaultColor rounded-lg p-4 flex items-center justify-center">
+                            <p class="text-center text-8xl text-white font-bold" id="AdditionalQuestionNumber"></p>
+                        </div>
+                    </aside>
+                </section>
+            </section>
+        </section>
+        <!-- Point Summary-->
+        <section
+            class="container min-w-full flex flex-row justify-center gap-4 items-center px-24 py-16 min-h-screen hidden"
+            id="PointSummary">
+            <div
+                class="min-h-[50vh] min-w-[27vw] bg-defaultColor flex items-center justify-center rounded-lg relative leftName">
+                <p class="text-white text-4xl font-bold p-24" id="PointSummaryPlayerName"></p>
+                <p class="w-full absolute bottom-2 left-0 right-0 text-white text-center text-xl">Thí sinh</p>
+            </div>
+            <div class="min-h-[50vh] min-w-[8vw] flex flex-col justify-between h-full">
+                <div class="min-h-[20vh] bg-white flex items-center rounded-lg relative leftAnswer">
+                    <p class="text-4xl font-bold text-center py-16 px-6 mx-auto" id="PointSummaryPlayerPoint"></p>
+                    <p class="w-full absolute bottom-2 left-0 right-0 text-black text-center text-xl">Điểm</p>
+                </div>
+                <div class="min-h-[20vh] bg-white flex items-center rounded-lg relative leftAnswer">
+                    <p class="text-4xl font-bold text-center py-16 px-6 mx-auto" id="PointSummaryPlayerRank"></p>
+                    <p class="w-full absolute bottom-2 left-0 right-0 text-black text-center text-xl">Xếp hạng</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <video id="IntroVideo" autoplay class="absolute top-0 left-0 w-full h-full object-cover z-[1]"></video>
+    <iframe id="IntroIframe" allow="autoplay" frameBorder="0"
+        class="absolute top-0 left-0 w-full h-full object-cover z-[1] pointer-events-none">
+    </iframe>
+
+
+    <video class="absolute top-0 left-0 w-full h-full object-cover z-[1] hidden" id="FinishVideo"></video>
+
+    <iframe id="FinishIframe" class="absolute top-0 left-0 w-full h-full object-cover z-[1] pointer-events-none hidden"
+        allow="autoplay" frameBorder="0">
+    </iframe>
+</body>
+
+<audio id="audio_StartingStart"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZMOOPaKZQGVoa1K2FsmpRiNrqdHx6g3TyblUf"></audio>
+<audio id="audio_StartQuestionShow"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZyHNEa7vgFXToSBx0vmK51IefkrAc9dE8Gis7"></audio>
+<audio id="audio_StartStartQuestionShow"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZCM5laOWOaEDzwRhfsbpY5lgTGWVuA3UNM0Zo"></audio>
+<audio id="audio_StartingTimes_Phase1"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZmn4qukyUKHcZEVWdMGb3vD97y02TxswhXIQ1" loop></audio>
+<audio id="audio_StartingTimes_Phase2"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZpX7gTOP8OFPLHXsCy9crjYkx2KaTnh0EuwmV" loop></audio>
+<audio id="audio_StartingTimes_Phase3"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZbopeTtxn0yFl8YpIeLOGWQZ5qMsVAKdB2xg4"></audio>
+<audio id="audio_StartingRightAnswer"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZfi0pp4JlzUCVJKIq6DSZOk92QnxsyGaFLrpE"></audio>
+<audio id="audio_StartingWrongAnswer"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZhNQEJwLM5LzqPKtc7Nf1IpdS4jBo0Uu9OlHY"></audio>
+<audio id="audio_StartingFinish"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZEQ1yJHeptLwFPAimQzTJ1BYZrDGxchMCv8dN"></audio>
+<audio id="audio_Spacing" src="audio/Others/Space.mp3"></audio>
+
+<audio id="audio_StartIIAnswerGranted"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZFz8Iubcx2uGCD1lNJpjt0KI6rTO49esoHMUg"></audio>
+<audio id="audio_StartIIFinish"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZEQ1yJHeptLwFPAimQzTJ1BYZrDGxchMCv8dN"></audio>
+
+
+<audio id="audio_StartIIStartingTimes_Phase1"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZmn4qukyUKHcZEVWdMGb3vD97y02TxswhXIQ1" loop></audio>
+<audio id="audio_StartIIStartingTimes_Phase2"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZpX7gTOP8OFPLHXsCy9crjYkx2KaTnh0EuwmV" loop></audio>
+<audio id="audio_StartIIStartingTimes_Phase3"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZbopeTtxn0yFl8YpIeLOGWQZ5qMsVAKdB2xg4"></audio>
+
+<audio id="audio_ObstacleStart"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZzNZvlNTX3gtyoIfpjTQ7eJrCl8aq49S20zsN"></audio>
+<audio id="audio_ObstacleRowShow"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZWH8b2vYlrREebLjN754wgxmVJUcOFk0HIoun"></audio>
+<audio id="audio_ObstacleRowChoose"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZTCLF0a2difZWrIsun5OBgvjhxGScoqY7aJb4"></audio>
+<audio id="audio_ObstacleRowThinking"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZhq5ZDoLM5LzqPKtc7Nf1IpdS4jBo0Uu9OlHY"></audio>
+<audio id="audio_ObstacleAnswers"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZAvopDGzdi3x0rVPYaT41mfpzFEj6G95Cu2Ht"></audio>
+<audio id="audio_ObstacleRightAnswer"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZbXCoD7n0yFl8YpIeLOGWQZ5qMsVAKdB2xg4v"></audio>
+<audio id="audio_ObstacleRowWrongAnswer"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZenZsCGMWbBwknvXtpo0KOsgh9amQz8NAGqeD"></audio>
+<audio id="audio_ObstacleAnswerBuzzer"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZcLEmAFO5xRQI90JGo2lPMnKj4yqiXZsHLfEr"></audio>
+<audio id="audio_ObstacleRight"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZAfpBuszdi3x0rVPYaT41mfpzFEj6G95Cu2Ht"></audio>
+<audio id="audio_ObstacleImageShow"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZLcT2ZvQCq6wNr4If3iO5JXoRM8SxbDBGyWzL"></audio>
+
+
+<audio id="audio_AccelerationStart"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZsn0e8lhMyBNCjtX245xlw6m7TDE9bH13JaPL"></audio>
+<audio id="audio_AccelerationQuestionShow"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZLX2tLOQCq6wNr4If3iO5JXoRM8SxbDBGyWzL"></audio>
+<audio id="audio_Acceleration10Seconds"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZJnhNUAleNIqAyl1FzwEOxmt7WonQZrVgR489"></audio>
+<audio id="audio_Acceleration20Seconds"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZYSLSv0UJjztUWYSPblX47iOKDHk3BLr0MZoR"></audio>
+<audio id="audio_Acceleration30Seconds"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZ60ndDio4HmS597g3GXOJ0PbeFqtpZCTrLKou"></audio>
+<audio id="audio_Acceleration40Seconds"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZdfuUmy5phZQzW928epxMnPduvmIHgrjatTNi"></audio>
+<audio id="audio_AccelerationAnswerShow"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZOkTtWj7jUvIdaTVE9R6SGMJgbzlXtsepFrxB"></audio>
+<audio id="audio_AccelerationRightAnswer"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZFjiZcqx2uGCD1lNJpjt0KI6rTO49esoHMUgQ"></audio>
+<audio id="audio_AccelerationWrongAnswer"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZW3oQJLYlrREebLjN754wgxmVJUcOFk0HIoun"></audio>
+
+
+
+<audio id="audio_FinishStart"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZYBSWCMUJjztUWYSPblX47iOKDHk3BLr0MZoR"></audio>
+<audio id="audio_FinishUserStart"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZrhyjuo0wMnsgj7HZBepkmPzxFUta0vd1rfyu"></audio>
+<audio id="audio_FinishQuestionPackShow"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZ0H6Lp6aMpNOthZsbKkJ5wFAcgSWXaUEeYL1D"></audio>
+<audio id="audio_FinishQuestionChoiceChoosen"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZ8zy1B1DW5gb1eIcdxrtunOw27CHjmPL4aDEi"></audio>
+<audio id="audio_FinishQuestionPackChoose"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZGVF9ux1seZPE6YRAf0Up7DxJobHrC8ymVjLM"></audio>
+<audio id="audio_Finish10Seconds"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZS0uywYqeB0ViLY9OWojqQ58CbIZ6nXMRHkyr"></audio>
+<audio id="audio_Finish15Seconds"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZaegYriJVcnLAJNQl2j3EW6gkoyY9UwPGz1bv"></audio>
+<audio id="audio_Finish20Seconds"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZL9OeFCQCq6wNr4If3iO5JXoRM8SxbDBGyWzL"></audio>
+<audio id="audio_FinishRightAnswer"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZEZLLtxTeptLwFPAimQzTJ1BYZrDGxchMCv8d"></audio>
+<audio id="audio_FinishWrongAnswer"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZJCrpYSleNIqAyl1FzwEOxmt7WonQZrVgR489"></audio>
+<audio id="audio_Finish5Seconds"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZo3ERlH8dZUi708lePcInwMNOA6BV34YF19Gh"></audio>
+<audio id="audio_FinishAnswerGranted"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZrkb9UGwMnsgj7HZBepkmPzxFUta0vd1rfyu5"></audio>
+<audio id="audio_FinishFinish"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZqG6rKdIa5npSzXG9krHUlxVDwKJBFcd3fWZ2"></audio>
+<audio id="audio_FinishStarChose"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZnNCRPD650PC8JB3tSoDMcO6U7pgXEzZslYLa"></audio>
+
+<audio id="audio_AdditionalRound"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZYaLOZjcUJjztUWYSPblX47iOKDHk3BLr0MZo"></audio>
+<audio id="audio_TenseMoments"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZyHTnc4vgFXToSBx0vmK51IefkrAc9dE8Gis7"></audio>
+
+
+<audio id="audio_PointSummary"
+    src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZ8z1dEoDW5gb1eIcdxrtunOw27CHjmPL4aDEi"></audio>
+<audio id="ObstacleAudio"></audio>
+
+
+<audio id="audio_extra_2" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZVvrtnkEThYyIFM1U3td6a7c09wi2rHuWofpZ"></audio>
+<audio id="audio_extra_3" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZU6V89E0EY8sFXranPy9kWMDHJt41Az0dS5Tg"></audio>
+<audio id="audio_extra_4" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZQEDM9jBvrcIqZgtASknGMzxhimbwVfCY91J3"></audio>
+<audio id="audio_extra_5" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZKozQF2m8CUtPo0RsHY7LuOJ4g1vBwnmeNlDG"></audio>
+<audio id="audio_extra_6" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZ8xwpi2DW5gb1eIcdxrtunOw27CHjmPL4aDEi"></audio>
+<audio id="audio_extra_7" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZs0VGLOhMyBNCjtX245xlw6m7TDE9bH13JaPL"></audio>
+<audio id="audio_extra_8" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZp12LifP8OFPLHXsCy9crjYkx2KaTnh0EuwmV"></audio>
+<audio id="audio_extra_9" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZSCZJOsoqeB0ViLY9OWojqQ58CbIZ6nXMRHky"></audio>
+<audio id="audio_extra_10" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZJDvN8vleNIqAyl1FzwEOxmt7WonQZrVgR489"></audio>
+<audio id="audio_extra_11" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZKg3ZRpMm8CUtPo0RsHY7LuOJ4g1vBwnmeNlD"></audio>
+<audio id="audio_extra_12" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZU7Ts6s0EY8sFXranPy9kWMDHJt41Az0dS5Tg"></audio>
+<audio id="audio_extra_13" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZm5gbbBoyUKHcZEVWdMGb3vD97y02TxswhXIQ"></audio>
+<audio id="audio_extra_14" src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZs0VGLOhMyBNCjtX245xlw6m7TDE9bH13JaPL"></audio>
+
+
+
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-functions.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="js/components/tab2/tab2.js"></script>
+<script src="js/firebaseConfig.js"></script>
+<script src="js/main/firebaseDefenition.js"></script>
+<script src="js/Utilities.js"></script>
+<script type="module" src="js/components/popover/popover.js"></script>
+<script src="js/components/dialog/dialog.js"></script>
+<script src="js/components/toast/toast.js"></script>
+<script src="js/projector/matchdata/playerlist/playerlist.js"></script>
+<script src="js/projector/matchdata/startI/startI.js"></script>
+<script src="js/projector/matchdata/startII/startII.js"></script>
+<script src="js/projector/matchdata/obstacle/obstacle.js"></script>
+<script src="js/projector/matchdata/acceleration/acceleration.js"></script>
+<script src="js/projector/matchdata/finish/finish.js"></script>
+<script src="js/projector/matchdata/additional/additional.js"></script>
+<script src="js/projector/matchdata/pointsummary/pointsummary.js"></script>
+<script src="js/projector/matchdata/intro/intro.js"></script>
+<script src="js/projector/ui.js"></script>
+<script src="js/projector/matchdata/sounds/sounds.js"></script>
+<script src="js/projector/participant/participant.js"></script>
+<script src="js/blockConsole.js"></script>
+
+</html>

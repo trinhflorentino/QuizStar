@@ -1,0 +1,326 @@
+body {
+    height: 100vh;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #00b140;
+    font-weight: bold;
+    background-repeat: no-repeat;
+    background-size: cover;
+    overflow: hidden;
+    background-position: center center;
+    background-attachment: fixed;
+    font-family: 'Cabin', sans-serif;
+    color: white;
+}
+
+
+.brand {
+    padding-left: 20px;
+    padding-top: 20px;
+    padding: 10px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.brand-text {
+    display: inline-block;
+    font-size: 15px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #7FB0E0
+}
+
+.superscript {
+    position: relative;
+    top: -0.5em;
+    font-size: 40%;
+}
+
+
+
+.multichat {
+    width: 1200px;
+    height: 550px;
+    margin: left;
+    border: 3px solid #000000;
+    background: white;
+    border-radius: 10px;
+    overflow-y: scroll;
+}
+
+.player {
+    width: 250px;
+    height: 550px;
+    margin-right: 15px;
+    right: 10px;
+    border: 3px solid #000000;
+    background: white;
+    border-radius: 10px;
+}
+
+
+
+.match-css {
+    display: fixed;
+    margin: auto;
+    width: 300px;
+    height: 20px;
+    border: 3px solid #000000;
+    background: white;
+    border-radius: 10px;
+    padding: 40px;
+    padding-left: 90px;
+    top: 400px;
+}
+
+
+
+.button-intomatch {
+    position: absolute;
+    right: 0;
+    width: 100px;
+    height: 30px;
+    background-color: white;
+    margin-right: 10px;
+    color: #7FB0E0;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.button-logout {
+    position: absolute;
+    right: 0;
+    top: 60px;
+    width: 100px;
+    height: 30px;
+    background-color: white;
+    margin-right: 10px;
+    color: #7FB0E0;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+
+
+.inline-result {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.chat {
+    margin-left: 12px;
+    margin-top: 30px;
+    width: auto;
+}
+
+.chatbar {
+    width: 1460px;
+    height: 20px;
+    border-radius: 5px;
+    border: 3px solid #000000;
+}
+
+.pointinm {
+    position: fixed;
+    margin-left: 200px;
+    font-weight: bold;
+}
+
+
+.imgts {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    position: absolute;
+    margin-left: 12px;
+    margin-top: 10px;
+    object-fit: cover;
+}
+
+.namets {
+    font-size: 20px;
+    margin-left: 100px;
+    margin-top: 40px;
+}
+
+.pointts {
+    position: relative;
+    font-size: 25px;
+    margin-top: 38px;
+    margin-right: 10px;
+    font-weight: bold;
+
+}
+
+
+::-webkit-scrollbar {
+    width: 13px;
+}
+
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: white;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(54, 56, 58);
+}
+
+.pre-class {
+    animation-fill-mode: forwards;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+
+
+.object-container {
+    position: relative;
+    /* Make this the containing block for absolutely positioned elements */
+    top: 25vh;
+    display: none;
+}
+
+.point {
+    width: 33vw;
+    height: 18vh;
+    border-radius: 14px;
+    border: 4px solid white;
+    background-image: url("/img/backgroundobject.jpg");
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(2em + 1vmin);
+    animation: zoomIn 0.5s ease-out forwards;
+    transform-origin: top left;
+    transform: scaleY(0);
+    opacity: 0;
+}
+
+
+.player-name {
+    font-size: calc(0.75em + 1vmin);
+}
+
+.player-info {
+    min-width: 16vw;
+    height: 10vh;
+    display: flex;
+    justify-content: center;
+    vertical-align: middle;
+    align-items: center;
+    gap: 10px;
+    padding: 3px;
+    padding-left: 14px;
+    padding-right: 14px;
+    border-radius: 14px;
+    z-index: 1;
+    background-image: url("/img/backgroundobject.jpg");
+    background-position: 100%;
+    border: 4px solid white;
+    position: absolute;
+    /* Position absolutely within .object-container */
+    top: -50px;
+    /* Align to the top */
+    left: 50%;
+    /* Center horizontally */
+    animation: zoomInPlayerInfo 0.5s ease-out forwards;
+    animation-delay: 0.5s;
+    transform-origin: bottom left;
+    transform: translateX(-50%) scaleY(0);
+    opacity: 0;
+}
+
+.player-image {
+    width: 3vw;
+    height: 3vw;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+
+@keyframes zoomIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes zoomInPlayerInfo {
+    0% {
+        transform: translateX(-50%) scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(-50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.notification {
+    position: fixed;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    width: 40%;
+    height: 40px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    background-color: #009A9C;
+    bottom: 35px;
+    animation-name: in;
+    animation-duration: 0.3s;
+    display: none;
+    z-index: 1;
+}
+
+@keyframes in {
+    0% {
+        position: fixed;
+        bottom: 0px;
+        visibility: hidden;
+    }
+
+    80% {
+        position: fixed;
+        bottom: 60px;
+        visibility: visible;
+    }
+
+    100% {
+        position: fixed;
+        bottom: 35px;
+        visibility: visible;
+    }
+}
+
+#notification-text {
+    text-align: center;
+    font-weight: 500;
+    font-size: 15px;
+    color: white;
+    margin-top: 10px;
+}

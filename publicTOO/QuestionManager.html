@@ -1,0 +1,367 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Quản lý câu hỏi | The Olympus Online</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    <link href="./dist/output.css" rel="stylesheet">
+
+    <!-- Material Icons Link -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
+    <!-- Font Awesome Link -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+        integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
+        crossorigin="anonymous" />
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-9BZ1P9KSJR');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7312982440694951"
+        crossorigin="anonymous"></script>
+</head>
+
+<body class="bg-gray-100 dark:bg-neutral-900">
+    <div class="p-4 flex flex-row justify-between bg-white dark:bg-neutral-800">
+        <h1 class="font-semibold text-2xl dark:text-white" id="QuestionManagerTitle">Quản lý câu hỏi</h1>
+        <div class="flex flex-row gap-2">
+            <button
+                class="rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-green-800 hover:border-green-800 focus:text-white focus:bg-green-800 focus:border-green-800 active:border-green-800 active:text-white active:bg-green-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none dark:text-white"
+                type="button" id="QuestionManagerSave">
+                Lưu thay đổi
+            </button>
+            <!-- <button
+                class="rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-red-800 hover:border-red-800 focus:text-white focus:bg-red-800 focus:border-red-800 active:border-red-800 active:text-white active:bg-red-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none dark:text-white"
+                type="button">
+                Xoá tất cả câu hỏi
+            </button> -->
+            <button
+                class="rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none dark:text-white"
+                type="button" onclick="window.close()">
+                Đóng trang quản lý câu hỏi
+            </button>
+            <button id="themeToggleButton" type="button" onclick="toggleTheme()" data-tab-target="#home"
+                class="text-black border border-slate-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white tab-button">
+                <span id="themeIcon" class="material-icons">
+                    dark_mode
+                </span>
+                <span class="sr-only">Toggle theme</span>
+            </button>
+        </div>
+    </div>
+    <div class="w-full">
+        <div class="relative right-0">
+            <ul class="relative flex flex-wrap px-1.5 py-1.5 list-none rounded-md bg-slate-50 dark:bg-neutral-700"
+                data-tabs="tabs" role="list">
+                <li class="z-30 flex-auto text-center">
+                    <a class="z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-md cursor-pointer text-slate-600 bg-inherit dark:text-slate-300"
+                        data-tab-target="" role="tab" aria-selected="true" aria-controls="generalInfo">
+                        <span class="material-symbols-outlined">
+                            chat
+                        </span>
+                        <span class="ml-1">Thông tin chung</span>
+                    </a>
+                </li>
+                <li class="z-30 flex-auto text-center">
+                    <a class="z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-md cursor-pointer text-slate-600 bg-inherit dark:text-slate-300"
+                        data-tab-target="" role="tab" aria-selected="false" aria-controls="startI">
+                        <span class="material-symbols-outlined">
+                            start
+                        </span>
+                        <span class="ml-1">Khởi động I</span>
+                    </a>
+                </li>
+                <li class="z-30 flex-auto text-center">
+                    <a class="z-30 flex items-center justify-center w-full px-0 py-2 mb-0 text-sm transition-all ease-in-out border-0 rounded-lg cursor-pointer text-slate-600 bg-inherit dark:text-slate-300"
+                        data-tab-target="" role="tab" aria-selected="false" aria-controls="startII">
+                        <span class="material-symbols-outlined">
+                            start
+                        </span>
+                        <span class="ml-1">Khởi động II</span>
+                    </a>
+                </li>
+                <li class="z-30 flex-auto text-center">
+                    <a class="z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-lg cursor-pointer text-slate-700 bg-inherit dark:text-slate-300"
+                        data-tab-target="" role="tab" aria-selected="false" aria-controls="obstacle">
+                        <span class="material-symbols-outlined">
+                            clear_all
+                        </span>
+                        <span class="ml-1">Vượt chướng ngại vật</span>
+                    </a>
+                </li>
+                <li class="z-30 flex-auto text-center">
+                    <a class="z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-lg cursor-pointer text-slate-700 bg-inherit dark:text-slate-300"
+                        data-tab-target="" role="tab" aria-selected="false" aria-controls="acceleration">
+                        <span class="material-symbols-outlined">
+                            sprint
+                        </span>
+                        <span class="ml-1">Tăng tốc</span>
+                    </a>
+                </li>
+                <li class="z-30 flex-auto text-center">
+                    <a class="z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-lg cursor-pointer text-slate-700 bg-inherit dark:text-slate-300"
+                        data-tab-target="" role="tab" aria-selected="false" aria-controls="finish">
+                        <span class="material-symbols-outlined">
+                            check
+                        </span>
+                        <span class="ml-1">Về đích</span>
+                    </a>
+                </li>
+                <li class="z-30 flex-auto text-center">
+                    <a class="z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-lg cursor-pointer text-slate-700 bg-inherit dark:text-slate-300"
+                        data-tab-target="" role="tab" aria-selected="false" aria-controls="additional">
+                        <span class="material-symbols-outlined">
+                            swords
+                        </span>
+                        <span class="ml-1">Câu hỏi phụ</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div data-tab-content="">
+        <div class="mx-6 mt-2" id="generalInfo" role="tabpanel">
+            <div
+                class="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-6 space-y-4 dark:bg-neutral-800">
+                <div>
+                    <p class="text-2xl text-slate-800 font-semibold dark:text-white">Nhập đề bằng file Excel</p>
+                    <p class="text-sm dark:text-white">Nhập đề nhanh bằng file Excel, tải xuống, chỉnh sửa và thêm vào
+                        bộ đề
+                        của bạn.</p>
+                </div>
+                <a href="https://drive.google.com/file/d/1LP6M9S0m5mGHrbDFHCBzWrNjm5RXbU1V/view?usp=sharing"
+                    target="_blank">
+                    <button
+                        class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white font-semibold transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none w-full dark:bg-neutral-700"
+                        type="button">
+                        Mở link tải file Excel
+                    </button>
+                </a>
+                <button
+                    class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white font-semibold transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none dark:bg-neutral-700"
+                    type="button" id="QuestionManagerLoadExcelFile">
+                    Chọn file Excel
+                </button>
+                <button
+                    class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white font-semibold transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none dark:bg-neutral-700"
+                    type="button" id="QuestionManagerExportExcelFile" disabled>
+                    Xuất file Excel
+                </button>
+                <input type="file" id="excelFileInput" accept=".xlsx, .xls" style="display: none;">
+            </div>
+            <div
+                class="relative flex flex-col my-6 bg-white shadow-sm border border-slate-200 rounded-lg p-6 space-y-4 dark:bg-neutral-800">
+                <p class="text-2xl text-slate-800 font-semibold dark:text-white">Tên trận đấu</p>
+                <div class="w-full">
+                    <input
+                        class="w-full bg-transparent placeholder:text-slate-400 text-slate-700 dark:text-slate-200 text-sm border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 hover:border-slate-300 dark:hover:border-slate-500 shadow-sm focus:shadow dark:bg-neutral-700"
+                        placeholder="Nhập tên trận đấu..." id="MatchName">
+                </div>
+            </div>
+        </div>
+        <div class="mx-6 hidden" id="startI" role="tabpanel">
+            <div id="questionsContainer"></div>
+        </div>
+        <div class="mx-6 hidden" id="startII" role="tabpanel">
+            <div id="questionsContainerII"></div>
+        </div>
+        <div class="mx-6 hidden" id="obstacle" role="tabpanel">
+            <div
+                class="relative flex flex-col mt-2 bg-white shadow-sm border border-slate-200 rounded-lg p-6 space-y-4 dark:bg-neutral-800">
+                <div>
+                    <p class="text-2xl text-slate-800 font-semibold dark:text-white">Chướng ngại vật</p>
+                    <div class="w-full mt-2">
+                        <input
+                            class="w-full bg-transparent placeholder:text-slate-400 text-slate-700 dark:text-slate-200 text-sm border border-slate-200 dark:border-slate-600 rounded-md px-3 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 hover:border-slate-300 dark:hover:border-slate-500 shadow-sm focus:shadow dark:bg-neutral-700 uppercase placeholder:normal-case"
+                            id="ObstacleText" placeholder="Nhập chướng ngại vật...">
+                    </div>
+                    <!-- <div class="w-full mt-2">
+                        <label class="block mb-1 text-sm text-slate-800 dark:text-white">
+                            Kiểu hiển thị chướng ngại vật
+                        </label>
+                        <div class="relative">
+                            <select
+                                class="w-full bg-transparent placeholder:text-slate-400 text-slate-700 dark:text-slate-200 text-sm border border-slate-200 dark:border-slate-600 rounded pl-3 pr-8 py-2 transition duration-300 ease focus:outline-none focus:border-slate-400 dark:focus:border-slate-500 hover:border-slate-400 dark:hover:border-slate-500 shadow-sm focus:shadow-md appearance-none cursor-pointer dark:bg-neutral-700"
+                                id="ObstacleKeyType">
+                                <option value="1">ký tự</option>
+                                <option value="2">chữ cái</option>
+                                <option value="3">chữ số</option>
+                            </select>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.2"
+                                stroke="currentColor"
+                                class="h-5 w-5 ml-1 absolute top-2.5 right-2.5 text-slate-700 dark:text-slate-200">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                            </svg>
+                        </div>
+                    </div> -->
+
+                </div>
+            </div>
+            <div
+                class="relative flex flex-col my-6 bg-white shadow-sm border border-slate-200 rounded-lg p-6 space-y-4 dark:bg-neutral-800">
+                <div>
+                    <p class="text-2xl text-slate-800 font-semibold dark:text-white">Ảnh chướng ngại vật</p>
+                    <div class="flex flex-col lg:flex-row justify-between gap-4 mt-4">
+                        <!-- Image Preview Section (Left) -->
+                        <div class="grid w-full lg:w-1/3 place-items-center overflow-hidden rounded-lg">
+                            <img class="object-cover object-center w-full h-[40vh] rounded-lg shadow-xl shadow-blue-gray-900/50"
+                                id="ObstacleImage" />
+                        </div>
+
+                        <!-- File Upload Section (Right) -->
+                        <div class="flex w-full lg:w-2/3">
+                            <label for="obstacleFileUpload"
+                                class="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-neutral-600 rounded-lg w-full h-[40vh] bg-white dark:bg-neutral-700 hover:bg-gray-50 dark:hover:bg-neutral-600 shadow-lg transition-all">
+                                <input type="file" id="obstacleFileUpload" class="hidden" accept="image/*" />
+                                <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-neutral-400">
+                                    cloud_upload
+                                </span>
+                                <span class="mt-4 text-lg text-gray-600 dark:text-neutral-200">Nhấp vào đây để tải lên
+                                    ảnh Chướng ngại vật</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button
+                        class="mt-4 rounded-md bg-red-600 py-2 px-4 border border-transparent text-center text-sm text-white font-semibold transition-all shadow-md hover:shadow-lg focus:bg-red-700 focus:shadow-none active:bg-red-700 hover:bg-red-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                        type="button" id="deleteObstacleImage">
+                        Xóa ảnh
+                    </button>
+                </div>
+            </div>
+            <div
+                class="relative flex flex-col my-6 bg-white shadow-sm border border-slate-200 rounded-lg p-6 space-y-4 dark:bg-neutral-800">
+                <div>
+                    <p class="text-2xl text-slate-800 font-semibold dark:text-white">Âm thanh câu hỏi hàng ngang</p>
+                    <div class="flex flex-col lg:flex-row justify-between gap-4 mt-4">
+                        <!-- Audio Preview Section (Left) -->
+                        <div
+                            class="flex flex-col items-center justify-center w-full lg:w-1/2 bg-gray-100 dark:bg-gray-800 rounded-lg p-4 shadow-lg">
+                            <div class="w-full flex flex-col items-center">
+                                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">Nghe trước âm
+                                    thanh
+                                </h3>
+                                <audio id="ObstacleAudio" controls
+                                    class="w-full rounded-md shadow-md bg-white dark:bg-gray-700">
+                                    <source type="audio/mpeg" />
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </div>
+                        </div>
+
+                        <!-- Audio Upload Section (Right) -->
+                        <div class="flex w-full lg:w-1/2">
+                            <label for="obstacleAudioUpload"
+                                class="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg w-full h-[30vh] bg-white dark:bg-neutral-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-lg transition-all">
+                                <input type="file" id="obstacleAudioUpload" class="hidden" accept="audio/*" />
+                                <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-neutral-400">
+                                    cloud_upload
+                                </span>
+                                <span class="mt-4 text-lg text-gray-600 dark:text-gray-300">Nhấp vào đây để tải lên âm
+                                    thanh hàng ngang</span>
+                            </label>
+                        </div>
+                    </div>
+                    <button
+                        class="mt-4 rounded-md bg-red-600 py-2 px-4 border border-transparent text-center text-sm text-white font-semibold transition-all shadow-md hover:shadow-lg focus:bg-red-700 focus:shadow-none active:bg-red-700 hover:bg-red-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                        type="button" id="deleteObstacleAudio">
+                        Xóa âm thanh
+                    </button>
+                </div>
+            </div>
+            <div id="questionsContainerObstacle"></div>
+        </div>
+        <div class="mx-6 hidden" id="acceleration" role="tabpanel">
+            <div id="questionsContainerAcceleration"></div>
+        </div>
+        <div class="mx-6 hidden" id="finish" role="tabpanel">
+            <div
+                class="relative flex flex-col mt-2 bg-white shadow-sm border border-slate-200 rounded-lg p-6 space-y-4 dark:bg-neutral-800">
+                <div>
+                    <p class="text-2xl text-slate-800 font-semibold dark:text-white">Video từ nguồn ngoài</p>
+                    <div
+                        class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md bg-clip-border rounded-xl mt-4 dark:text-neutral-300 dark:bg-neutral-800">
+                        <div class="p-4">
+                            <!-- Input fields for name and URL -->
+                            <input id="videoName" type="text" placeholder="Tên"
+                                class="border rounded p-2 mr-2 bg-white text-gray-700 dark:bg-neutral-700 dark:text-neutral-300 dark:border-neutral-600" />
+                            <input id="videoURL" type="text" placeholder="Đường dẫn"
+                                class="border rounded p-2 mr-2 bg-white text-gray-700 dark:bg-neutral-700 dark:text-neutral-300 dark:border-neutral-600" />
+                            <button id="addVideoBtn"
+                                class="bg-neutral-800 dark:bg-neutral-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-neutral-900 dark:hover:bg-neutral-700 transition duration-300">Thêm
+                                Video</button>
+                            <button onclick="window.open('https://youtu.be/3MhCCaNAvcg?si=4ekGsC9QH_DQYEVz', '_blank')"
+                                class="bg-neutral-800 dark:bg-neutral-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-neutral-900 dark:hover:bg-neutral-700 transition duration-300">
+                                Hướng dẫn lấy đường dẫn từ Youtube
+                            </button>
+                        </div>
+                        <table class="w-full text-left table-auto min-w-max">
+                            <thead>
+                                <tr>
+                                    <th
+                                        class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
+                                        Thứ tự</th>
+                                    <th
+                                        class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
+                                        Tên</th>
+                                    <th
+                                        class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
+                                        Đường dẫn</th>
+                                    <th
+                                        class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
+                                        Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="videoTableBody">
+                                <tr>
+                                    <td colspan="4" class="p-4 text-center text-gray-700 dark:text-neutral-300">Không có
+                                        video nào được
+                                        thêm</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="questionsContainerFinish"></div>
+        </div>
+        <div class="mx-6 hidden" id="additional" role="tabpanel">
+            <div id="questionsContainerAdditional"></div>
+        </div>
+</body>
+<script src="js/Utilities.js"></script>
+<!-- <script src="https://unpkg.com/@material-tailwind/html@latest/scripts/tabs.js"></script> -->
+<script src="js/components/tab2/tab2.js"></script>
+<script type="module" src="js/components/popover/popover.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-functions.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="js/components/toast/toast.js"></script>
+<script src="js/firebaseConfig.js"></script>
+<script src="js/main/firebaseDefenition.js"></script>
+<script src="js/Utilities.js"></script>
+<script src="js/components/toast/toast.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="js/technician/questionmanagement/data/questionManagementData.js"></script>
+<script src="js/technician/questionmanagement/controls/questionManagementControls.js"></script>
+<script src="js/blockConsole.js"></script>
+
+</html>
