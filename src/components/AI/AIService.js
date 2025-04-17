@@ -27,7 +27,7 @@ const model1206 = genAI.getGenerativeModel({
 });
 
 const model15pro = genAI.getGenerativeModel({
-  model: "gemini-2.5.pro-exp-03-25",
+  model: "gemini-2.5-pro-exp-03-25",
   generationConfig: {
     "responseMimeType": "application/json",
     temperature: 0.6,

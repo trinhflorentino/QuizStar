@@ -17,6 +17,7 @@ import FileUploadModal from './FileUploadModal';
 import MatrixUploadModal from './MatrixUploadModal';
 import QuestionGeneratorModal from './QuestionGeneratorModal';
 import { extractQuestionsJSON, matrixQuestionsJSON, createQuestionsJSON } from '../AI/AIService';
+import { MathJax } from 'better-react-mathjax';
 
 function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubmit }) {
   const [quizTitle, setQuizTitle] = useState("");
@@ -640,13 +641,12 @@ truefalse: "question" chứa nội dung câu hỏi. "options" chứa mảng các
 shortanswer: "answer" chứa đáp án ngắn gọn dưới dạng chuỗi. Nếu câu hỏi yêu cầu đánh giá đúng/sai nhiều mệnh đề, "answer" sẽ là mảng các giá trị boolean (true/false). Ưu tiên sử dụng mảng boolean [true, false, ...] nếu có thể.
 
 Lưu ý:
-Phải tạo các câu hỏi tiếng Việt rõ ràng, dễ hiểu.
-Nếu file có định dạng HTML không được thêm các thẻ có định dạng HTML vào câu hỏi.
-Với câu hỏi có công thức hãy viết dưới dạng Latex.
+Phải tạo các câu hỏi tiếng Việt rõ ràng, dễ hiểu. Nếu đề bài bằng tiếng Anh thì giữ nguyên văn bản tiếng Anh.
+Với câu hỏi có công thức, bắt buộc phải viết dưới định dạng Latex và không được viết dưới dạng HTML. Nếu file gốc có công thức định dạng HTML thì phải chuyển sang Latex. 
+Nếu file có định dạng HTML, tuyệt đối không được thêm các thẻ có định dạng HTML vào câu hỏi.
 Chỉ trích xuất câu hỏi thuộc ba dạng trên. Bỏ qua các câu hỏi khác.
-
+Nếu câu hỏi có đáp án trong file thì chọn output đáp án của file. Nếu không có thì chọn đáp án đúng.
 Mỗi câu hỏi phải rõ ràng, dễ hiểu và có đáp án duy nhất.
-
 Đối với câu hỏi truefalse, mỗi mệnh đề phải có giá trị đúng hoặc sai rõ ràng, các mệnh đề phải nằm trong mảng options, không để trên question.
 
 Đối với câu hỏi shortanswer, đáp án cần ngắn gọn, súc tích và chính xác.
@@ -710,9 +710,6 @@ truefalse: "question" chứa nội dung câu hỏi. "options" chứa mảng các
 shortanswer: "answer" chứa đáp án ngắn gọn dưới dạng chuỗi. Nếu câu hỏi yêu cầu đánh giá đúng/sai nhiều mệnh đề, "answer" sẽ là mảng các giá trị boolean (true/false). Ưu tiên sử dụng mảng boolean [true, false, ...] nếu có thể.
 
 Lưu ý:
-Nếu file có định dạng HTML không được thêm các thẻ có định dạng HTML vào câu hỏi.
-Với câu hỏi có công thức hãy viết dưới dạng Latex.
-
 Nếu file có định dạng HTML không được thêm các thẻ có định dạng HTML vào câu hỏi.
 Với câu hỏi có công thức hãy viết dưới dạng Latex.
 Chỉ tạo câu hỏi thuộc ba dạng trên.
@@ -1441,18 +1438,22 @@ async function uploadImage(file, examPin, questionId) {
                      question.type === 'truefalse' ? 'Đúng/Sai' : 'Trả lời ngắn'}
                   </span>
                 </div>
-                <div className="mb-2">{question.question}</div>
+                <div className="mb-2">
+                  <MathJax inline dynamic>{question.question}</MathJax>
+                </div>
                 {question.type !== 'shortanswer' && (
                   <div className="ml-4 space-y-1">
                     {previewOptions[index].map((option, optIndex) => (
                       <div key={option.id} className="flex items-center gap-2">
-                        <span className="font-medium">{option.optionNo}.</span>
-                        <span>{option.option}</span>
+                        <span className="font-medium">{String.fromCharCode(65 + optIndex)}.</span>
+                        <MathJax inline dynamic>{option.option}</MathJax>
                         {question.type === 'mcq' && question.answer === optIndex && (
                           <span className="text-green-500">(Đáp án đúng)</span>
                         )}
-                        {question.type === 'truefalse' && option.answer && (
-                          <span className="text-green-500">(Đúng)</span>
+                        {question.type === 'truefalse' && (
+                          <span className={option.answer ? "text-green-500" : "text-red-500"}>
+                            ({option.answer ? "Đúng" : "Sai"})
+                          </span>
                         )}
                       </div>
                     ))}
@@ -1460,7 +1461,8 @@ async function uploadImage(file, examPin, questionId) {
                 )}
                 {question.type === 'shortanswer' && (
                   <div className="ml-4">
-                    <span className="text-gray-600">Đáp án: {question.answer}</span>
+                    <span className="text-gray-600">Đáp án: </span>
+                    <MathJax inline dynamic>{question.answer}</MathJax>
                   </div>
                 )}
               </div>

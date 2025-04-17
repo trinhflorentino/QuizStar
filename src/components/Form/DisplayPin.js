@@ -6,7 +6,7 @@ import { IoMdInformationCircle } from "react-icons/io";
 function DisplayPin() {
   let { pin } = useParams();
   const [copied, setCopied] = useState(false);
-  const quizUrl = `https://quizstar-khkt.web.app/pinverify/Form/${pin}`;
+  const quizUrl = `https://quizstar-txqt.web.app/pinverify/Form/${pin}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(quizUrl);
