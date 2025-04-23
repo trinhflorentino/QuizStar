@@ -5,13 +5,13 @@ const apiKey = "AIzaSyAeMN1c914F4WzgwKKbr4C29KbYx76h5a4";
 const genAI = new GoogleGenerativeAI(apiKey);
 
 const model20flash = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash",
+  model: "gemini-2.5-flash-preview-04-17",
   generationConfig: {
-    "responseMimeType": "application/json",
     temperature: 0.6,
-    topP: 0.95,
-    topK: 40,
-    maxOutputTokens: 8192,
+    responseMimeType: 'application/json',
+    thinkingConfig: {
+      thinkingBudget: 0,
+    },
   },
 });
 
@@ -27,13 +27,9 @@ const model1206 = genAI.getGenerativeModel({
 });
 
 const model15pro = genAI.getGenerativeModel({
-  model: "gemini-2.5-pro-exp-03-25",
+  model: "learnlm-1.5-pro-experimental",
   generationConfig: {
     "responseMimeType": "application/json",
-    temperature: 0.6,
-    topP: 0.95,
-    topK: 40,
-    maxOutputTokens: 8192,
   },
 });
 
