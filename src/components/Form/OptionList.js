@@ -59,7 +59,7 @@ function OptionList({
               type="text"
               className="flex-1 px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder={`Ý kiến ${String.fromCharCode(97 + ind)}`}
-              value={option.option}
+              value={option.option ?? ""}
               onChange={(event) => onOptionChange(event, index, ind)}
             />
             <div className="flex items-center gap-3">

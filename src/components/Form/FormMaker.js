@@ -45,6 +45,8 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewQuestions, setPreviewQuestions] = useState([]);
   const [previewOptions, setPreviewOptions] = useState([]);
+  const [currentPreviewPage, setCurrentPreviewPage] = useState(0);
+  const questionsPerPage = 10;
 
   // Create refs for the number inputs
   const mcqRef = React.useRef(null);
@@ -132,7 +134,7 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
     ]);
     setOptionList(values);
     // Set default score based on type when adding new question
-    setList([...list, { id: uuid(), question: "", answer: '', type: "mcq", score: 0.25 }]);
+    setList([...list, { id: uuid(), question: "", answer: "", type: "mcq", score: 0.25 }]);
   }
 
   function handleRemoveQuest(index) {
@@ -619,42 +621,7 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
     }
     setIsLoading(true);
     try {
-      const prompt = `
-Hãy phân tích file được upload và trích xuất tất cả các câu hỏi thuộc các dạng "mcq", "truefalse", và "shortanswer" cùng với đáp án của chúng. Kết quả bắt buộc phải được định dạng JSON theo cấu trúc sau:
-
-[
-  {
-    "answer": "<đáp án>",
-    "question": "<nội dung câu hỏi>",
-    "type": "<loại câu hỏi>",
-    "options": ["<lựa chọn 1>", "<lựa chọn 2>", ...] // Chỉ dành cho mcq và truefalse
-  },
-  ...
-]
-
-Yêu cầu cụ thể:
-
-mcq: "answer" chứa ký tự đại diện cho đáp án đúng (A, B, C, hoặc D). "options" chứa mảng các lựa chọn.
-
-truefalse: "question" chứa nội dung câu hỏi. "options" chứa mảng các mệnh đề cần đánh giá. "answer" là mảng các giá trị boolean (true/false) tương ứng với từng mệnh đề trong "options". Ưu tiên sử dụng mảng boolean [true, false, ...] thay vì dạng chuỗi "Đáp án a [true, false]".
-
-shortanswer: "answer" chứa đáp án ngắn gọn dưới dạng chuỗi. Nếu câu hỏi yêu cầu đánh giá đúng/sai nhiều mệnh đề, "answer" sẽ là mảng các giá trị boolean (true/false). Ưu tiên sử dụng mảng boolean [true, false, ...] nếu có thể.
-
-Lưu ý:
-Phải tạo các câu hỏi tiếng Việt rõ ràng, dễ hiểu. Nếu đề bài bằng tiếng Anh thì giữ nguyên văn bản tiếng Anh.
-Với câu hỏi có công thức, bắt buộc phải viết dưới định dạng Latex và không được viết dưới dạng HTML. Nếu file gốc có công thức định dạng HTML thì phải chuyển sang Latex. 
-Nếu file có định dạng HTML, tuyệt đối không được thêm các thẻ có định dạng HTML vào câu hỏi.
-Chỉ trích xuất câu hỏi thuộc ba dạng trên. Bỏ qua các câu hỏi khác.
-Nếu câu hỏi có đáp án trong file thì chọn output đáp án của file. Nếu không có thì chọn đáp án đúng.
-Mỗi câu hỏi phải rõ ràng, dễ hiểu và có đáp án duy nhất.
-Đối với câu hỏi truefalse, mỗi mệnh đề phải có giá trị đúng hoặc sai rõ ràng, các mệnh đề phải nằm trong mảng options, không để trên question.
-
-Đối với câu hỏi shortanswer, đáp án cần ngắn gọn, súc tích và chính xác.
-
-Tuân thủ nghiêm ngặt định dạng JSON.
-
-Ưu tiên sử dụng mảng boolean [true, false] cho câu hỏi truefalse và shortanswer thay vì dạng chuỗi "Đáp án a [true, false]", trừ khi format của file input không cho phép.
-`;
+      const prompt = "Phân tích nội dung file được cung cấp. Trích xuất tất cả các câu hỏi thuộc loại 'mcq', 'truefalse', và 'shortanswer'.\n\n**YÊU CẦU OUTPUT JSON NGHIÊM NGẶT:**\n\n1.  **Định dạng & Cú pháp:** Output *phải* là một chuỗi JSON hợp lệ duy nhất. Tất cả tên thuộc tính (keys) và giá trị chuỗi (strings) **BẮT BUỘC** phải được đặt trong dấu ngoặc kép (`\"`). Tuân thủ `responseSchema`.\n2.  **Bỏ qua trường Null:** **Nếu một trường (ví dụ: `\"answer\"` hoặc `\"options\"`) không có giá trị hợp lệ hoặc giá trị của nó sẽ là `null`, thì trường đó (cả key và value) phải được bỏ qua hoàn toàn, KHÔNG được xuất hiện trong đối tượng JSON của câu hỏi đó.**\n3.  **Loại câu hỏi:** Chỉ trích xuất 'mcq', 'truefalse', 'shortanswer'.\n4.  **Ngôn ngữ & Công thức:** Giữ nguyên ngôn ngữ gốc. Chuyển đổi công thức sang LaTeX. Loại bỏ HTML.\n\n**QUY TẮC XỬ LÝ ĐÁP ÁN (`answer`):**\n\n5.  **Tìm kiếm trong File:** Tìm các dấu hiệu đáp án trong file (đánh dấu, chỉ định, bảng đáp án).\n6.  **Nếu Tìm Thấy Đáp Án:**\n    *   Bao gồm trường `\"answer\"` trong output JSON.\n    *   Định dạng giá trị `\"answer\"` như sau:\n        *   MCQ: Ký tự đáp án đúng (ví dụ: `\"A\"`).\n        *   True/False: Chuỗi JSON biểu diễn mảng boolean (ví dụ: `\"[true, false, true]\"`).\n        *   Short Answer: Chuỗi đáp án ngắn hoặc chuỗi JSON biểu diễn mảng boolean (ví dụ: `\"[true, false]\"`).\n7.  **Nếu KHÔNG Tìm Thấy Đáp Án:** **KHÔNG được bao gồm trường `\"answer\"` trong output JSON cho câu hỏi đó.**\n\n**QUY TẮC XỬ LÝ LỰA CHỌN (`options`):**\n\n8.  **Áp dụng cho MCQ/TrueFalse:** Trường `\"options\"` chỉ áp dụng cho loại `\"mcq\"` và `\"truefalse\"`.\n9.  **Nếu có Lựa chọn/Mệnh đề:**\n    *   Bao gồm trường `\"options\"` trong output JSON.\n    *   Giá trị phải là một mảng các chuỗi (ví dụ: `[\"Lựa chọn 1\", \"Mệnh đề A\"]`).\n10. **Nếu là ShortAnswer hoặc không có Lựa chọn/Mệnh đề:** **KHÔNG được bao gồm trường `\"options\"` trong output JSON cho câu hỏi đó.**\n\n**CHI TIẾT CÁC LOẠI CÂU HỎI (Tóm tắt):**\n\n11. **MCQ:** Bao gồm `\"question\"`, `\"type\": \"mcq\"`. Bao gồm `\"options\"` (mảng chuỗi) và `\"answer\"` (chuỗi ký tự) *chỉ khi* chúng có giá trị/được tìm thấy.\n12. **True/False:** Bao gồm `\"question\"`, `\"type\": \"truefalse\"`. Bao gồm `\"options\"` (mảng chuỗi mệnh đề) và `\"answer\"` (chuỗi JSON mảng boolean) *chỉ khi* chúng có giá trị/được tìm thấy.\n13. **Short Answer:** Bao gồm `\"question\"`, `\"type\": \"shortanswer\"`. Bao gồm `\"answer\"` (chuỗi hoặc chuỗi JSON mảng boolean) *chỉ khi* nó được tìm thấy. **Không bao giờ** bao gồm `\"options\"`.\n\n14. **Tính rõ ràng:** Chỉ trích xuất các câu hỏi hoàn chỉnh, rõ ràng.";
 
       const ketQua = await extractQuestionsJSON(file, prompt);
       console.log("Original Extracted Data:", ketQua);
@@ -831,32 +798,62 @@ Với câu hỏi có công thức hãy viết dưới dạng Latex.
 
   function convertAnswers(dataArray) {
     // Helper to convert letter to index
-    // console.log(dataArray);
     const letterToIndex = (letter) => {
       if (typeof letter !== 'string') {
-        throw new Error(`Answer must be a string. Received type: ${typeof letter}`);
+        console.warn(`Answer must be a string. Received type: ${typeof letter}.`);
+        return null; // Return null instead of default
       }
       const upperLetter = letter.toUpperCase();
       const index = upperLetter.charCodeAt(0) - 65; // 'A' is 65 in ASCII
       if (index < 0 || index >= 26) {
-        throw new Error(`Invalid answer letter: "${letter}". Must be A-Z.`);
+        console.warn(`Invalid answer letter: "${letter}".`);
+        return null; // Return null instead of default
       }
       return index;
     };
 
     // Process each question
     const convertedData = dataArray.map((question, qIndex) => {
-      if (question.type === "mcq") {
-        if (!question.answer) {
-          throw new Error(`Missing answer for question at index ${qIndex}.`);
-        }
-        return {
-          ...question,
-          answer: letterToIndex(question.answer)
-        };
+      // Create a new question object with defaults for missing fields
+      const processedQuestion = {
+        question: question.question || "",
+        type: question.type || "mcq",
+        score: question.score || (
+          question.type === "shortanswer" ? 0.5 : 
+          question.type === "truefalse" ? 1.0 : 0.25
+        )
+      };
+
+      // Handle options if missing
+      if (Array.isArray(question.options)) {
+        processedQuestion.options = question.options;
+      } else if (question.type !== "shortanswer") {
+        // Default options for non-shortanswer questions
+        processedQuestion.options = question.type === "truefalse" ? 
+          ["True", "False"] : 
+          ["Option A", "Option B", "Option C", "Option D"];
       }
-      // Add processing for other types if necessary
-      return question;
+
+      // Handle answers based on question type
+      if (question.type === "mcq") {
+        // Only set answer if it exists in the original data
+        if (question.answer) {
+          processedQuestion.answer = letterToIndex(question.answer);
+        }
+      } else if (question.type === "truefalse") {
+        // Only set answer if it exists in the original data
+        if (Array.isArray(question.answer)) {
+          processedQuestion.answer = question.answer;
+        }
+      } else if (question.type === "shortanswer") {
+        // Only set answer if it exists in the original data
+        if (question.answer) {
+          processedQuestion.answer = question.answer;
+        }
+      }
+
+      // Copy any other fields from the original question
+      return { ...question, ...processedQuestion };
     });
 
     return convertedData;
@@ -890,22 +887,56 @@ Với câu hỏi có công thức hãy viết dưới dạng Latex.
       throw new Error("Data is not an array.");
     }
 
-    dataArray.forEach((q, index) => {
+    return dataArray.map((q, index) => {
+      // Create a new question object with necessary properties
+      const validatedQuestion = { ...q };
+
+      // Check and set question text
       if (typeof q.question !== 'string' || q.question.trim() === "") {
-        throw new Error(`Question text missing or invalid at index ${index}.`);
+        console.warn(`Question text missing or invalid at index ${index}, setting to empty string.`);
+        validatedQuestion.question = "";
       }
+
+      // Check and set question type
       if (typeof q.type !== 'string' || !["mcq", "truefalse", "shortanswer"].includes(q.type)) {
-        throw new Error(`Invalid or unsupported question type at index ${index}.`);
+        console.warn(`Invalid or unsupported question type at index ${index}, defaulting to mcq.`);
+        validatedQuestion.type = "mcq";
       }
-      if (q.type === "mcq") {
-        if (typeof q.answer !== 'string' || !/^[A-Z]$/.test(q.answer.toUpperCase())) {
-          throw new Error(`Invalid answer format for MCQ at index ${index}.`);
+
+      // Handle based on question type
+      if (validatedQuestion.type === "mcq") {
+        // Check answer format for MCQ
+        if (typeof q.answer !== 'string' || !/^[A-Z]$/.test(q.answer?.toUpperCase())) {
+          console.warn(`Invalid answer format for MCQ at index ${index}, setting to null.`);
+          validatedQuestion.answer = null;
         }
+        
+        // Check options for MCQ
         if (!Array.isArray(q.options) || q.options.length < 2) {
-          throw new Error(`Insufficient options for MCQ at index ${index}.`);
+          console.warn(`Insufficient options for MCQ at index ${index}, creating default options.`);
+          validatedQuestion.options = ["Option A", "Option B", "Option C", "Option D"];
+        }
+      } else if (validatedQuestion.type === "truefalse") {
+        // Check answer format for true/false
+        if (!Array.isArray(q.answer)) {
+          console.warn(`Invalid answer format for true/false at index ${index}, setting to null.`);
+          validatedQuestion.answer = null;
+        }
+        
+        // Check options for true/false
+        if (!Array.isArray(q.options)) {
+          console.warn(`Missing options for true/false at index ${index}, creating default options.`);
+          validatedQuestion.options = ["Statement 1", "Statement 2"];
+        }
+      } else if (validatedQuestion.type === "shortanswer") {
+        // Check answer for shortanswer
+        if (typeof q.answer !== 'string') {
+          console.warn(`Invalid answer for shortanswer at index ${index}, setting to null.`);
+          validatedQuestion.answer = null;
         }
       }
-      // Add more validations for other types if necessary
+
+      return validatedQuestion;
     });
   }
 
@@ -915,88 +946,80 @@ Với câu hỏi có công thức hãy viết dưới dạng Latex.
         throw new Error("Invalid JSON format: Expected an array of questions.");
       }
       
-      // Arrays to hold new questions and options
-      const newQuestions = [];
-      const newOptions = [];
+      // Pre-allocate arrays with known size to avoid resizing
+      const newQuestions = new Array(jsonData.length);
+      const newOptions = new Array(jsonData.length);
 
-      jsonData.forEach((q, qIndex) => {
-        // Validate and process each question
-        if (typeof q.question !== 'string') {
-          throw new Error(`Invalid question text at index ${qIndex}.`);
-        }
-        if (typeof q.type !== 'string') {
-          throw new Error(`Invalid question type at index ${qIndex}.`);
-        }
-
-        let processedAnswer;
-        if (q.type === "shortanswer") {
-          if (typeof q.answer !== 'string') {
-            throw new Error(`Invalid answer for short answer question at index ${qIndex}.`);
-          }
+      // Process questions in a single pass without repeated operations
+      for (let qIndex = 0; qIndex < jsonData.length; qIndex++) {
+        const q = jsonData[qIndex];
+        
+        // Basic validation with defaults
+        const question = typeof q.question === 'string' ? q.question.trim() : "";
+        const type = typeof q.type === 'string' && ["mcq", "truefalse", "shortanswer"].includes(q.type) ? q.type : "mcq";
+        
+        // Set appropriate default score based on question type
+        const defaultScore = type === 'truefalse' ? 1.0 : type === 'shortanswer' ? 0.5 : 0.25;
+        
+        // Initialize answer based on question type (no defaults, just validation)
+        let processedAnswer = "";
+        if (type === "shortanswer" && typeof q.answer === 'string') {
           processedAnswer = q.answer.trim();
-        } else if (q.type === "mcq") {
-          if (typeof q.answer !== 'number') { // After conversion, answer should be a number
-            throw new Error(`Invalid answer index for MCQ question at index ${qIndex}.`);
-          }
+        } else if (type === "mcq" && q.answer !== undefined && q.answer !== null) {
           processedAnswer = q.answer;
-        } else if (q.type === "truefalse") {
+        } else if (type === "truefalse" && Array.isArray(q.answer)) {
           processedAnswer = q.answer;
-        } else {
-          throw new Error(`Unsupported question type "${q.type}" at index ${qIndex}.`);
         }
 
-        // Set default score based on type
-        let defaultScore;
-        switch(q.type) {
-          case 'truefalse':
-            defaultScore = 1.0;
-            break;
-          case 'shortanswer':
-            defaultScore = 0.5;
-            break;
-          default:
-            defaultScore = 0.25; // mcq
-        }
-
-        // Push new question to the array with default score
-        newQuestions.push({
+        // Create new question object
+        newQuestions[qIndex] = {
           id: uuid(),
-          question: q.question.trim(),
+          question: question,
           answer: processedAnswer,
-          type: q.type,
+          type: type,
           score: defaultScore
-        });
+        };
 
-        if (q.type === "mcq") {
-          if (!Array.isArray(q.options) || q.options.length < 2) {
-            throw new Error(`MCQ type must have at least two options. Issue with question at index ${qIndex}.`);
+        // Create options based on question type
+        if (type === "mcq") {
+          let options = q.options;
+          if (!Array.isArray(options) || options.length < 2) {
+            options = ["Option A", "Option B", "Option C", "Option D"];
           }
-          if (typeof q.answer !== 'number' || q.answer < 0 || q.answer >= q.options.length) {
-            throw new Error(`MCQ question at index ${qIndex} has an invalid answer index.`);
+          
+          const mcqOptions = new Array(options.length);
+          for (let i = 0; i < options.length; i++) {
+            mcqOptions[i] = {
+              id: uuid(),
+              option: typeof options[i] === 'string' ? options[i].trim() : '',
+              optionNo: i + 1
+            };
           }
-          const mcqOptions = q.options.map((option, index) => ({
-            id: uuid(),
-            option: typeof option === 'string' ? option.trim() : '',
-            optionNo: index + 1,
-          }));
-          newOptions.push(mcqOptions);
-        } else if (q.type === "truefalse") {
-          if (!Array.isArray(q.options)) {
-            throw new Error(`True/False type must have an options array at index ${qIndex}.`);
+          newOptions[qIndex] = mcqOptions;
+          
+        } else if (type === "truefalse") {
+          let options = q.options;
+          if (!Array.isArray(options) || options.length < 1) {
+            options = ["Statement 1", "Statement 2"];
           }
-          const tfOptions = q.options.map((option, index) => ({
-            id: uuid(),
-            option: typeof option === 'string' ? option.trim() : '',
-            optionNo: index + 1,
-            answer: q.answer[index],
-          }));
-          newOptions.push(tfOptions);
-        } else if (q.type === "shortanswer") {
-          newOptions.push([]);
+          
+          const tfOptions = new Array(options.length);
+          for (let i = 0; i < options.length; i++) {
+            tfOptions[i] = {
+              id: uuid(),
+              option: typeof options[i] === 'string' ? options[i].trim() : '',
+              optionNo: i + 1,
+              answer: Array.isArray(q.answer) && i < q.answer.length ? q.answer[i] : null
+            };
+          }
+          newOptions[qIndex] = tfOptions;
+          
+        } else if (type === "shortanswer") {
+          newOptions[qIndex] = [];
         }
-      });
+      }
       
-      // Set preview data and show modal
+      // Set preview data and show modal - now with optimized data
       setPreviewQuestions(newQuestions);
       setPreviewOptions(newOptions);
       setShowPreviewModal(true);
@@ -1008,14 +1031,35 @@ Với câu hỏi có công thức hãy viết dưới dạng Latex.
   }
 
   const handleConfirmAddQuestions = () => {
-    setList([...list, ...previewQuestions]);
-    setOptionList([...optionList, ...previewOptions]);
-    setShowPreviewModal(false);
+    // Use React batch updates to handle both state changes in one render cycle
+    // This improves performance significantly when adding many questions
+    const batchedUpdate = () => {
+      setList(prevList => [...prevList, ...previewQuestions]);
+      setOptionList(prevOptions => [...prevOptions, ...previewOptions]);
+      setShowPreviewModal(false);
+    };
+    
+    batchedUpdate();
   };
 
   const handleCancelAddQuestions = () => {
     setShowPreviewModal(false);
+    setCurrentPreviewPage(0); // Reset pagination when closing
   };
+
+  const paginatedPreviewQuestions = React.useMemo(() => {
+    if (!previewQuestions.length) return [];
+    const startIndex = currentPreviewPage * questionsPerPage;
+    return previewQuestions.slice(startIndex, startIndex + questionsPerPage);
+  }, [previewQuestions, currentPreviewPage, questionsPerPage]);
+  
+  const paginatedPreviewOptions = React.useMemo(() => {
+    if (!previewOptions.length) return [];
+    const startIndex = currentPreviewPage * questionsPerPage;
+    return previewOptions.slice(startIndex, startIndex + questionsPerPage);
+  }, [previewOptions, currentPreviewPage, questionsPerPage]);
+  
+  const totalPreviewPages = Math.ceil((previewQuestions?.length || 0) / questionsPerPage);
 
   const [mathJaxReady, setMathJaxReady] = useState(false);
 
@@ -1212,7 +1256,7 @@ async function uploadImage(file, examPin, questionId) {
               type="number"
               min="0"
               step="0.25"
-              value={scoreDistribution.mcq.totalScore}
+              value={scoreDistribution.mcq.totalScore ?? 0}
               onChange={(e) => handleTypeScoreChange('mcq', e)}
               className="w-24 px-2 py-1 border rounded"
               placeholder="Tổng điểm"
@@ -1231,7 +1275,7 @@ async function uploadImage(file, examPin, questionId) {
               type="number"
               min="0"
               step="0.25"
-              value={scoreDistribution.truefalse.totalScore}
+              value={scoreDistribution.truefalse.totalScore ?? 0}
               onChange={(e) => handleTypeScoreChange('truefalse', e)}
               className="w-24 px-2 py-1 border rounded"
               placeholder="Tổng điểm"
@@ -1250,7 +1294,7 @@ async function uploadImage(file, examPin, questionId) {
               type="number"
               min="0"
               step="0.25"
-              value={scoreDistribution.shortanswer.totalScore}
+              value={scoreDistribution.shortanswer.totalScore ?? 0}
               onChange={(e) => handleTypeScoreChange('shortanswer', e)}
               className="w-24 px-2 py-1 border rounded"
               placeholder="Tổng điểm"
@@ -1408,7 +1452,7 @@ async function uploadImage(file, examPin, questionId) {
             <input 
               type="number"
               min="1"
-              value={duration}
+              value={duration ?? 45}
               onChange={(e) => setDuration(parseInt(e.target.value))}
               className="w-24 px-2 py-1 border rounded"
             />
@@ -1429,7 +1473,7 @@ async function uploadImage(file, examPin, questionId) {
         <div className="bg-white p-6 rounded-lg w-full max-w-4xl max-h-[80vh] overflow-y-auto">
           <h2 className="text-xl font-bold mb-4">Xem trước câu hỏi</h2>
           <div className="space-y-4">
-            {previewQuestions.map((question, index) => (
+            {paginatedPreviewQuestions.map((question, index) => (
               <div key={question.id} className="border rounded-lg p-4">
                 <div className="flex justify-between items-start mb-2">
                   <span className="font-medium">Câu {index + 1}</span>
@@ -1439,20 +1483,25 @@ async function uploadImage(file, examPin, questionId) {
                   </span>
                 </div>
                 <div className="mb-2">
-                  <MathJax inline dynamic>{question.question}</MathJax>
+                  <MathJax inline dynamic>{question.question ?? ""}</MathJax>
                 </div>
                 {question.type !== 'shortanswer' && (
                   <div className="ml-4 space-y-1">
-                    {previewOptions[index].map((option, optIndex) => (
+                    {paginatedPreviewOptions[currentPreviewPage * questionsPerPage + index].map((option, optIndex) => (
                       <div key={option.id} className="flex items-center gap-2">
-                        <span className="font-medium">{String.fromCharCode(65 + optIndex)}.</span>
-                        <MathJax inline dynamic>{option.option}</MathJax>
+                        <span className="font-medium">
+                          {question.type === 'truefalse' 
+                            ? String.fromCharCode(97 + optIndex)
+                            : String.fromCharCode(65 + optIndex) 
+                          }.
+                        </span>
+                        <MathJax inline dynamic>{option.option ?? ""}</MathJax>
                         {question.type === 'mcq' && question.answer === optIndex && (
                           <span className="text-green-500">(Đáp án đúng)</span>
                         )}
                         {question.type === 'truefalse' && (
-                          <span className={option.answer ? "text-green-500" : "text-red-500"}>
-                            ({option.answer ? "Đúng" : "Sai"})
+                          <span className={option.answer === null ? "text-gray-500" : option.answer ? "text-green-500" : "text-red-500"}>
+                            ({option.answer === null ? "Không có đáp án" : option.answer ? "Đúng" : "Sai"})
                           </span>
                         )}
                       </div>
@@ -1462,12 +1511,49 @@ async function uploadImage(file, examPin, questionId) {
                 {question.type === 'shortanswer' && (
                   <div className="ml-4">
                     <span className="text-gray-600">Đáp án: </span>
-                    <MathJax inline dynamic>{question.answer}</MathJax>
+                    <MathJax inline dynamic>{question.answer ?? ""}</MathJax>
                   </div>
                 )}
               </div>
             ))}
           </div>
+          
+          {/* Pagination Controls */}
+          {totalPreviewPages > 1 && (
+            <div className="flex justify-center items-center mt-6 space-x-2">
+              <button
+                onClick={() => setCurrentPreviewPage(prev => Math.max(0, prev - 1))}
+                disabled={currentPreviewPage === 0}
+                className={`px-3 py-1 border rounded ${
+                  currentPreviewPage === 0 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'bg-white text-blue-500 hover:bg-blue-50'
+                }`}
+              >
+                &laquo; Trước
+              </button>
+              
+              <div className="px-3 py-1 text-sm">
+                Trang {currentPreviewPage + 1} / {totalPreviewPages}
+                {previewQuestions.length > 0 && 
+                  ` (${currentPreviewPage * questionsPerPage + 1}-${Math.min((currentPreviewPage + 1) * questionsPerPage, previewQuestions.length)} của ${previewQuestions.length} câu hỏi)`
+                }
+              </div>
+              
+              <button
+                onClick={() => setCurrentPreviewPage(prev => Math.min(totalPreviewPages - 1, prev + 1))}
+                disabled={currentPreviewPage >= totalPreviewPages - 1}
+                className={`px-3 py-1 border rounded ${
+                  currentPreviewPage >= totalPreviewPages - 1
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'bg-white text-blue-500 hover:bg-blue-50'
+                }`}
+              >
+                Tiếp &raquo;
+              </button>
+            </div>
+          )}
+          
           <div className="mt-6 flex justify-end gap-2">
             <button
               className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"

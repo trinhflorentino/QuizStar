@@ -163,7 +163,7 @@ function QuestionItem({
             <textarea
               placeholder={`Câu hỏi ${index + 1}`}
               className="w-full px-4 py-3 text-base md:text-lg border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px] resize-y pr-12"
-              value={question.question}
+              value={question.question ?? ""}
               onChange={(event) => onQuestionChange(event, index, "question")}
             />
             <button
@@ -199,7 +199,7 @@ function QuestionItem({
                       type="text"
                       className="w-full px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
                       placeholder={`Phương án ${String.fromCharCode(65 + ind)}`}
-                      value={option.option}
+                      value={option.option ?? ""}
                       onChange={(event) => onOptionChange(event, index, ind)}
                     />
                     <button
@@ -274,7 +274,7 @@ function QuestionItem({
                 type="text"
                 className="w-full px-4 py-2 text-sm md:text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12"
                 placeholder="Nhập đáp án..."
-                value={question.answer}
+                value={question.answer ?? ""}
                 onChange={(event) => onQuestionChange(event, index, "answer")}
               />
               <button

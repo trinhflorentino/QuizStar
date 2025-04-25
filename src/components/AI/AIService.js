@@ -1,37 +1,109 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI, Type } from "@google/genai";
 import mammoth from 'mammoth';
 
 const apiKey = "AIzaSyAeMN1c914F4WzgwKKbr4C29KbYx76h5a4";
-const genAI = new GoogleGenerativeAI(apiKey);
+const ai = new GoogleGenAI({ apiKey });
 
-const model20flash = genAI.getGenerativeModel({
+const responseSchema = {
+  type: Type.ARRAY,
+  description: "Một mảng các đối tượng câu hỏi được trích xuất từ file.",
+  items: {
+    type: Type.OBJECT,
+    description: "Đại diện cho một câu hỏi duy nhất được trích xuất. Các trường có giá trị null sẽ bị bỏ qua.",
+    required: ["question", "type"],
+    properties: {
+      answer: {
+        type: Type.STRING,
+        description: "Đáp án được trích xuất từ file nếu có (ký tự MCQ, chuỗi JSON mảng boolean T/F, chuỗi text SA). Trường này sẽ bị bỏ qua nếu không tìm thấy đáp án.",
+        nullable: "True",
+      },
+      question: {
+        type: Type.STRING,
+        description: "Nội dung câu hỏi. Công thức ở dạng LaTeX. Không chứa HTML.",
+      },
+      type: {
+        type: Type.STRING,
+        description: "Loại câu hỏi.",
+        enum: ["mcq", "truefalse", "shortanswer"],
+      },
+      options: {
+        type: Type.ARRAY,
+        description: "Mảng các lựa chọn (mcq) hoặc mệnh đề (truefalse). Trường này sẽ bị bỏ qua đối với 'shortanswer' hoặc nếu không có lựa chọn/mệnh đề.",
+        nullable: "True",
+        items: {
+          type: Type.STRING,
+          description: "Một lựa chọn hoặc một mệnh đề.",
+        },
+      },
+    },
+  },
+};
+
+// {
+//   "type": "ARRAY",
+//   "description": "Một mảng các đối tượng câu hỏi được trích xuất từ file.",
+//   "items": {
+//     "type": "OBJECT",
+//     "description": "Đại diện cho một câu hỏi duy nhất được trích xuất. Các trường có giá trị null sẽ bị bỏ qua.",
+//     "properties": {
+//       "answer": {
+//         "type": "STRING",
+//         "nullable": true, 
+//         "description": "Đáp án được trích xuất từ file nếu có (ký tự MCQ, chuỗi JSON mảng boolean T/F, chuỗi text SA). Trường này sẽ bị bỏ qua nếu không tìm thấy đáp án."
+//       },
+//       "question": {
+//         "type": "STRING",
+//         "description": "Nội dung câu hỏi. Công thức ở dạng LaTeX. Không chứa HTML."
+//       },
+//       "type": {
+//         "type": "STRING",
+//         "description": "Loại câu hỏi.",
+//         "enum": ["mcq", "truefalse", "shortanswer"]
+//       },
+//       "options": {
+//         "type": "ARRAY",
+//         "nullable": true,
+//         "description": "Mảng các lựa chọn (mcq) hoặc mệnh đề (truefalse). Trường này sẽ bị bỏ qua đối với 'shortanswer' hoặc nếu không có lựa chọn/mệnh đề.",
+//         "items": {
+//           "type": "STRING",
+//           "description": "Một lựa chọn hoặc một mệnh đề."
+//         }
+//       }
+//     },
+//     "required": ["question", "type"],
+//     "propertyOrdering": ["answer", "type", "question", "options", "answer"] 
+//   }
+// }
+
+const model20flash = {
   model: "gemini-2.5-flash-preview-04-17",
-  generationConfig: {
-    temperature: 0.6,
+  config: {
+    temperature: 0.2,
     responseMimeType: 'application/json',
     thinkingConfig: {
       thinkingBudget: 0,
     },
-  },
-});
+    responseSchema: responseSchema
+  }
+};
 
-const model1206 = genAI.getGenerativeModel({
+const model1206 = {
   model: "gemini-exp-1206",
-  generationConfig: {
-    "responseMimeType": "application/json",
+  config: {
+    responseMimeType: "application/json",
     temperature: 0.6,
     topP: 0.95,
     topK: 40,
-    maxOutputTokens: 8192,
-  },
-});
+    maxOutputTokens: 8192
+  }
+};
 
-const model15pro = genAI.getGenerativeModel({
+const model15pro = {
   model: "learnlm-1.5-pro-experimental",
-  generationConfig: {
-    "responseMimeType": "application/json",
-  },
-});
+  config: {
+    responseMimeType: "application/json"
+  }
+};
 
 export async function extractQuestionsJSON(file, prompt) {
   console.time("Thời gian thực hiện");
@@ -40,7 +112,7 @@ export async function extractQuestionsJSON(file, prompt) {
     return;
   }
   try {
-    let fileContent = await readFile(file);
+    let fileContent;
     let fileType = file.type;
     
     if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
@@ -48,36 +120,38 @@ export async function extractQuestionsJSON(file, prompt) {
       const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
       fileContent = result.value;
       fileType = "text/html";
+    } else {
+      fileContent = await readFile(file);
     }
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/upload/v1beta/files",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": fileType,
-          "x-goog-api-key": apiKey,
-        },
-        body: fileContent,
-      }
-    );
+    // Upload the file using the new API
+    const uploadedFile = await ai.files.upload({
+      file: new Blob([fileContent], { type: fileType }),
+      mimeType: fileType
+    });
 
-    const uploadResponse = await response.json();
-    const fileUri = uploadResponse.file.uri;
-    
-    const result = await model20flash.generateContent([
-      {
-        fileData: {
-          mimeType: fileType,
-          fileUri: fileUri,
-        },
-      },
-      { text: prompt },
-    ]);
+    // Generate content using the uploaded file
+    const response = await ai.models.generateContent({
+      model: model20flash.model,
+      contents: [
+        {
+          parts: [
+            {
+              fileData: {
+                mimeType: fileType,
+                fileUri: uploadedFile.uri
+              }
+            },
+            { text: prompt }
+          ]
+        }
+      ],
+      config: model20flash.config
+    });
 
     console.timeEnd("Thời gian thực hiện");
     
-    let responseText = result.response.text();
+    let responseText = response.text;
     if (responseText.endsWith("]}]}]")) {
       responseText = responseText.slice(0, -2);
     }
@@ -94,7 +168,7 @@ export async function matrixQuestionsJSON(file, prompt) {
     return;
   }
   try {
-    let fileContent = await readFile(file);
+    let fileContent;
     let fileType = file.type;
     
     if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
@@ -102,36 +176,38 @@ export async function matrixQuestionsJSON(file, prompt) {
       const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
       fileContent = result.value;
       fileType = "text/html";
+    } else {
+      fileContent = await readFile(file);
     }
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/upload/v1beta/files",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": fileType,
-          "x-goog-api-key": apiKey,
-        },
-        body: fileContent,
-      }
-    );
+    // Upload the file using the new API
+    const uploadedFile = await ai.files.upload({
+      file: new Blob([fileContent], { type: fileType }),
+      mimeType: fileType
+    });
 
-    const uploadResponse = await response.json();
-    const fileUri = uploadResponse.file.uri;
-    
-    const result = await model20flash.generateContent([
-      {
-        fileData: {
-          mimeType: fileType,
-          fileUri: fileUri,
-        },
-      },
-      { text: prompt },
-    ]);
+    // Generate content using the uploaded file
+    const response = await ai.models.generateContent({
+      model: model20flash.model,
+      contents: [
+        {
+          parts: [
+            {
+              fileData: {
+                mimeType: fileType,
+                fileUri: uploadedFile.uri
+              }
+            },
+            { text: prompt }
+          ]
+        }
+      ],
+      config: model20flash.config
+    });
 
     console.timeEnd("Thời gian thực hiện");
     
-    let responseText = result.response.text();
+    let responseText = response.text;
     if (responseText.endsWith("]}]}]")) {
       responseText = responseText.slice(0, -2);
     }
@@ -144,9 +220,14 @@ export async function matrixQuestionsJSON(file, prompt) {
 export async function createQuestionsJSON(prompt) {
   console.time("Thời gian thực hiện");
   try {
-    const result = await model15pro.generateContent(prompt);
+    const response = await ai.models.generateContent({
+      model: model15pro.model,
+      contents: prompt,
+      config: model15pro.config
+    });
+    
     console.timeEnd("Thời gian thực hiện");
-    return result.response.text();
+    return response.text;
   } catch (error) {
     console.error("Error uploading or summarizing:", error);
   }
