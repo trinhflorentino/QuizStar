@@ -1,1 +1,134 @@
-const a0_0x477385=a0_0x1e9e;(function(_0x2c8abb,_0x24a28b){const _0x5ec0a5=a0_0x1e9e,_0x1ba84f=_0x2c8abb();while(!![]){try{const _0x1ea830=-parseInt(_0x5ec0a5(0x19a))/0x1+parseInt(_0x5ec0a5(0x1bf))/0x2+parseInt(_0x5ec0a5(0x197))/0x3*(parseInt(_0x5ec0a5(0x1a9))/0x4)+parseInt(_0x5ec0a5(0x19b))/0x5+-parseInt(_0x5ec0a5(0x1a3))/0x6+parseInt(_0x5ec0a5(0x1b3))/0x7*(parseInt(_0x5ec0a5(0x193))/0x8)+-parseInt(_0x5ec0a5(0x1a4))/0x9*(-parseInt(_0x5ec0a5(0x1aa))/0xa);if(_0x1ea830===_0x24a28b)break;else _0x1ba84f['push'](_0x1ba84f['shift']());}catch(_0x3989dc){_0x1ba84f['push'](_0x1ba84f['shift']());}}}(a0_0x4e0d,0xc1727),auth[a0_0x477385(0x1bb)](_0xbceefc=>{const _0x3a9328=a0_0x477385;if(!_0xbceefc)return;const _0x37ddfd=firestoreDB[_0x3a9328(0x1b5)](_0x3a9328(0x1c1))[_0x3a9328(0x19e)](auth[_0x3a9328(0x198)][_0x3a9328(0x1a2)]);_0x37ddfd['onSnapshot'](_0x3b7e0c=>{const _0x2b11b7=_0x3a9328;if(!_0x3b7e0c[_0x2b11b7(0x1c4)])return;const _0x1e05ad=_0x3b7e0c[_0x2b11b7(0x1a6)]()['match'],_0x5572ec={'CompetitorList':_0x2b11b7(0x1af),'MatchName':'BannerUI_MatchName','CustomText':_0x2b11b7(0x1c6)},_0x32e479={'Advisor1':_0x2b11b7(0x19c),'Advisor2':'BannerMusic_Advisor2','Advisor3':_0x2b11b7(0x1ab),'Advisor4':_0x2b11b7(0x1b4),'Advisor5':'BannerMusic_Advisor5','ContestantIntroduction':_0x2b11b7(0x1cb),'End':_0x2b11b7(0x1ca),'GivingPrize':_0x2b11b7(0x1c5),'MC':'BannerMusic_MC','TenseMoments':'BannerMusic_TenseMoments','Place1st':_0x2b11b7(0x1ba),'Place2nd':_0x2b11b7(0x196),'Place3rd':'BannerMusic_Place3rd','Place4th':_0x2b11b7(0x1c9)},_0x485f7a=(_0x595af8,_0x537185=null)=>{const _0x19f1cb=_0x2b11b7,_0x510c66={'ContestantList':![],'MatchName':![],'CustomText':![],'CustomTextContent':null};_0x510c66[_0x595af8]=!![],_0x537185!==null&&(_0x510c66[_0x19f1cb(0x1b0)]=_0x537185),Object[_0x19f1cb(0x1a5)](_0x510c66)[_0x19f1cb(0x1ad)](_0x47e6c5=>{const _0x374d8c=_0x19f1cb;realtimeDB[_0x374d8c(0x19f)](_0x1e05ad+_0x374d8c(0x1c3)+_0x47e6c5)[_0x374d8c(0x1b7)](_0x510c66[_0x47e6c5]);}),successToast(_0x19f1cb(0x1c7),0xbb8,_0x19f1cb(0x1a8),_0x19f1cb(0x1b1),![],_0x19f1cb(0x1c8),'');},_0x5c3f79=_0x52227f=>{const _0x1935eb=_0x2b11b7,_0x132cf0={'Advisor1':![],'Advisor2':![],'Advisor3':![],'Advisor4':![],'Advisor5':![],'ContestantIntroduction':![],'End':![],'GivingPrize':![],'MC':![],'TenseMoments':![],'Place1st':![],'Place2nd':![],'Place3rd':![],'Place4th':![]};Object[_0x1935eb(0x1a5)](_0x132cf0)[_0x1935eb(0x1ad)](_0x51e80d=>{const _0xa2df22=_0x1935eb;realtimeDB[_0xa2df22(0x19f)](_0x1e05ad+_0xa2df22(0x19d)+_0x51e80d)['set'](_0x132cf0[_0x51e80d]);}),setTimeout(()=>{const _0x531245=_0x1935eb;_0x132cf0[_0x52227f]=!![],realtimeDB['ref'](_0x1e05ad+_0x531245(0x19d)+_0x52227f)[_0x531245(0x1b7)](_0x132cf0[_0x52227f]);},0x64);};document[_0x2b11b7(0x1b9)](_0x5572ec['CompetitorList'])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{_0x485f7a('ContestantList');}),document[_0x2b11b7(0x1b9)](_0x5572ec[_0x2b11b7(0x195)])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x435ab1=_0x2b11b7;_0x485f7a(_0x435ab1(0x195));}),document['getElementById'](_0x5572ec[_0x2b11b7(0x1be)])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x477f67=_0x2b11b7,_0x5d0121=prompt(_0x477f67(0x1b8));_0x485f7a(_0x477f67(0x1be),_0x5d0121);}),document[_0x2b11b7(0x1b9)](_0x32e479[_0x2b11b7(0x1c0)])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x13bc90=_0x2b11b7;_0x5c3f79(_0x13bc90(0x1c0));}),document['getElementById'](_0x32e479['Advisor2'])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{_0x5c3f79('Advisor2');}),document['getElementById'](_0x32e479[_0x2b11b7(0x1a7)])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x1cddec=_0x2b11b7;_0x5c3f79(_0x1cddec(0x1a7));}),document[_0x2b11b7(0x1b9)](_0x32e479[_0x2b11b7(0x1b6)])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x4378fd=_0x2b11b7;_0x5c3f79(_0x4378fd(0x1b6));}),document['getElementById'](_0x32e479[_0x2b11b7(0x1a1)])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x400d74=_0x2b11b7;_0x5c3f79(_0x400d74(0x1a1));}),document[_0x2b11b7(0x1b9)](_0x32e479[_0x2b11b7(0x1a0)])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x3f5c7a=_0x2b11b7;_0x5c3f79(_0x3f5c7a(0x1a0));}),document[_0x2b11b7(0x1b9)](_0x32e479[_0x2b11b7(0x1bc)])['addEventListener'](_0x2b11b7(0x1c2),()=>{const _0xa781d0=_0x2b11b7;_0x5c3f79(_0xa781d0(0x1bc));}),document[_0x2b11b7(0x1b9)](_0x32e479['GivingPrize'])['addEventListener'](_0x2b11b7(0x1c2),()=>{const _0x23fa07=_0x2b11b7;_0x5c3f79(_0x23fa07(0x192));}),document[_0x2b11b7(0x1b9)](_0x32e479['MC'])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{_0x5c3f79('MC');}),document[_0x2b11b7(0x1b9)](_0x32e479[_0x2b11b7(0x199)])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x372401=_0x2b11b7;_0x5c3f79(_0x372401(0x199));}),document[_0x2b11b7(0x1b9)](_0x32e479[_0x2b11b7(0x194)])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x2885e4=_0x2b11b7;_0x5c3f79(_0x2885e4(0x194));}),document[_0x2b11b7(0x1b9)](_0x32e479[_0x2b11b7(0x1ae)])[_0x2b11b7(0x1ac)]('click',()=>{_0x5c3f79('Place3rd');}),document[_0x2b11b7(0x1b9)](_0x32e479[_0x2b11b7(0x1bd)])[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x9fbf6c=_0x2b11b7;_0x5c3f79(_0x9fbf6c(0x1bd));}),document[_0x2b11b7(0x1b9)]('BannerOthers_StopMusic')[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0x3df872={'Advisor1':![],'Advisor2':![],'Advisor3':![],'Advisor4':![],'Advisor5':![],'ContestantIntroduction':![],'End':![],'GivingPrize':![],'MC':![],'TenseMoments':![],'Place1st':![],'Place2nd':![],'Place3rd':![],'Place4th':![]};Object['keys'](_0x3df872)['forEach'](_0x41707a=>{const _0x482b4b=a0_0x1e9e;realtimeDB[_0x482b4b(0x19f)](_0x1e05ad+_0x482b4b(0x19d)+_0x41707a)[_0x482b4b(0x1b7)](_0x3df872[_0x41707a]);});}),document['getElementById'](_0x2b11b7(0x1b2))[_0x2b11b7(0x1ac)](_0x2b11b7(0x1c2),()=>{const _0xae6aad={'ContestantList':![],'MatchName':![],'CustomText':![],'CustomTextContent':null};Object['keys'](_0xae6aad)['forEach'](_0x5bd82b=>{const _0x571950=a0_0x1e9e;realtimeDB[_0x571950(0x19f)](_0x1e05ad+_0x571950(0x1c3)+_0x5bd82b)[_0x571950(0x1b7)](_0xae6aad[_0x5bd82b]);});});});}));function a0_0x1e9e(_0x53e0b0,_0x4f4e95){const _0x4e0d56=a0_0x4e0d();return a0_0x1e9e=function(_0x1e9ea4,_0x2a35bc){_0x1e9ea4=_0x1e9ea4-0x192;let _0xaee2d8=_0x4e0d56[_0x1e9ea4];return _0xaee2d8;},a0_0x1e9e(_0x53e0b0,_0x4f4e95);}function a0_0x4e0d(){const _0x1d8766=['BannerOthers_ClearUI','7OVJQKo','BannerMusic_Advisor4','collection','Advisor4','set','Enter\x20custom\x20text:','getElementById','BannerMusic_Place1st','onAuthStateChanged','End','Place4th','CustomText','1399940OLlNsy','Advisor1','match','click','/Banner/Elements/','exists','BannerMusic_GivingPrize','BannerUI_CustomText','Thao\x20tác\x20thành\x20công','radial-gradient(circle\x20at\x2074.2%\x2050.9%,\x20rgb(14,\x2072,\x20222)\x205.2%,\x20rgb(3,\x2022,\x2065)\x2075.3%)','BannerMusic_Place4th','BannerMusic_End','BannerMusic_ContestantIntroduction','GivingPrize','2524192EQUlQc','Place2nd','MatchName','BannerMusic_Place2nd','226647NeJTVO','currentUser','Place1st','1302357GEslPw','2841565YWMCwk','BannerMusic_Advisor1','/Banner/Music/','doc','ref','ContestantIntroduction','Advisor5','uid','348972wjcPfQ','1602zZbCZK','keys','data','Advisor3','top','28sghVkl','2260YluznF','BannerMusic_Advisor3','addEventListener','forEach','Place3rd','BannerUI_CompetitorList','CustomTextContent','right'];a0_0x4e0d=function(){return _0x1d8766;};return a0_0x4e0d();}
+auth.onAuthStateChanged(_0x21b6c3 => {
+    if (!_0x21b6c3) {
+      return;
+    }
+    const _0x2015df = firestoreDB.collection('match').doc(auth.currentUser.uid);
+    _0x2015df.onSnapshot(_0x5b83cb => {
+      if (!_0x5b83cb.exists) {
+        return;
+      }
+      const _0x3e54fe = _0x5b83cb.data().match;
+      const _0x2b90a9 = (_0x6fa8fd, _0x429301 = null) => {
+        const _0x10f28e = {
+          'ContestantList': false,
+          'MatchName': false,
+          'CustomText': false,
+          'CustomTextContent': null
+        };
+        _0x10f28e[_0x6fa8fd] = true;
+        if (_0x429301 !== null) {
+          _0x10f28e.CustomTextContent = _0x429301;
+        }
+        Object.keys(_0x10f28e).forEach(_0x3cbc7f => {
+          realtimeDB.ref(_0x3e54fe + "/Banner/Elements/" + _0x3cbc7f).set(_0x10f28e[_0x3cbc7f]);
+        });
+        successToast("Thao tác thành công", 0xbb8, "top", 'right', false, "radial-gradient(circle at 74.2% 50.9%, rgb(14, 72, 222) 5.2%, rgb(3, 22, 65) 75.3%)", '');
+      };
+      const _0x254a9f = _0x57aeec => {
+        const _0x26bda3 = {
+          'Advisor1': false,
+          'Advisor2': false,
+          'Advisor3': false,
+          'Advisor4': false,
+          'Advisor5': false,
+          'ContestantIntroduction': false,
+          'End': false,
+          'GivingPrize': false,
+          'MC': false,
+          'TenseMoments': false,
+          'Place1st': false,
+          'Place2nd': false,
+          'Place3rd': false,
+          'Place4th': false
+        };
+        Object.keys(_0x26bda3).forEach(_0x2a6444 => {
+          realtimeDB.ref(_0x3e54fe + '/Banner/Music/' + _0x2a6444).set(_0x26bda3[_0x2a6444]);
+        });
+        setTimeout(() => {
+          _0x26bda3[_0x57aeec] = true;
+          realtimeDB.ref(_0x3e54fe + "/Banner/Music/" + _0x57aeec).set(_0x26bda3[_0x57aeec]);
+        }, 0x64);
+      };
+      document.getElementById("BannerUI_CompetitorList").addEventListener("click", () => {
+        _0x2b90a9("ContestantList");
+      });
+      document.getElementById("BannerUI_MatchName").addEventListener("click", () => {
+        _0x2b90a9("MatchName");
+      });
+      document.getElementById("BannerUI_CustomText").addEventListener("click", () => {
+        const _0x30fcee = prompt("Enter custom text:");
+        _0x2b90a9('CustomText', _0x30fcee);
+      });
+      document.getElementById('BannerMusic_Advisor1').addEventListener("click", () => {
+        _0x254a9f("Advisor1");
+      });
+      document.getElementById("BannerMusic_Advisor2").addEventListener("click", () => {
+        _0x254a9f('Advisor2');
+      });
+      document.getElementById('BannerMusic_Advisor3').addEventListener("click", () => {
+        _0x254a9f("Advisor3");
+      });
+      document.getElementById('BannerMusic_Advisor4').addEventListener("click", () => {
+        _0x254a9f("Advisor4");
+      });
+      document.getElementById("BannerMusic_Advisor5").addEventListener("click", () => {
+        _0x254a9f('Advisor5');
+      });
+      document.getElementById('BannerMusic_ContestantIntroduction').addEventListener("click", () => {
+        _0x254a9f("ContestantIntroduction");
+      });
+      document.getElementById("BannerMusic_End").addEventListener('click', () => {
+        _0x254a9f("End");
+      });
+      document.getElementById("BannerMusic_GivingPrize").addEventListener("click", () => {
+        _0x254a9f("GivingPrize");
+      });
+      document.getElementById("BannerMusic_MC").addEventListener("click", () => {
+        _0x254a9f('MC');
+      });
+      document.getElementById("BannerMusic_Place1st").addEventListener("click", () => {
+        _0x254a9f('Place1st');
+      });
+      document.getElementById("BannerMusic_Place2nd").addEventListener("click", () => {
+        _0x254a9f("Place2nd");
+      });
+      document.getElementById("BannerMusic_Place3rd").addEventListener("click", () => {
+        _0x254a9f("Place3rd");
+      });
+      document.getElementById("BannerMusic_Place4th").addEventListener("click", () => {
+        _0x254a9f('Place4th');
+      });
+      document.getElementById("BannerOthers_StopMusic").addEventListener("click", () => {
+        const _0x5e0160 = {
+          'Advisor1': false,
+          'Advisor2': false,
+          'Advisor3': false,
+          'Advisor4': false,
+          'Advisor5': false,
+          'ContestantIntroduction': false,
+          'End': false,
+          'GivingPrize': false,
+          'MC': false,
+          'TenseMoments': false,
+          'Place1st': false,
+          'Place2nd': false,
+          'Place3rd': false,
+          'Place4th': false
+        };
+        Object.keys(_0x5e0160).forEach(_0x9fdae1 => {
+          realtimeDB.ref(_0x3e54fe + '/Banner/Music/' + _0x9fdae1).set(_0x5e0160[_0x9fdae1]);
+        });
+      });
+      document.getElementById('BannerOthers_ClearUI').addEventListener("click", () => {
+        const _0x6acaaa = {
+          'ContestantList': false,
+          'MatchName': false,
+          'CustomText': false,
+          'CustomTextContent': null
+        };
+        Object.keys(_0x6acaaa).forEach(_0x589728 => {
+          realtimeDB.ref(_0x3e54fe + "/Banner/Elements/" + _0x589728).set(_0x6acaaa[_0x589728]);
+        });
+      });
+    });
+  });

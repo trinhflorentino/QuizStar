@@ -1,0 +1,23 @@
+{
+  "dependencies": {
+    "@material-tailwind/html": "^2.2.5",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "firebase": "^10.4.0",
+    "firebase-tools": "^12.6.2"
+  },
+  "name": "theolympusonline",
+  "description": "<div align=\"center\">\r   <a href=\"https://github.com/anhkhoatqt11/theolympusonline/\">\r     <img src=\"img/Logo.png\" alt=\"Logo\" width=\"120\" height=\"120\">\r   </a>",
+  "version": "1.0.0",
+  "main": "tailwind.config.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tailwindcss -i ./css/style.css -o ./dist/output.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.4.7"
+  }
+}

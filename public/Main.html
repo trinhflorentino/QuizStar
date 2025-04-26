@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-  <title>Tạo trò chơi | QuizStar</title>
+  <title>Trang chính | QuizStar</title>
   <link href="./dist/output.css" rel="stylesheet">
   <!-- Material Icons Link -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -34,58 +34,39 @@
 </head>
 
 <body class="dark:bg-neutral-900">
-  <!-- Modified Sidebar Section -->
   <aside
     class="fixed top-0 left-0 z-40 w-32 h-screen transition-transform -translate-x-full sm:translate-x-0 border-r-2 border-neutral-100 dark:border-gray-500 flex flex-col justify-between items-center">
-    
-    <!-- App Logo (Static, No Redirect) -->
+    <!-- App Logo -->
     <div class="mt-6">
-      <img id="appLogoImage" src="img/appLogo.png" class="rounded-full w-16 h-16 cursor-default" alt="appLogo">
-      <!-- <div data-tooltip="appLogoToolTip" data-tooltip-placement="right-end"
-        class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
-        Logo Ứng Dụng
-      </div> -->
-    </div>
-
-    <!-- Back Button -->
-    <div class="my-4">
-      <button onclick="window.location.href='./'"
-        class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
-        data-ripple-light="true" data-tooltip-target="backToolTip" id="backButton">
-        <span class="material-symbols-outlined">
-          arrow_back
-        </span>
+      <button data-tab-target="#home" class="tab-button" data-ripple-light="true" data-tooltip-target="homeToolTip">
+        <img id="appLogoImage" src="img/appLogo.png" class="rounded-full w-16 h-16" alt="appLogo">
       </button>
-      <div data-tooltip="backToolTip" data-tooltip-placement="right-end"
+      <div data-tooltip="homeToolTip" data-tooltip-placement="right-end"
         class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
-        Quay lại Trang Chủ
+        Trang chủ
       </div>
     </div>
 
     <!-- Icon List (Center) -->
     <div class="flex flex-col items-center">
-      
-      <!-- Play Icon (Replaces Home Icon) -->
-      <div class="my-4">
-        <button data-tab-target="#home"
-          class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
-          data-ripple-light="true" data-tooltip-target="playToolTip" id="playButton">
+          <div class="my-4">
+        <a href="/"
+          class="text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
+          data-tooltip-target="homeNavigationToolTip">
           <span class="material-symbols-outlined">
-            play_arrow
+            home
           </span>
-        </button>
-        <div data-tooltip="playToolTip" data-tooltip-placement="right-end"
+        </a>
+        <div data-tooltip="homeNavigationToolTip" data-tooltip-placement="right-end"
           class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
-          Chơi trò chơi
+          Quay lại trang chủ
         </div>
       </div>
-
-      <!-- Existing Match List Icon -->
       <div class="my-4">
         <button data-tab-target="#matches"
           class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
           data-ripple-light="true" data-tooltip-target="matchListToolTip" id="matchListButton">
-          <span class="material-symbols-outlined">
+          <span id="matchListIcon" class="material-symbols-outlined">
             splitscreen_landscape
           </span>
         </button>
@@ -94,13 +75,11 @@
           Danh sách phòng trò chơi
         </div>
       </div>
-
-      <!-- Existing Video Setup Icon -->
       <div class="my-4">
         <button data-tab-target="#video"
           class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
           data-ripple-light="true" data-tooltip-target="videoToolTip" id="videoButton">
-          <span class="material-symbols-outlined">
+          <span id="videoIcon" class="material-symbols-outlined">
             movie
           </span>
         </button>
@@ -109,13 +88,11 @@
           Thiết lập Video giới thiệu
         </div>
       </div>
-
-      <!-- Existing Theme Customization Icon -->
       <div class="my-4">
         <button data-tab-target="#theme"
           class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
           data-ripple-light="true" data-tooltip-target="themeCustomizationToolTip" id="themeCustomizationButton">
-          <span class="material-symbols-outlined">
+          <span id="themeCustomizationIcon" class="material-symbols-outlined">
             palette
           </span>
         </button>
@@ -130,7 +107,7 @@
     <div class="mb-4">
       <button data-tab-target="#profile" class="tab-button" data-ripple-light="true"
         data-tooltip-target="profileToolTip">
-        <img id="userAvatar" src="img/userAvatar.png" alt="avatar"
+        <img id="userAvatar" src="img/appLogo.png" alt="avatar"
           class="relative inline-block h-14 w-14 rounded-full object-cover object-center">
       </button>
       <div data-tooltip="profileToolTip" data-tooltip-placement="right-end"
@@ -155,8 +132,8 @@
     <!-- Home Page -->
     <div id="home" class="tab-content block">
       <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
-        <p class="font-semibold text-3xl dark:text-white">Tham gia trò chơi</p>
-        <p class="font-light text-gray-500 text-lg">Nhập mã trận và mật khẩu để tham gia trò chơi</p>
+        <p class="font-semibold text-3xl dark:text-white">Tham gia phòng trò chơi</p>
+        <p class="font-medium text-gray-500 text-lg">Nhập mã trận và mật khẩu để tham gia phòng trò chơi</p>
       </div>
 
       <div id="promotion-container">
@@ -167,7 +144,7 @@
         id="matchJoinCard" data-dialog-target="choose-positon-dialog">
         <div class="p-8">
           <h5 class="block mb-2 text-xl antialiased font-semibold leading-snug tracking-normal">
-            Bạn đang tham gia trò chơi
+            Bạn đang tham gia
           </h5>
           <div class="w-full h-px bg-white my-4"></div>
           <h5 class="block mb-2 text-xl antialiased font-semibold leading-snug tracking-normal" id="matchJoiningName">
@@ -187,7 +164,7 @@
             Chào mừng bạn đến với QuizStar
           </h5>
           <p class="block text-base antialiased font-light leading-relaxed text-inherit">
-            Tham gia trò chơi bằng cách nhập mã trận và mật khẩu
+            Tham gia phòng trò chơi bằng cách nhập mã trận và mật khẩu
           </p>
         </div>
       </div>
@@ -196,14 +173,14 @@
     <!-- Matches Page -->
     <div id="matches" class="tab-content hidden">
       <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
-        <p class="font-semibold text-3xl dark:text-white">Danh sách trò chơi</p>
-        <p class="font-light text-gray-400 text-lg">Danh sách trò chơi của bạn</p>
+        <p class="font-semibold text-3xl dark:text-white">Danh sách phòng trò chơi</p>
+        <p class="text-gray-400 text-lg font-medium">Danh sách phòng trò chơi của bạn</p>
       </div>
       <div class="w-full flex justify-between items-center mb-3 mt-1 pl-3 p-6">
         <div class="ml-3">
           <button
             class="bg-neutral-800 dark:bg-neutral-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-neutral-900 dark:hover:bg-neutral-700 transition duration-300"
-            data-dialog-target="match-creation-modal">Tạo trò chơi mới
+            data-dialog-target="match-creation-modal">Tạo phòng trò chơi mới
           </button>
         </div>
         <div class="ml-3">
@@ -236,7 +213,7 @@
               </th>
               <th class="p-4 border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-neutral-700">
                 <p class="text-sm font-normal leading-none text-slate-500 dark:text-slate-300">
-                  Tên trò chơi
+                  Tên phòng trò chơi
                 </p>
               </th>
               <th class="p-4 border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-neutral-700">
@@ -280,10 +257,6 @@
             </button>
             <button
               class="px-3 py-1 min-w-9 min-h-9 text-sm font-normal text-slate-500 bg-white dark:bg-neutral-800 dark:text-slate-300 border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-400 transition duration-200 ease">
-              3
-            </button>
-            <button
-              class="px-3 py-1 min-w-9 min-h-9 text-sm font-normal text-slate-500 bg-white dark:bg-neutral-800 dark:text-slate-300 border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-400 transition duration-200 ease">
               Next
             </button>
           </div>
@@ -296,14 +269,15 @@
     <div id="theme" class="tab-content hidden">
       <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
         <p class="font-semibold text-3xl dark:text-white">Chỉnh sửa giao diện</p>
-        <p class="font-light text-gray-400 text-lg">Cá nhân hoá giao diện trò chơi của bạn</p>
+        <p class="font-medium text-gray-400 text-lg">Cá nhân hoá giao diện phòng trò chơi của bạn</p>
       </div>
 
       <div class="flex flex-col items-center justify-center text-center p-6">
         <img src="img/appLogo.png" alt="Designing" class="mb-4 w-24 h-24 rounded-full">
         <p class="text-lg font-semibold dark:text-white">
-          Tính năng này đang được thiết kế cho giao diện mới. Để chỉnh sửa giao diện, truy cập tại <a
-            href="./ThemeCustomization.html" target="_blank" class="text-blue-800">đây</a> bạn nhé.
+          <!-- Tính năng này đang được thiết kế cho giao diện mới. Để chỉnh sửa giao diện, truy cập tại <a
+            href="./ThemeCustomization.html" target="_blank" class="text-blue-800">đây</a> bạn nhé. -->
+            Chức năng chỉnh sửa giao diện tạm thời không khả dụng.
         </p>
       </div>
     </div>
@@ -322,8 +296,8 @@
       </div> -->
       <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
         <p class="font-semibold text-3xl dark:text-white">Thiết lập Video giới thiệu</p>
-        <p class="font-light text-gray-400 text-lg">Các Video mở đầu áp dụng trong các phần thi (chỉ áp dụng trong các
-          trò chơi của bạn)</p>
+        <p class="font-medium text-gray-400 text-lg">Các Video mở đầu áp dụng trong các phần thi (chỉ áp dụng trong các
+          phòng trò chơi của bạn)</p>
       </div>
       <div class="flex flex-col sm:flex-row gap-6 p-4 hidden" id="introSelection">
         <div
@@ -670,7 +644,7 @@
       <!-- Header -->
       <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
         <p class="font-semibold text-3xl dark:text-white">Trang cá nhân</p>
-        <p class="font-light text-gray-400 text-lg">Thông tin cá nhân của bạn</p>
+        <p class="font-medium text-gray-400 text-lg">Thông tin cá nhân của bạn</p>
       </div>
 
       <!-- Profile Section -->
@@ -865,7 +839,7 @@
   </form>
   <div data-dialog-backdrop="choose-positon-dialog" data-dialog-backdrop-close="true"
     class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300">
-    <div class="relative m-4 w-2/4 rounded-lg bg-white shadow-sm dark:bg-neutral-900" role="dialog"
+    <div class="relative m-4 w-full sm:w-2/4 rounded-lg bg-white shadow-sm dark:bg-neutral-900" role="dialog"
       data-dialog="choose-positon-dialog">
       <div class="flex items-center justify-between p-4">
         <div class="flex items-center gap-3">
@@ -881,7 +855,7 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <p class="font-semibold dark:text-white">Tham gia trò chơi</p>
+          <p class="font-semibold dark:text-white">Tham gia phòng trò chơi</p>
         </div>
       </div>
       <div
@@ -915,7 +889,7 @@
           <span class="material-icons">
             check
           </span>
-          Tham gia trò chơi
+          Tham gia phòng trò chơi
         </button>
       </div>
     </div>
@@ -926,7 +900,7 @@
     <div data-dialog="match-creation-modal"
       class="relative m-4 p-4 w-2/5 rounded-lg bg-white shadow-sm dark:bg-neutral-900">
       <div class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800 dark:text-white">
-        Tạo trò chơi mới
+        Tạo phòng trò chơi mới
       </div>
 
 
@@ -951,7 +925,7 @@
         <div>
           <button type="submit" data-ripple-dark="true" data-dialog-close="true"
             class="w-full bg-black text-white p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:bg-black focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300">Tạo
-            trò chơi mới</button>
+            phòng trò chơi mới</button>
         </div>
       </form>
       <!-- Form Inputs End -->

@@ -1,198 +1,194 @@
 let selectedItem = null;
-auth.onAuthStateChanged(_0xc4d60b => {
-  if (!_0xc4d60b) {
+auth.onAuthStateChanged(_0x3a2b99 => {
+  if (!_0x3a2b99) {
     return;
   }
-  const _0x4f537f = firestoreDB.collection("match").doc(auth.currentUser.uid);
-  _0x4f537f.onSnapshot(_0x5479a1 => {
-    if (!_0x5479a1.exists) {
+  const _0x4725c1 = firestoreDB.collection('match').doc(auth.currentUser.uid);
+  _0x4725c1.onSnapshot(_0x313886 => {
+    if (!_0x313886.exists) {
       return;
     }
-    const _0x35ff39 = _0x5479a1.data().match;
-    const _0x5ec9f8 = realtimeDB.ref(_0x35ff39 + "/games");
-    const _0x5eef25 = realtimeDB.ref(_0x35ff39 + '/Participant');
-    _0x5ec9f8.on('value', _0x27a3d5 => {
-      const _0x367514 = _0x27a3d5.val();
-      const _0x1533c7 = document.getElementById("competition-container");
-      _0x1533c7.innerHTML = '';
-      for (let _0x1fd2f7 = 0x1; _0x1fd2f7 <= 0x4; _0x1fd2f7++) {
-        const _0xbbfdb4 = _0x367514['player' + _0x1fd2f7];
-        if (_0xbbfdb4) {
-          const _0x3f4a65 = "Thí sinh " + _0x1fd2f7;
-          const _0x58f220 = createCompetitionItem(_0xbbfdb4.uid, _0xbbfdb4.displayName, _0x3f4a65, _0x1fd2f7);
-          _0x1533c7.appendChild(_0x58f220);
+    const _0x1a743e = _0x313886.data().match;
+    const _0x2804a1 = realtimeDB.ref(_0x1a743e + "/games");
+    const _0x1d579c = realtimeDB.ref(_0x1a743e + '/Participant');
+    _0x2804a1.on('value', _0x34fb17 => {
+      const _0x4eda1 = _0x34fb17.val();
+      const _0x5b3044 = document.getElementById("competition-container");
+      _0x5b3044.innerHTML = '';
+      for (let _0x555abf = 0x1; _0x555abf <= 0x4; _0x555abf++) {
+        const _0x8445fd = _0x4eda1["player" + _0x555abf];
+        if (_0x8445fd) {
+          const _0x18a5e7 = "Thí sinh " + _0x555abf;
+          const _0x42ab91 = createCompetitionItem(_0x8445fd.uid, _0x8445fd.displayName, _0x18a5e7, _0x555abf);
+          _0x5b3044.appendChild(_0x42ab91);
         }
       }
-      addExtraItems(_0x1533c7);
+      addExtraItems(_0x5b3044);
       addSelectItemListeners();
     });
-    document.getElementById("joinMatchButton").addEventListener("click", function () {
+    document.getElementById("joinMatchButton").addEventListener('click', function () {
       if (!selectedItem) {
-        failToast("Chọn một vị trí trước khi vào trận đấu");
+        failToast("Chọn một vị trí trước khi vào phòng trò chơi");
         return;
       }
-      const _0x2a0fd4 = parseInt(selectedItem.getAttribute("data-value"), 0xa);
-      _0x5eef25.orderByChild("uid").equalTo(auth.currentUser.uid).once('value', function (_0x160670) {
-        if (_0x160670.exists()) {
-          const _0x44eb49 = _0x160670.val();
-          const _0x3999e5 = Object.values(_0x44eb49)[0x0]?.["requestStatus"];
-          if (_0x3999e5 === 0x1) {
-            _0x5c34d0(_0x2a0fd4);
+      const _0x53e336 = parseInt(selectedItem.getAttribute("data-value"), 0xa);
+      if (_0x53e336 === 0x7) {
+        location.replace('Scoreboard.html');
+        return;
+      }
+      _0x1d579c.orderByChild('uid').equalTo(auth.currentUser.uid).once("value", function (_0x2b2e94) {
+        if (_0x2b2e94.exists()) {
+          const _0x112d0d = _0x2b2e94.val();
+          const _0x5e854a = Object.values(_0x112d0d)[0x0]?.["requestStatus"];
+          if (_0x5e854a === 0x1) {
+            _0xcddbba(_0x53e336);
           } else {
-            if (_0x3999e5 === 0x3) {
+            if (_0x5e854a === 0x3) {
               failToast("Bạn đã bị chặn bởi chủ phòng");
             } else {
-              if (_0x3999e5 === 0x2) {
+              if (_0x5e854a === 0x2) {
                 failToast("Bạn đã bị từ chối");
-                const _0x211c4a = Object.keys(_0x44eb49)[0x0];
-                _0x5eef25.child(_0x211c4a).remove();
+                const _0x222eec = Object.keys(_0x112d0d)[0x0];
+                _0x1d579c.child(_0x222eec).remove();
               } else {
                 failToast("Yêu cầu của bạn đang chờ xử lý");
               }
             }
           }
         } else {
-          _0x3419a0(_0x2a0fd4);
+          _0x4c800b(_0x53e336);
         }
       });
     });
-    function _0x5c34d0(_0x22058e) {
-      if (_0x22058e === 0x6) {
-        location.replace('MC.html');
+    function _0xcddbba(_0x21d1eb) {
+      if (_0x21d1eb === 0x6) {
+        location.replace("MC.html");
         localStorage.setItem('id', 0x7);
+      } else if (_0x21d1eb === 0x5) {
+        successToast("Tham gia phòng trò chơi thành công.");
+        localStorage.setItem('id', 0x5);
+        setTimeout(() => {
+          location.replace('Projector.html');
+        }, 0xbb8);
       } else {
-        if (_0x22058e === 0x5) {
-          _0x305f1e();
-        } else if (_0x22058e === 0x7) {
-          location.replace("Scoreboard.html");
-        } else {
-          failToast("Bạn đã tham gia ở một vai trò khác.");
-        }
+        failToast("Bạn đã tham gia ở một vai trò khác.");
       }
     }
-    function _0x305f1e() {
-      const _0x3a86d9 = confirm("Đây có phải là máy chiếu không?");
-      localStorage.setItem("isProjector", _0x3a86d9);
-      if (_0x3a86d9) {
-        const _0x53a8a9 = confirm("Bạn có muốn sử dụng nền xanh không?");
-        localStorage.setItem('isGreenBackground', _0x53a8a9);
-        const _0x21db34 = confirm("Bạn có muốn hiển thị Avatar thí sinh không?");
-        localStorage.setItem("isDisplayAvatar", _0x21db34);
-      } else {
-        localStorage.setItem("isGreenBackground", false);
-        localStorage.setItem("isDisplayAvatar", true);
-      }
-      successToast("Tham gia trận đấu thành công.");
-      localStorage.setItem('id', 0x5);
-      setTimeout(() => {
-        location.replace("Room.html");
-      }, 0xbb8);
-    }
-    function _0x3419a0(_0x2df6ad) {
-      console.log(_0x2df6ad);
-      if (_0x2df6ad < 0x5) {
-        const _0x217b0e = realtimeDB.ref(_0x35ff39 + '/games/player' + _0x2df6ad);
-        _0x217b0e.once("value", function (_0x905321) {
-          const _0x490c66 = _0x905321.val();
-          if (!_0x490c66 || _0x490c66.uid === '' || _0x490c66.uid === auth.currentUser.uid) {
-            successToast("Đã tham gia trận đấu");
-            _0x217b0e.set({
+    function _0x4c800b(_0x3b9d04) {
+      console.log(_0x3b9d04);
+      if (_0x3b9d04 < 0x5) {
+        const _0x4c10b1 = realtimeDB.ref(_0x1a743e + "/games/player" + _0x3b9d04);
+        _0x4c10b1.once("value", function (_0x5b693b) {
+          const _0x512287 = _0x5b693b.val();
+          if (!_0x512287 || _0x512287.uid === '') {
+            successToast("Đã tham gia phòng trò chơi");
+            _0x4c10b1.set({
               'uid': auth.currentUser.uid,
               'displayName': auth.currentUser.displayName,
-              'id': _0x2df6ad
+              'id': _0x3b9d04
             });
             setItemRendering();
-            localStorage.setItem('id', _0x2df6ad);
+            localStorage.setItem('id', _0x3b9d04);
             setTimeout(() => {
-              location.replace("Room.html");
+              location.replace("Ingame.html");
+            }, 0xbb8);
+          } else if (_0x512287.uid === auth.currentUser.uid) {
+            successToast("Đã tham gia phòng trò chơi");
+            _0x4c10b1.update({
+              'id': _0x3b9d04
+            });
+            setItemRendering();
+            localStorage.setItem('id', _0x3b9d04);
+            setTimeout(() => {
+              location.replace("Ingame.html");
             }, 0xbb8);
           } else {
             failToast("Vị trí đã được chọn");
           }
         });
       } else {
-        _0x5eef25.push({
+        _0x1d579c.push({
           'uid': auth.currentUser.uid,
           'displayName': auth.currentUser.displayName,
           'role': '',
           'requestStatus': 0x0
         }).then(() => {
-          successToast("Đã gửi yêu cầu tham gia trận đấu");
+          successToast("Đã gửi yêu cầu tham gia phòng trò chơi");
         });
       }
     }
   });
 });
 function addSelectItemListeners() {
-  const _0x320503 = document.querySelectorAll(".competition-item");
-  _0x320503.forEach(_0x5c08ae => {
-    _0x5c08ae.addEventListener("click", function () {
-      const _0x471e58 = localStorage.getItem("mode");
+  const _0x5c6c05 = document.querySelectorAll(".competition-item");
+  _0x5c6c05.forEach(_0x12c511 => {
+    _0x12c511.addEventListener("click", function () {
+      const _0x48b535 = localStorage.getItem("mode");
       if (selectedItem) {
-        selectedItem.classList.remove("bg-blue-100", "text-blue-800", "dark:bg-gray-700", 'dark:text-gray-200');
+        selectedItem.classList.remove("bg-blue-100", "text-blue-800", "dark:bg-gray-700", "dark:text-gray-200");
       }
-      selectedItem = _0x5c08ae;
-      if (_0x471e58 === "dark") {
+      selectedItem = _0x12c511;
+      if (_0x48b535 === "dark") {
         selectedItem.classList.add("dark:bg-gray-700", "dark:text-gray-200");
       } else {
-        selectedItem.classList.add('bg-blue-100', "text-blue-800");
+        selectedItem.classList.add('bg-blue-100', 'text-blue-800');
       }
     });
   });
 }
-function createCompetitionItem(_0xef9f20, _0x239e48, _0x33ae5e, _0x1f8994) {
-  const _0x12c2ca = document.createElement("div");
-  _0x12c2ca.className = "competition-item flex justify-between items-center cursor-pointer text-slate-800 p-4 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-all";
-  _0x12c2ca.setAttribute("data-value", _0x1f8994);
-  const _0x1f28d9 = document.createElement("div");
-  _0x1f28d9.className = "flex items-center space-x-2";
-  const _0x1c438c = document.createElement('img');
-  _0x1c438c.className = "relative inline-block h-10 w-10 !rounded-full object-cover object-center";
-  fetchUserAvatar(_0xef9f20).then(_0x1ebd83 => {
-    _0x1c438c.src = _0x1ebd83;
+function createCompetitionItem(_0x143afd, _0x5c1ad9, _0x1b6166, _0x55f049) {
+  const _0x50fbcd = document.createElement("div");
+  _0x50fbcd.className = "competition-item flex justify-between items-center cursor-pointer text-slate-800 p-4 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-all";
+  _0x50fbcd.setAttribute("data-value", _0x55f049);
+  const _0xc6c118 = document.createElement("div");
+  _0xc6c118.className = "flex items-center space-x-2";
+  const _0x17b493 = document.createElement("img");
+  _0x17b493.className = "relative inline-block h-10 w-10 !rounded-full object-cover object-center";
+  fetchUserAvatar(_0x143afd).then(_0x361f4a => {
+    _0x17b493.src = _0x361f4a;
   })["catch"](() => {});
-  const _0x294ae9 = document.createElement('p');
-  _0x294ae9.className = "dark:text-white font-semibold";
-  _0x294ae9.textContent = _0x239e48;
-  _0x1f28d9.appendChild(_0x1c438c);
-  _0x1f28d9.appendChild(_0x294ae9);
-  _0x12c2ca.appendChild(_0x1f28d9);
-  const _0x5309c7 = document.createElement('p');
-  _0x5309c7.className = "font-semibold dark:text-white";
-  _0x5309c7.textContent = _0x33ae5e;
-  _0x12c2ca.appendChild(_0x5309c7);
-  return _0x12c2ca;
+  const _0x468a93 = document.createElement('p');
+  _0x468a93.className = "dark:text-white font-semibold";
+  _0x468a93.textContent = _0x5c1ad9;
+  _0xc6c118.appendChild(_0x17b493);
+  _0xc6c118.appendChild(_0x468a93);
+  _0x50fbcd.appendChild(_0xc6c118);
+  const _0x48f59b = document.createElement('p');
+  _0x48f59b.className = "font-semibold dark:text-white";
+  _0x48f59b.textContent = _0x1b6166;
+  _0x50fbcd.appendChild(_0x48f59b);
+  return _0x50fbcd;
 }
-function fetchUserAvatar(_0x5adcda) {
-  return new Promise((_0x163b31, _0x759323) => {
-    firebase.storage().ref("users/" + _0x5adcda + '/profile.jpg').getDownloadURL().then(_0x5c4d28 => {
-      _0x163b31(_0x5c4d28);
-    })["catch"](_0x30320b => {
-      firebase.storage().ref("users/profile.jpg").getDownloadURL().then(_0x19086d => {
-        _0x163b31(_0x19086d);
-      })["catch"](_0x759323);
+function fetchUserAvatar(_0x38cd11) {
+  return new Promise((_0x44c7ca, _0x45435c) => {
+    firebase.storage().ref('users/' + _0x38cd11 + "/profile.jpg").getDownloadURL().then(_0x75ace1 => {
+      _0x44c7ca(_0x75ace1);
+    })["catch"](_0x52abfe => {
+      firebase.storage().ref("users/profile.jpg").getDownloadURL().then(_0x16a3b6 => {
+        _0x44c7ca(_0x16a3b6);
+      })["catch"](_0x45435c);
     });
   });
 }
-function addExtraItems(_0x13a443) {
-  const _0x4c5190 = document.createElement("div");
-  _0x4c5190.className = "competition-item flex justify-between items-center cursor-pointer text-slate-800 p-4 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-all font-semibold dark:text-white";
-  _0x4c5190.textContent = 'MC';
-  _0x4c5190.setAttribute("data-value", 0x6);
-  _0x13a443.appendChild(_0x4c5190);
-  const _0x4c5daf = document.createElement('div');
-  _0x4c5daf.className = "competition-item flex justify-between items-center cursor-pointer text-slate-800 p-4 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-all font-semibold dark:text-white";
-  _0x4c5daf.textContent = "Người xem";
-  _0x4c5daf.setAttribute('data-value', 0x5);
-  _0x13a443.appendChild(_0x4c5daf);
-  const _0x322b7c = document.createElement("div");
-  _0x322b7c.className = "competition-item flex justify-between items-center cursor-pointer text-slate-800 p-4 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-all font-semibold dark:text-white";
-  _0x322b7c.textContent = "Bảng điểm";
-  _0x322b7c.setAttribute("data-value", 0x7);
-  _0x13a443.appendChild(_0x322b7c);
+function addExtraItems(_0x57c160) {
+  const _0x1df479 = document.createElement("div");
+  _0x1df479.className = "competition-item flex justify-between items-center cursor-pointer text-slate-800 p-4 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-all font-semibold dark:text-white";
+  _0x1df479.textContent = 'MC';
+  _0x1df479.setAttribute("data-value", 0x6);
+  _0x57c160.appendChild(_0x1df479);
+  const _0x41a9ca = document.createElement('div');
+  _0x41a9ca.className = "competition-item flex justify-between items-center cursor-pointer text-slate-800 p-4 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-all font-semibold dark:text-white";
+  _0x41a9ca.textContent = "Người xem";
+  _0x41a9ca.setAttribute("data-value", 0x5);
+  _0x57c160.appendChild(_0x41a9ca);
+  const _0x55d4b0 = document.createElement("div");
+  _0x55d4b0.className = "competition-item flex justify-between items-center cursor-pointer text-slate-800 p-4 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-all font-semibold dark:text-white";
+  _0x55d4b0.textContent = "Bảng điểm";
+  _0x55d4b0.setAttribute("data-value", 0x7);
+  _0x57c160.appendChild(_0x55d4b0);
 }
 function setItemRendering() {
   localStorage.setItem("isProjector", "false");
-  localStorage.setItem("isGreenBackground", "false");
-  localStorage.setItem("isDisplayAvatar", "true");
+  localStorage.setItem('isGreenBackground', "false");
+  localStorage.setItem('isDisplayAvatar', 'true');
 }

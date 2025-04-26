@@ -101,7 +101,9 @@ const model1206 = {
 const model15pro = {
   model: "learnlm-1.5-pro-experimental",
   config: {
-    responseMimeType: "application/json"
+    responseMimeType: "application/json",
+    temperature: 2,
+    responseSchema: responseSchema
   }
 };
 
@@ -186,7 +188,6 @@ export async function matrixQuestionsJSON(file, prompt) {
       mimeType: fileType
     });
 
-    // Generate content using the uploaded file
     const response = await ai.models.generateContent({
       model: model20flash.model,
       contents: [

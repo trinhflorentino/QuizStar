@@ -264,7 +264,7 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
       if (
         (question.type === "mcq" && (question.answer === "" || question.answer === null)) ||
         (question.type === "truefalse" && 
-           !options.some(opt => opt.answer === true || opt.answer === false) 
+           options.some(opt => typeof opt.answer !== "boolean") 
         )
       ) {
         console.log(question);
@@ -654,45 +654,7 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
     }
     setIsLoading(true);
     try {
-      const prompt = `
-Hãy phân tích file được upload (ma trận/đặc tả/đề cương) và tạo ra các câu hỏi thuộc các dạng "mcq", "truefalse", và "shortanswer" cùng với đáp án của chúng dựa trên nội dung file. Kết quả bắt buộc phải được định dạng JSON theo cấu trúc sau:
-
-[
-{
-"answer": "<đáp án>",
-"question": "<nội dung câu hỏi>",
-"type": "<loại câu hỏi>",
-"options": ["<lựa chọn 1>", "<lựa chọn 2>", ...] // Chỉ dành cho mcq và truefalse
-},
-...
-]
-
-Yêu cầu cụ thể:
-Dựa vào nội dung được cung cấp trong file để tạo ra các câu hỏi phù hợp, ưu tiên tạo các bài toán thực tế.
-
-mcq: "answer" chứa ký tự đại diện cho đáp án đúng (A, B, C, D). "options" chứa mảng các lựa chọn. Yêu cầu bắt buộc phải có 4 options.
-
-truefalse: "question" chứa nội dung câu hỏi. "options" chứa mảng các mệnh đề cần đánh giá. "answer" là mảng các giá trị boolean (true/false) tương ứng với từng mệnh đề trong "options". Ưu tiên sử dụng mảng boolean [true, false, ...] thay vì dạng chuỗi "Đáp án a [true, false]".
-
-shortanswer: "answer" chứa đáp án ngắn gọn dưới dạng chuỗi. Nếu câu hỏi yêu cầu đánh giá đúng/sai nhiều mệnh đề, "answer" sẽ là mảng các giá trị boolean (true/false). Ưu tiên sử dụng mảng boolean [true, false, ...] nếu có thể.
-
-Lưu ý:
-Nếu file có định dạng HTML không được thêm các thẻ có định dạng HTML vào câu hỏi.
-Với câu hỏi có công thức hãy viết dưới dạng Latex.
-Chỉ tạo câu hỏi thuộc ba dạng trên.
-
-Mỗi câu hỏi phải rõ ràng, dễ hiểu và có đáp án duy nhất.
-
-Đối với câu hỏi truefalse, mỗi mệnh đề phải có giá trị đúng hoặc sai rõ ràng, các mệnh đề phải nằm trong mảng options, không để trên question. Mỗi câu hỏi truefalse phải có 4 options.
-
-Đối với câu hỏi shortanswer, đáp án cần phải súc tích và chính xác, chỉ chứa 4 kí tự là một số có nghĩa, có thể chứa 2 kí tự số âm("-") và dấu phẩy(",").
-
-Tuân thủ nghiêm ngặt định dạng JSON.
-
-Ưu tiên sử dụng mảng boolean [true, false] cho câu hỏi truefalse và shortanswer thay vì dạng chuỗi "Đáp án a [true, false]", trừ khi format của file input không cho phép.
-
-Số lượng và nội dung câu hỏi phải bám sát ma trận/đặc tả/đề cương trong file upload.
-`;
+      const prompt = "Nhiệm vụ: Phân tích kỹ lưỡng nội dung file ma trận/đặc tả/đề cương được cung cấp và **TẠO RA** các câu hỏi thuộc dạng 'mcq', 'truefalse', và 'shortanswer' cùng với đáp án chính xác dựa trên nội dung đó.\n\n**YÊU CẦU OUTPUT JSON NGHIÊM NGẶT:**\n\n1.  **Định dạng & Cú pháp:** Output *phải* là một chuỗi JSON hợp lệ duy nhất, không có văn bản nào khác. Tất cả tên thuộc tính (keys) và giá trị chuỗi (strings) **BẮT BUỘC** phải được đặt trong dấu ngoặc kép (`\"`). Tuân thủ `responseSchema` được cung cấp.\n2.  **Loại câu hỏi:** Chỉ tạo câu hỏi thuộc 3 dạng: 'mcq', 'truefalse', 'shortanswer'.\n3.  **Nội dung & Số lượng:** Nội dung, số lượng, và độ khó (nếu có trong ma trận) của các câu hỏi được tạo ra **phải bám sát chặt chẽ** các chủ đề, mục tiêu học tập, và phân bố được nêu trong file ma trận/đặc tả/đề cương. Ưu tiên tạo các câu hỏi dạng bài toán tình huống hoặc ứng dụng thực tế khi phù hợp với nội dung.\n4.  **ĐỊNH DẠNG CÔNG THỨC (MATHJAX):**\n    *   Chuyển đổi TẤT CẢ công thức toán học sang định dạng LaTeX.\n    *   **BẮT BUỘC** sử dụng dấu phân cách MathJax: `\\( ... \\)` (inline) và `\\[ ... \\]` (display).\n    *   Ví dụ: `\"Công thức \\\\(ax^2+bx+c=0\\\\)\"`, `\"Tìm \\\\[\\\\lim_{x \\\\to 0} \\\\frac{\\\\sin x}{x}\\\\]\"`.\n    *   **TUYỆT ĐỐI KHÔNG** dùng định dạng khác (MathML, ảnh, text, `$`, `$$`). Loại bỏ mọi thẻ HTML.\n\n**QUY TẮC TẠO CÂU HỎI VÀ ĐÁP ÁN CHI TIẾT:**\n\n5.  **MCQ (Multiple Choice Question):**\n    *   `\"type\"`: `\"mcq\"`.\n    *   `\"question\"`: Nội dung câu hỏi rõ ràng, dễ hiểu.\n    *   `\"options\"`: **BẮT BUỘC** phải tạo ra **đúng 4 lựa chọn** dưới dạng mảng chuỗi. Các lựa chọn phải liên quan đến câu hỏi.\n    *   `\"answer\"`: **BẮT BUỘC** phải là một chuỗi ký tự (ví dụ: `\"A\"`, `\"B\"`, `\"C\"`, `\"D\"`) chỉ ra đáp án đúng duy nhất trong 4 lựa chọn.\n    *   Các lựa chọn sai (phương án nhiễu) phải hợp lý nhưng chắc chắn sai dựa trên nội dung file.\n6.  **True/False:**\n    *   `\"type\"`: `\"truefalse\"`.\n    *   `\"question\"`: Có thể là câu dẫn chung (nếu cần) hoặc để trống (`\"\"`) nếu các mệnh đề tự đứng vững.\n    *   `\"options\"`: **BẮT BUỘC** phải tạo ra **đúng 4 mệnh đề** cần đánh giá Đúng/Sai, dưới dạng mảng chuỗi. Các mệnh đề phải rõ ràng, có thể xác định tính đúng sai dựa trên nội dung file.\n    *   `\"answer\"`: **BẮT BUỘC** phải là một **chuỗi JSON biểu diễn một mảng boolean gồm đúng 4 phần tử** (ví dụ: `\"[true, false, true, false]\"`), tương ứng với tính đúng/sai của từng mệnh đề trong `options`.\n7.  **Short Answer:**\n    *   `\"type\"`: `\"shortanswer\"`.\n    *   `\"question\"`: Nội dung câu hỏi yêu cầu một đáp án ngắn gọn, thường là một giá trị số hoặc thuật ngữ cụ thể dựa trên file.\n    *   `\"options\"`: **KHÔNG được bao gồm trường `\"options\"`** cho loại này.\n    *   `\"answer\"`: **BẮT BUỘC** phải là một **chuỗi (string)** chứa đáp án ngắn gọn. **Đáp án này phải tuân thủ định dạng:** tối đa 4 ký tự, chỉ chứa chữ số (0-9), có thể có dấu âm (`-`) ở đầu, và có thể có một dấu phẩy (`,`) làm dấu thập phân. Ví dụ: `\"100\"`, `\"-25\"`, `\"9,81\"`, `\"-0,5\"`.\n8.  **Định dạng Mảng Boolean (Nhắc lại):** Khi `answer` cần là mảng boolean (cho True/False), nó **phải** được biểu diễn dưới dạng **CHUỖI JSON** (ví dụ: `\"[true, false, false, true]\"`).\n9.  **Tính chính xác & Rõ ràng:** Mỗi câu hỏi tạo ra phải rõ ràng, dễ hiểu. Đáp án được cung cấp trong trường `answer` phải là đáp án chính xác duy nhất dựa trên nội dung trong file ma trận/đặc tả.\n\n10. **Tuân thủ nghiêm ngặt:** Đảm bảo output cuối cùng khớp hoàn toàn với cấu trúc JSON, các quy tắc định dạng và yêu cầu về số lượng đã nêu.";
 
       const ketQua = await matrixQuestionsJSON(file, prompt);
       console.log("Original Extracted Data:", ketQua);
@@ -721,43 +683,7 @@ Số lượng và nội dung câu hỏi phải bám sát ma trận/đặc tả/�
 
       const currentQuestions = serializeCurrentQuestions();
 
-      const prompt = `
-Hãy phân tích đoạn JSON được upload và tạo ra các câu hỏi tương tự thuộc các dạng "mcq", "truefalse", và "shortanswer" cùng với đáp án của chúng. Kết quả bắt buộc phải được định dạng JSON theo cấu trúc sau:
-
-[
-  {
-    "answer": "<đáp án>",
-    "question": "<nội dung câu hỏi>",
-    "type": "<loại câu hỏi>",
-    "options": ["<lựa chọn 1>", "<lựa chọn 2>", ...] // Chỉ dành cho mcq và truefalse
-  },
-  ...
-]
-
-Đầu vào:
-Các câu hỏi hiện tại:
-${currentQuestions}
-
-Đầu ra: số câu hỏi= {"mcq": ${mcqCount}, "truefalse": ${trueFalseCount}, "shortanswer": ${shortAnswerCount}}
-
-Yêu cầu cụ thể:
-
-- **mcq**: "answer" chứa ký tự đại diện cho đáp án đúng (A, B, C, hoặc D). "options" chứa mảng các lựa chọn.
-- **truefalse**: "question" chứa nội dung câu hỏi. "options" chứa mảng các mệnh đề cần đánh giá. "answer" là mảng các giá trị boolean (true/false) tương ứng với từng mệnh đề trong "options". Ưu tiên sử dụng mảng boolean [true, false, ...] thay vì dạng chuỗi "Đáp án a [true, false]".
-- **shortanswer**: "answer" chứa đáp án ngắn gọn dưới dạng chuỗi. Nếu câu hỏi yêu cầu đánh giá đúng/sai nhiều mệnh đề, "answer" sẽ là mảng các giá trị boolean (true/false). Ưu tiên sử dụng mảng boolean [true, false, ...] nếu có thể.
-
-Lưu ý:
-Phải tạo các câu hỏi tiếng Việt dễ hiểu, rõ ràng và chính xác.
-Nếu file có định dạng HTML không được thêm các thẻ có định dạng HTML vào câu hỏi.
-Với câu hỏi có công thức hãy viết dưới dạng Latex.
-- Không trả về các câu hỏi giống với câu hỏi đã có.
-- Chỉ trích xuất câu hỏi thuộc ba dạng trên. Bỏ qua các câu hỏi khác.
-- Mỗi câu hỏi phải rõ ràng, dễ hiểu và có đáp án duy nhất.
-- Đối với câu hỏi truefalse, mỗi mệnh đề phải có giá trị đúng hoặc sai rõ ràng, các mệnh đề phải nằm trong mảng options, không để trên question.
-- Đối với câu hỏi shortanswer, đáp án cần ngắn gọn, súc tích và chính xác.
-- Tuân thủ nghiêm ngặt định dạng JSON.
-- Ưu tiên sử dụng mảng boolean [true, false] cho câu hỏi truefalse và shortanswer thay vì dạng chuỗi "Đáp án a [true, false]", trừ khi format của file input không cho phép.
-`;
+      const prompt = "Nhiệm vụ: Phân tích kỹ lưỡng bộ câu hỏi JSON hiện tại được cung cấp trong `${currentQuestions}`. Dựa trên chủ đề, phong cách, độ khó và cấu trúc của các câu hỏi đó, **TẠO RA các câu hỏi MỚI và TƯƠNG TỰ** thuộc các dạng 'mcq', 'truefalse', và 'shortanswer' cùng với đáp án chính xác.\n\n**Đầu vào:**\n*   Các câu hỏi hiện tại (dùng làm nguồn tham khảo và ngữ cảnh): `${currentQuestions}`\n\n**Yêu cầu Số lượng Đầu ra:**\n*   Số câu MCQ mới cần tạo: `${mcqCount}`\n*   Số câu True/False mới cần tạo: `${trueFalseCount}`\n*   Số câu Short Answer mới cần tạo: `${shortAnswerCount}`\n\n**YÊU CẦU OUTPUT JSON NGHIÊM NGẶT:**\n\n1.  **Định dạng & Cú pháp:** Output *phải* là một chuỗi JSON hợp lệ duy nhất, không có văn bản nào khác. Tất cả tên thuộc tính (keys) và giá trị chuỗi (strings) **BẮT BUỘC** phải được đặt trong dấu ngoặc kép (`\"`). Tuân thủ `responseSchema` được cung cấp.\n2.  **Nội dung Mới & Tương tự:** Các câu hỏi tạo ra **KHÔNG ĐƯỢC TRÙNG LẶP** với bất kỳ câu hỏi nào trong `${currentQuestions}`. Tuy nhiên, chúng phải tương tự về chủ đề, lĩnh vực kiến thức, kiểu câu hỏi, và mức độ phức tạp so với các câu hỏi đầu vào.\n3.  **Loại câu hỏi:** Chỉ tạo câu hỏi thuộc 3 dạng: 'mcq', 'truefalse', 'shortanswer' với số lượng chính xác đã yêu cầu.\n4.  **Ngôn ngữ:** Tạo các câu hỏi bằng Tiếng Việt, rõ ràng, dễ hiểu và chính xác về mặt ngữ nghĩa/chuyên môn dựa trên ngữ cảnh từ câu hỏi đầu vào.\n5.  **ĐỊNH DẠNG CÔNG THỨC (MATHJAX/LATEX):**\n    *   Nếu câu hỏi hoặc đáp án/lựa chọn chứa công thức toán học, **BẮT BUỘC** phải viết dưới dạng LaTeX.\n    *   Sử dụng dấu phân cách MathJax: `\\( ... \\)` (inline) và `\\[ ... \\]` (display).\n    *   Ví dụ: `\"Công thức \\\\(E=mc^2\\\\)\"`, `\"Giải phương trình \\\\[x^2 - 5x + 6 = 0\\\\]\"`.\n    *   **TUYỆT ĐỐI KHÔNG** dùng định dạng khác (HTML, ảnh, text, `$`, `$$`). Loại bỏ mọi thẻ HTML.\n\n**QUY TẮC TẠO CÂU HỎI VÀ ĐÁP ÁN CHI TIẾT:**\n\n6.  **MCQ (Multiple Choice Question):**\n    *   `\"type\"`: `\"mcq\"`.\n    *   `\"question\"`: Nội dung câu hỏi mới, tương tự câu hỏi MCQ đầu vào.\n    *   `\"options\"`: **BẮT BUỘC** tạo **đúng 4 lựa chọn** (mảng chuỗi). Một đúng, ba sai (nhiễu).\n    *   `\"answer\"`: Chuỗi ký tự (`\"A\"`, `\"B\"`, `\"C\"`, `\"D\"`) chỉ ra đáp án đúng.\n    *   Các lựa chọn nhiễu phải hợp lý nhưng sai, dựa trên chủ đề chung.\n7.  **True/False:**\n    *   `\"type\"`: `\"truefalse\"`.\n    *   `\"question\"`: Câu dẫn chung (nếu cần) hoặc để trống (`\"\"`).\n    *   `\"options\"`: **BẮT BUỘC** tạo **đúng 4 mệnh đề** mới (mảng chuỗi) cần đánh giá Đúng/Sai, tương tự các mệnh đề trong câu hỏi T/F đầu vào.\n    *   `\"answer\"`: **BẮT BUỘC** phải là một **chuỗi JSON biểu diễn một mảng boolean gồm đúng 4 phần tử** (ví dụ: `\"[true, false, true, false]\"`), tương ứng với tính đúng/sai của từng mệnh đề trong `options`.\n8.  **Short Answer:**\n    *   `\"type\"`: `\"shortanswer\"`.\n    *   `\"question\"`: Nội dung câu hỏi mới yêu cầu đáp án ngắn, tương tự câu hỏi Short Answer đầu vào.\n    *   `\"options\"`: **KHÔNG bao gồm trường `\"options\"`**.\n    *   `\"answer\"`: Chuỗi chứa đáp án ngắn gọn, súc tích và chính xác. Nếu câu hỏi yêu cầu đánh giá nhiều mệnh đề đúng/sai (ít phổ biến cho short answer, nhưng nếu có), `answer` phải là chuỗi JSON biểu diễn mảng boolean (ví dụ: `\"[true, false]\"`).\n9.  **Định dạng Mảng Boolean (Nhắc lại):** Khi `answer` cần là mảng boolean (cho True/False), nó **phải** được biểu diễn dưới dạng **CHUỖI JSON** (ví dụ: `\"[true, true, false, false]\"`).\n10. **Tính chính xác & Rõ ràng:** Mỗi câu hỏi tạo ra phải rõ ràng, dễ hiểu. Đáp án phải chính xác dựa trên kiến thức phổ thông hoặc logic nội tại của chủ đề được gợi ý từ câu hỏi đầu vào.\n\n11. **Tuân thủ nghiêm ngặt:** Đảm bảo output cuối cùng khớp hoàn toàn với cấu trúc JSON, các quy tắc định dạng và số lượng yêu cầu.";
 
       const ketQua = await createQuestionsJSON(prompt);
       console.log("Original Extracted Data:", ketQua);

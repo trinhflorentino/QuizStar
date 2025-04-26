@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+  <title>Tạo trò chơi | QuizStar</title>
+  <link href="./dist/output.css" rel="stylesheet">
+  <!-- Material Icons Link -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <!-- Font Awesome Link -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"
+    integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w=="
+    crossorigin="anonymous" />
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css"
+    integrity="sha512-UtLOu9C7NuThQhuXXrGwx9Jb/z9zPQJctuAgNUBK3Z6kkSYT9wJ+2+dh6klS+TDBCV9kNPBbAxbVD+vCcfGPaA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-9BZ1P9KSJR');
+  </script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7312982440694951"
+    crossorigin="anonymous"></script>
+</head>
+
+<body class="dark:bg-neutral-900">
+  <!-- Modified Sidebar Section -->
+  <aside
+    class="fixed top-0 left-0 z-40 w-32 h-screen transition-transform -translate-x-full sm:translate-x-0 border-r-2 border-neutral-100 dark:border-gray-500 flex flex-col justify-between items-center">
+    
+    <!-- App Logo (Static, No Redirect) -->
+    <div class="mt-6">
+      <img id="appLogoImage" src="img/appLogo.png" class="rounded-full w-16 h-16 cursor-default" alt="appLogo">
+      <!-- <div data-tooltip="appLogoToolTip" data-tooltip-placement="right-end"
+        class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+        Logo Ứng Dụng
+      </div> -->
+    </div>
+
+    <!-- Back Button -->
+    <div class="my-4">
+      <button onclick="window.location.href='./'"
+        class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
+        data-ripple-light="true" data-tooltip-target="backToolTip" id="backButton">
+        <span class="material-symbols-outlined">
+          arrow_back
+        </span>
+      </button>
+      <div data-tooltip="backToolTip" data-tooltip-placement="right-end"
+        class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+        Quay lại Trang Chủ
+      </div>
+    </div>
+
+    <!-- Icon List (Center) -->
+    <div class="flex flex-col items-center">
+      
+      <!-- Play Icon (Replaces Home Icon) -->
+      <div class="my-4">
+        <button data-tab-target="#home"
+          class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
+          data-ripple-light="true" data-tooltip-target="playToolTip" id="playButton">
+          <span class="material-symbols-outlined">
+            play_arrow
+          </span>
+        </button>
+        <div data-tooltip="playToolTip" data-tooltip-placement="right-end"
+          class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+          Chơi trò chơi
+        </div>
+      </div>
+
+      <!-- Existing Match List Icon -->
+      <div class="my-4">
+        <button data-tab-target="#matches"
+          class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
+          data-ripple-light="true" data-tooltip-target="matchListToolTip" id="matchListButton">
+          <span class="material-symbols-outlined">
+            splitscreen_landscape
+          </span>
+        </button>
+        <div data-tooltip="matchListToolTip" data-tooltip-placement="right-end"
+          class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+          Danh sách phòng trò chơi
+        </div>
+      </div>
+
+      <!-- Existing Video Setup Icon -->
+      <div class="my-4">
+        <button data-tab-target="#video"
+          class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
+          data-ripple-light="true" data-tooltip-target="videoToolTip" id="videoButton">
+          <span class="material-symbols-outlined">
+            movie
+          </span>
+        </button>
+        <div data-tooltip="videoToolTip" data-tooltip-placement="right-end"
+          class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+          Thiết lập Video giới thiệu
+        </div>
+      </div>
+
+      <!-- Existing Theme Customization Icon -->
+      <div class="my-4">
+        <button data-tab-target="#theme"
+          class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
+          data-ripple-light="true" data-tooltip-target="themeCustomizationToolTip" id="themeCustomizationButton">
+          <span class="material-symbols-outlined">
+            palette
+          </span>
+        </button>
+        <div data-tooltip="themeCustomizationToolTip" data-tooltip-placement="right-end"
+          class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+          Chỉnh sửa giao diện
+        </div>
+      </div>
+    </div>
+
+    <!-- Avatar -->
+    <div class="mb-4">
+      <button data-tab-target="#profile" class="tab-button" data-ripple-light="true"
+        data-tooltip-target="profileToolTip">
+        <img id="userAvatar" src="img/userAvatar.png" alt="avatar"
+          class="relative inline-block h-14 w-14 rounded-full object-cover object-center">
+      </button>
+      <div data-tooltip="profileToolTip" data-tooltip-placement="right-end"
+        class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+        Trang cá nhân
+      </div>
+    </div>
+  </aside>
+
+  <div class="absolute right-0 p-6">
+    <button id="themeToggleButton" type="button" onclick="toggleTheme()"
+      class="text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white tab-button">
+      <span id="themeIcon" class="material-icons">
+        dark_mode
+      </span>
+      <span class="sr-only">Toggle theme</span>
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="sm:ml-32">
+    <!-- Home Page -->
+    <div id="home" class="tab-content block">
+      <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
+        <p class="font-semibold text-3xl dark:text-white">Tham gia trò chơi</p>
+        <p class="font-light text-gray-500 text-lg">Nhập mã trận và mật khẩu để tham gia trò chơi</p>
+      </div>
+
+      <div id="promotion-container">
+        <!-- Promotion card will be appended here -->
+      </div>
+      <div
+        class="relative flex flex-col mt-6 text-white bg-gradient-to-r from-cyan-500 to-blue-500 shadow-md bg-clip-border rounded-xl mx-6 cursor-pointer hidden transition-all"
+        id="matchJoinCard" data-dialog-target="choose-positon-dialog">
+        <div class="p-8">
+          <h5 class="block mb-2 text-xl antialiased font-semibold leading-snug tracking-normal">
+            Bạn đang tham gia trò chơi
+          </h5>
+          <div class="w-full h-px bg-white my-4"></div>
+          <h5 class="block mb-2 text-xl antialiased font-semibold leading-snug tracking-normal" id="matchJoiningName">
+
+          </h5>
+          <p class="block text-base antialiased font-light leading-relaxed text-inherit" id="matchHostName">
+
+          </p>
+        </div>
+      </div>
+      <div
+        class="relative flex flex-col mt-6 text-white bg-gradient-to-r from-orange-500 to-yellow-500 shadow-md bg-clip-border rounded-xl mx-6 cursor-pointer"
+        id="joinAnotherMatchCard" data-dialog-target="match-join-dialog">
+        <div class="p-8">
+          <h5 class="block mb-2 text-xl antialiased font-semibold leading-snug tracking-normal"
+            id="joinAnotherMatchTitle">
+            Chào mừng bạn đến với QuizStar
+          </h5>
+          <p class="block text-base antialiased font-light leading-relaxed text-inherit">
+            Tham gia trò chơi bằng cách nhập mã trận và mật khẩu
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Matches Page -->
+    <div id="matches" class="tab-content hidden">
+      <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
+        <p class="font-semibold text-3xl dark:text-white">Danh sách trò chơi</p>
+        <p class="font-light text-gray-400 text-lg">Danh sách trò chơi của bạn</p>
+      </div>
+      <div class="w-full flex justify-between items-center mb-3 mt-1 pl-3 p-6">
+        <div class="ml-3">
+          <button
+            class="bg-neutral-800 dark:bg-neutral-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-neutral-900 dark:hover:bg-neutral-700 transition duration-300"
+            data-dialog-target="match-creation-modal">Tạo trò chơi mới
+          </button>
+        </div>
+        <div class="ml-3">
+          <div class="w-full max-w-sm min-w-[200px] relative">
+            <div class="relative">
+              <input
+                class="bg-white dark:bg-neutral-800 w-full pr-11 h-10 pl-3 py-2 bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded transition duration-200 ease focus:outline-none focus:border-slate-400 hover:border-slate-400 shadow-sm focus:shadow-md dark:text-white"
+                id="searchMatches" placeholder="Tìm kiếm bằng mã trân" />
+              <button class="absolute h-8 w-8 right-1 top-1 my-auto px-2 flex items-center bg-white rounded "
+                type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3"
+                  stroke="currentColor" class="w-8 h-8 text-slate-600">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="relative flex flex-col h-full text-gray-700 shadow-md rounded-lg bg-clip-border m-6 dark:bg-neutral-800 overflow-x-auto">
+        <table class="w-full text-left table-auto min-w-max">
+          <thead>
+            <tr>
+              <th class="p-4 border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-neutral-700">
+                <p class="text-sm font-normal leading-none text-slate-500 dark:text-slate-300">
+                  Mã trận
+                </p>
+              </th>
+              <th class="p-4 border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-neutral-700">
+                <p class="text-sm font-normal leading-none text-slate-500 dark:text-slate-300">
+                  Tên trò chơi
+                </p>
+              </th>
+              <th class="p-4 border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-neutral-700">
+                <p class="text-sm font-normal leading-none text-slate-500 dark:text-slate-300">
+                  Người tạo trận
+                </p>
+              </th>
+              <th class="p-4 border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-neutral-700">
+                <p class="text-sm font-normal leading-none text-slate-500 dark:text-slate-300">
+                  Mật khẩu
+                </p>
+              </th>
+              <th class="p-4 border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-neutral-700">
+                <p class="text-sm font-normal leading-none text-slate-500 dark:text-slate-300">
+                  Thao tác
+                </p>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+
+        <div class="flex justify-between items-center px-4 py-3">
+          <div class="pagination-number text-sm text-slate-500">
+
+          </div>
+          <div class="flex space-x-1">
+            <button
+              class="px-3 py-1 min-w-9 min-h-9 text-sm font-normal text-slate-500 bg-white dark:bg-neutral-800 dark:text-slate-300 border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-400 transition duration-200 ease">
+              Prev
+            </button>
+            <button
+              class="px-3 py-1 min-w-9 min-h-9 text-sm font-normal text-white bg-slate-800 dark:bg-white dark:text-slate-500 border border-slate-800 rounded hover:bg-slate-600 hover:border-slate-600 transition duration-200 ease">
+              1
+            </button>
+            <button
+              class="px-3 py-1 min-w-9 min-h-9 text-sm font-normal text-slate-500 bg-white dark:bg-neutral-800 dark:text-slate-300 border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-400 transition duration-200 ease">
+              2
+            </button>
+            <button
+              class="px-3 py-1 min-w-9 min-h-9 text-sm font-normal text-slate-500 bg-white dark:bg-neutral-800 dark:text-slate-300 border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-400 transition duration-200 ease">
+              3
+            </button>
+            <button
+              class="px-3 py-1 min-w-9 min-h-9 text-sm font-normal text-slate-500 bg-white dark:bg-neutral-800 dark:text-slate-300 border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-400 transition duration-200 ease">
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Theme Customization Page -->
+    <div id="theme" class="tab-content hidden">
+      <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
+        <p class="font-semibold text-3xl dark:text-white">Chỉnh sửa giao diện</p>
+        <p class="font-light text-gray-400 text-lg">Cá nhân hoá giao diện trò chơi của bạn</p>
+      </div>
+
+      <div class="flex flex-col items-center justify-center text-center p-6">
+        <img src="img/appLogo.png" alt="Designing" class="mb-4 w-24 h-24 rounded-full">
+        <p class="text-lg font-semibold dark:text-white">
+          Tính năng này đang được thiết kế cho giao diện mới. Để chỉnh sửa giao diện, truy cập tại <a
+            href="./ThemeCustomization.html" target="_blank" class="text-blue-800">đây</a> bạn nhé.
+        </p>
+      </div>
+    </div>
+
+    <!-- Video Customization Page -->
+    <div id="video" class="tab-content hidden">
+
+      <!-- <div class="w-full h-full">
+        <div class="relative inline-block w-11 h-5">
+          <input checked checked id="switch-component-1" type="checkbox"
+            class="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 cursor-pointer transition-colors duration-300" />
+          <label for="switch-component-1"
+            class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-slate-800 cursor-pointer">
+          </label>
+        </div>
+      </div> -->
+      <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
+        <p class="font-semibold text-3xl dark:text-white">Thiết lập Video giới thiệu</p>
+        <p class="font-light text-gray-400 text-lg">Các Video mở đầu áp dụng trong các phần thi (chỉ áp dụng trong các
+          trò chơi của bạn)</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-6 p-4 hidden" id="introSelection">
+        <div
+          class="relative flex flex-col my-6 bg-white shadow-sm border border-slate-200 rounded-lg dark:bg-neutral-700">
+          <div class="relative w-full h-56 m-2.5 overflow-hidden text-white rounded-md">
+            <img src="img/Olympia_24.webp" alt="card-image" class="w-full h-full object-cover" />
+          </div>
+          <div class="p-4">
+            <h6 class="mb-2 text-slate-800 text-xl font-semibold dark:text-white">
+              Sử dụng Video từ Đường lên đỉnh Olympia
+            </h6>
+            <p class="text-slate-600 leading-normal font-light dark:text-white">
+              Sử dụng Video Intro nguồn từ Đường lên đỉnh Olympia
+            </p>
+          </div>
+          <div class="px-4 pb-4 pt-0 mt-2">
+            <button
+              class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none w-full"
+              type="button" onclick="changeIntroUsageType(false)">
+              SỬ DỤNG VIDEO TỪ NGUỒN ĐƯỜNG LÊN ĐỈNH OLYMPIA
+            </button>
+          </div>
+        </div>
+        <div
+          class="relative flex flex-col my-6 bg-white shadow-sm border border-slate-200 rounded-lg dark:bg-neutral-700">
+          <div class="relative w-full h-56 m-2.5 overflow-hidden text-white rounded-md">
+            <img src="img/NewBackground.png" class="w-full h-full object-cover" />
+          </div>
+          <div class="p-4">
+            <h6 class="mb-2 text-slate-800 text-xl font-semibold dark:text-white">
+              Tuỳ chỉnh
+            </h6>
+            <p class="text-slate-600 leading-normal font-light dark:text-white">
+              Sử dụng Video tuỳ chỉnh
+            </p>
+          </div>
+          <div class="px-4 pb-4 pt-0 mt-2">
+            <button
+              class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none w-full"
+              type="button" onclick="changeIntroUsageType(true)">
+              SỬ DỤNG VIDEO TUỲ CHỈNH
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="w-full h-full p-4" id="introSettings">
+        <div class="flex justify-between items-center p-6 border-b-2 border-neutral-100 dark:border-gray-500 w-full">
+          <div>
+            <p class="font-semibold text-2xl dark:text-white">Phát Video từ nguồn ngoài</p>
+            <p class="font-light text-sm dark:text-white">Nhập URL hoặc nhúng Video từ các nền tảng khác (như Youtube,
+              ...)</p>
+
+            <div
+              class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md bg-clip-border rounded-xl mt-4 dark:text-neutral-300 dark:bg-neutral-800">
+              <div class="p-4">
+                <!-- Input fields for name and URL -->
+                <input id="videoName" type="text" placeholder="Tên"
+                  class="border rounded p-2 mr-2 bg-white text-gray-700 dark:bg-neutral-700 dark:text-neutral-300 dark:border-neutral-600" />
+                <input id="videoURL" type="text" placeholder="Đường dẫn"
+                  class="border rounded p-2 mr-2 bg-white text-gray-700 dark:bg-neutral-700 dark:text-neutral-300 dark:border-neutral-600" />
+                <button id="addVideoBtn"
+                  class="bg-neutral-800 dark:bg-neutral-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-neutral-900 dark:hover:bg-neutral-700 transition duration-300">Thêm
+                  Video</button>
+                <button onclick="window.open('https://youtu.be/3MhCCaNAvcg?si=4ekGsC9QH_DQYEVz', '_blank')"
+                  class="bg-neutral-800 dark:bg-neutral-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-neutral-900 dark:hover:bg-neutral-700 transition duration-300">
+                  Hướng dẫn lấy đường dẫn từ Youtube
+                </button>
+              </div>
+              <table class="w-full text-left table-auto min-w-max">
+                <thead>
+                  <tr>
+                    <th
+                      class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
+                      Thứ tự</th>
+                    <th
+                      class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
+                      Tên</th>
+                    <th
+                      class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
+                      Đường dẫn</th>
+                    <th
+                      class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
+                      Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="videoTableBody">
+                  <tr>
+                    <td colspan="4" class="p-4 text-center text-gray-700 dark:text-neutral-300">Không có video nào được
+                      thêm</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+          </div>
+        </div>
+        <div class="flex justify-between items-center p-6 border-b-2 border-neutral-100 dark:border-gray-500 w-full">
+          <div>
+            <p class="font-semibold text-2xl dark:text-white">Hiển thị Video giới thiệu ở máy thí sinh</p>
+            <p class="font-light text-sm dark:text-white">Khi bật, video giới thiệu sẽ được phát trên máy của thí sinh;
+              khi tắt, video chỉ được phát trên máy chiếu.</p>
+          </div>
+          <div class="relative inline-block w-11 h-5">
+            <input type="checkbox" id="DisplayIntroToContestantSwitch"
+              class="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 dark:bg-slate-700 dark:checked:bg-white cursor-pointer transition-colors duration-300" />
+            <label for="DisplayIntroToContestantSwitch"
+              class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-slate-800 cursor-pointer dark:bg-slate-900 dark:peer-checked:bg-slate-300 dark:peer-checked:border-white"></label>
+          </div>
+        </div>
+        <div class="flex justify-between items-center p-6 border-b-2 border-neutral-100 dark:border-gray-500 w-full">
+          <div>
+            <p class="font-semibold text-2xl dark:text-white">Sử dụng Video giới thiệu tuỳ chỉnh</p>
+            <p class="font-light text-sm dark:text-white">Khi tắt, các video giới thiệu sẽ được phát từ nguồn Đường lên
+              đỉnh Olympia; khi bật, người dùng sẽ cần thiết lập thủ công.</p>
+          </div>
+          <div class="relative inline-block w-11 h-5">
+            <input type="checkbox" id="UseCustomIntroSwitch"
+              class="peer appearance-none w-11 h-5 bg-slate-100 rounded-full checked:bg-slate-800 dark:bg-slate-700 dark:checked:bg-white cursor-pointer transition-colors duration-300" />
+            <label for="UseCustomIntroSwitch"
+              class="absolute top-0 left-0 w-5 h-5 bg-white rounded-full border border-slate-300 shadow-sm transition-transform duration-300 peer-checked:translate-x-6 peer-checked:border-slate-800 cursor-pointer dark:bg-slate-900 dark:peer-checked:bg-slate-300 dark:peer-checked:border-white"></label>
+          </div>
+        </div>
+      </div>
+      <div class="hidden custom-video">
+        <div class="flex flex-col sm:flex-row gap-6 p-10">
+          <div class="flex flex-col sm:w-1/2">
+            <h2 class="text-2xl font-semibold dark:text-white">Video giới thiệu mở đầu</h2>
+            <p class="text-gray-500 dark:text-gray-300">Giới thiệu về cuộc thi</p>
+            <div class="w-full h-full mt-4 file-upload-container" data-competition-stage="Opening">
+              <div
+                class="flex justify-center items-center p-6 w-full border-2 border-dashed border-neutral-200 dark:border-gray-500 rounded-lg">
+                <label
+                  class="flex flex-col items-center justify-center cursor-pointer w-full h-48 dark:bg-gray-800 dark:hover:bg-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-300 file-upload-label">
+                  <div class="flex flex-col items-center">
+                    <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-neutral-400">
+                      cloud_upload
+                    </span>
+                    <p class="text-lg font-medium text-gray-600 dark:text-gray-300">Nhấn vào đây để tải lên file video
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Dung lượng tối đa 8MB</p>
+                  </div>
+                  <input type="file" class="hidden file-upload-input" accept=".mp4,.png,.jpg,.pdf" />
+                </label>
+              </div>
+              <div class="file-name-display mt-4 text-sm text-gray-500 dark:text-gray-300"></div>
+              <div class="mt-4 flex justify-end gap-2">
+                <button
+                  class="bg-slate-800 dark:bg-slate-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-slate-900 dark:hover:bg-slate-700 transition duration-300 w-full upload-button">Tải
+                  lên</button>
+                <button
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition duration-300 w-full preview-button">Xem
+                  Video hiện tại</button>
+              </div>
+              <div class="mt-4">
+                <!--Delete button-->
+                <button
+                  class="bg-red-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-red-700 transition duration-300 w-full delete-button">Xóa
+                  Video hiện tai</button>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:w-1/2">
+            <video class="h-full w-full rounded-lg" controls data-competition-stage="Opening"></video>
+          </div>
+        </div>
+
+
+        <div class="flex flex-col sm:flex-row gap-6 p-10">
+          <div class="flex flex-col sm:w-1/2">
+            <h2 class="text-2xl font-semibold dark:text-white">Video bắt đầu phần thi Khởi động</h2>
+            <p class="text-gray-500 dark:text-gray-300">Mở đầu phần thi Khởi động</p>
+            <div class="w-full h-full mt-4 file-upload-container" data-competition-stage="Start">
+              <div
+                class="flex justify-center items-center p-6 w-full border-2 border-dashed border-neutral-200 dark:border-gray-500 rounded-lg">
+                <label
+                  class="flex flex-col items-center justify-center cursor-pointer w-full h-48 dark:bg-gray-800 dark:hover:bg-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-300 file-upload-label">
+                  <div class="flex flex-col items-center">
+                    <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-neutral-400">
+                      cloud_upload
+                    </span>
+                    <p class="text-lg font-medium text-gray-600 dark:text-gray-300">Nhấn vào đây để tải lên file video
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Dung lượng tối đa 8MB</p>
+                  </div>
+                  <input type="file" class="hidden file-upload-input" accept=".mp4,.png,.jpg,.pdf" />
+                </label>
+              </div>
+              <div class="file-name-display mt-4 text-sm text-gray-500 dark:text-gray-300"></div>
+              <div class="mt-4 flex justify-end gap-2">
+                <button
+                  class="bg-slate-800 dark:bg-slate-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-slate-900 dark:hover:bg-slate-700 transition duration-300 w-full upload-button">Tải
+                  lên</button>
+                <button
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition duration-300 w-full preview-button">Xem
+                  Video hiện tại</button>
+              </div>
+              <div class="mt-4">
+                <!--Delete button-->
+                <button
+                  class="bg-red-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-red-700 transition duration-300 w-full delete-button">Xóa
+                  Video hiện tai</button>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:w-1/2">
+            <video class="h-full w-full rounded-lg" controls data-competition-stage="Start"></video>
+          </div>
+        </div>
+
+
+        <div class="flex flex-col sm:flex-row gap-6 p-10">
+          <div class="flex flex-col sm:w-1/2">
+            <h2 class="text-2xl font-semibold dark:text-white">Video bắt đầu phần thi Vượt chướng ngại vật</h2>
+            <p class="text-gray-500 dark:text-gray-300">Mở đầu phần thi Vượt chướng ngại vật</p>
+            <div class="w-full h-full mt-4 file-upload-container" data-competition-stage="Obstacle">
+              <div
+                class="flex justify-center items-center p-6 w-full border-2 border-dashed border-neutral-200 dark:border-gray-500 rounded-lg">
+                <label
+                  class="flex flex-col items-center justify-center cursor-pointer w-full h-48 dark:bg-gray-800 dark:hover:bg-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-300 file-upload-label">
+                  <div class="flex flex-col items-center">
+                    <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-neutral-400">
+                      cloud_upload
+                    </span>
+                    <p class="text-lg font-medium text-gray-600 dark:text-gray-300">Nhấn vào đây để tải lên file video
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Dung lượng tối đa 8MB</p>
+                  </div>
+                  <input type="file" class="hidden file-upload-input" accept=".mp4,.png,.jpg,.pdf" />
+                </label>
+              </div>
+              <div class="file-name-display mt-4 text-sm text-gray-500 dark:text-gray-300"></div>
+              <div class="mt-4 flex justify-end gap-2">
+                <button
+                  class="bg-slate-800 dark:bg-slate-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-slate-900 dark:hover:bg-slate-700 transition duration-300 w-full upload-button">Tải
+                  lên</button>
+                <button
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition duration-300 w-full preview-button">Xem
+                  Video hiện tại</button>
+              </div>
+              <div class="mt-4">
+                <!--Delete button-->
+                <button
+                  class="bg-red-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-red-700 transition duration-300 w-full delete-button">Xóa
+                  Video hiện tai</button>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:w-1/2">
+            <video class="h-full w-full rounded-lg" controls data-competition-stage="Obstacle"></video>
+          </div>
+        </div>
+
+
+        <div class="flex flex-col sm:flex-row gap-6 p-10">
+          <div class="flex flex-col sm:w-1/2">
+            <h2 class="text-2xl font-semibold dark:text-white">Video bắt đầu phần thi Tăng tốc</h2>
+            <p class="text-gray-500 dark:text-gray-300">Mở đầu phần thi Tăng tốc</p>
+            <div class="w-full h-full mt-4 file-upload-container" data-competition-stage="Acceleration">
+              <div
+                class="flex justify-center items-center p-6 w-full border-2 border-dashed border-neutral-200 dark:border-gray-500 rounded-lg">
+                <label
+                  class="flex flex-col items-center justify-center cursor-pointer w-full h-48 dark:bg-gray-800 dark:hover:bg-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-300 file-upload-label">
+                  <div class="flex flex-col items-center">
+                    <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-neutral-400">
+                      cloud_upload
+                    </span>
+                    <p class="text-lg font-medium text-gray-600 dark:text-gray-300">Nhấn vào đây để tải lên file video
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Dung lượng tối đa 8MB</p>
+                  </div>
+                  <input type="file" class="hidden file-upload-input" accept=".mp4,.png,.jpg,.pdf" />
+                </label>
+              </div>
+              <div class="file-name-display mt-4 text-sm text-gray-500 dark:text-gray-300"></div>
+              <div class="mt-4 flex justify-end gap-2">
+                <button
+                  class="bg-slate-800 dark:bg-slate-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-slate-900 dark:hover:bg-slate-700 transition duration-300 w-full upload-button">Tải
+                  lên</button>
+                <button
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition duration-300 w-full preview-button">Xem
+                  Video hiện tại</button>
+              </div>
+              <div class="mt-4">
+                <!--Delete button-->
+                <button
+                  class="bg-red-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-red-700 transition duration-300 w-full delete-button">Xóa
+                  Video hiện tai</button>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:w-1/2">
+            <video class="h-full w-full rounded-lg" controls data-competition-stage="Acceleration"></video>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-6 p-10">
+          <div class="flex flex-col sm:w-1/2">
+            <h2 class="text-2xl font-semibold dark:text-white">Video bắt đầu phần thi Về đích</h2>
+            <p class="text-gray-500 dark:text-gray-300">Mở đầu phần thi Về đích</p>
+            <div class="w-full h-full mt-4 file-upload-container" data-competition-stage="Finish">
+              <div
+                class="flex justify-center items-center p-6 w-full border-2 border-dashed border-neutral-200 dark:border-gray-500 rounded-lg">
+                <label
+                  class="flex flex-col items-center justify-center cursor-pointer w-full h-48 dark:bg-gray-800 dark:hover:bg-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition duration-300 file-upload-label">
+                  <div class="flex flex-col items-center">
+                    <span class="material-symbols-outlined text-6xl text-gray-400 dark:text-neutral-400">
+                      cloud_upload
+                    </span>
+                    <p class="text-lg font-medium text-gray-600 dark:text-gray-300">Nhấn vào đây để tải lên file video
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Dung lượng tối đa 8MB</p>
+                  </div>
+                  <input type="file" class="hidden file-upload-input" accept=".mp4,.png,.jpg,.pdf" />
+                </label>
+              </div>
+              <div class="file-name-display mt-4 text-sm text-gray-500 dark:text-gray-300"></div>
+              <div class="mt-4 flex justify-end gap-2">
+                <button
+                  class="bg-slate-800 dark:bg-slate-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-slate-900 dark:hover:bg-slate-700 transition duration-300 w-full upload-button">Tải
+                  lên</button>
+                <button
+                  class="bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-blue-700 transition duration-300 w-full preview-button">Xem
+                  Video hiện tại</button>
+              </div>
+              <div class="mt-4">
+                <!--Delete button-->
+                <button
+                  class="bg-red-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-red-700 transition duration-300 w-full delete-button">Xóa
+                  Video hiện tai</button>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:w-1/2">
+            <video class="h-full w-full rounded-lg" controls data-competition-stage="Finish"></video>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!-- Profile Page -->
+    <div id="profile" class="tab-content hidden">
+      <!-- Header -->
+      <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
+        <p class="font-semibold text-3xl dark:text-white">Trang cá nhân</p>
+        <p class="font-light text-gray-400 text-lg">Thông tin cá nhân của bạn</p>
+      </div>
+
+      <!-- Profile Section -->
+      <div
+        class="m-6 h-48 rounded-md bg-gradient-to-r from-blue-800 to-indigo-900 flex flex-col justify-end items-center relative">
+        <!-- Profile Image -->
+        <img src="img/appLogo.png" alt="Profile Image" id="userProfileImage"
+          class="w-36 h-36 object-cover rounded-full absolute bottom-0 transform translate-y-1/2 border-4 border-white" />
+      </div>
+
+      <!-- User Info -->
+      <div class="text-center mt-20">
+        <p class="font-bold text-3xl dark:text-white" id="userDisplayName"></p>
+        <p class="text-gray-500 text-sm" id="joinDate">Thành viên từ ngày 01/01/1970</p>
+      </div>
+
+      <!-- Actions Button -->
+
+      <div class="mt-4">
+        <div>
+          <div class="flex flex-row justify-center gap-4">
+            <button data-ripple-light="true" data-collapse-target="collapse"
+              class="flex items-center rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none dark:text-white"
+              type="button">
+              <span class="material-symbols-outlined mr-1.5">
+                account_circle
+              </span>
+              Chỉnh sửa thông tin
+            </button>
+            <button
+              class="flex items-center rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-red-500 hover:border-red-500 focus:text-white focus:bg-red-500 focus:border-red-500 active:border-slate-800 active:text-white active:bg-red-500 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none dark:text-white"
+              type="button" onclick="signOut()">
+              <span class="material-symbols-outlined mr-1.5">
+                logout
+              </span>
+              Đăng xuất
+            </button>
+          </div>
+          <div data-collapse="collapse"
+            class="block h-0 w-full basis-full overflow-hidden transition-all duration-300 ease-in-out">
+            <div
+              class="relative mx-auto my-4 flex w-8/12 flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-md dark:bg-gray-900">
+              <div class="p-6">
+                <h2 class="text-2xl font-semibold text-black dark:text-white">Chỉnh sửa thông tin</h2>
+                <div>
+                  <p class="text-base font-medium text-black dark:text-white mt-4">Ảnh đại diện</p>
+                  <!-- Add buttons here -->
+                  <div class="mt-4 flex flex-col sm:flex-row gap-2">
+                    <button
+                      class="rounded-md bg-blue-500 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-blue-600 focus:shadow-none active:bg-blue-600 hover:bg-blue-600 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none w-full sm:w-auto"
+                      type="button" onclick="uploadAvatar()">
+                      Thay đổi ảnh đại diện
+                    </button>
+                    <button
+                      class="rounded-md bg-red-500 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:shadow-none active:bg-red-600 hover:bg-red-600 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none w-full sm:w-auto"
+                      type="button" onclick="deleteAvatar()">
+                      Xoá hình ảnh
+                    </button>
+                  </div>
+                </div>
+                <div>
+                  <p class="text-base font-medium text-black dark:text-white mt-4">Họ và tên</p>
+                  <div class="w-full">
+                    <form id="nameChangeForm">
+                      <div class="relative">
+                        <input type="text"
+                          class="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 pr-16 py-4 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow dark:text-white"
+                          placeholder="Họ và tên" id="userNameInput" />
+                        <button
+                          class="absolute right-1 top-1.5 rounded bg-slate-800 py-2.5 px-2.5 border border-transparent text-center text-sm text-white transition-all shadow-sm hover:shadow focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none dark:bg-neutral-700"
+                          type="submit">
+                          Xác nhận
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+                <!-- Add change password form here -->
+                <div>
+                  <p class="text-lg font-medium text-black dark:text-white mt-4">Đổi mật khẩu</p>
+                  <form class="space-y-4 mt-4" id="passwordChangeForm">
+                    <div class="relative">
+                      <label class="block text-sm font-medium text-black dark:text-white" for="current-password">Mật
+                        khẩu hiện tại</label>
+                      <input type="password"
+                        class="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 py-4 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow dark:text-white"
+                        id="currentPassword" placeholder="Nhập mật khẩu hiện tại" />
+                      <!-- Eye icon for current password -->
+                      <span class="absolute right-3 top-9 cursor-pointer"
+                        onclick="togglePassword('currentPassword', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </span>
+                    </div>
+                    <div class="relative">
+                      <label class="block text-sm font-medium text-black dark:text-white" for="new-password">Mật khẩu
+                        mới</label>
+                      <input type="password"
+                        class="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 py-4 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow dark:text-white"
+                        id="newPassword" placeholder="Nhập mật khẩu mới" />
+                      <!-- Eye icon for new password -->
+                      <span class="absolute right-3 top-9 cursor-pointer" onclick="togglePassword('newPassword', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </span>
+                    </div>
+                    <div class="relative">
+                      <label class="block text-sm font-medium text-black dark:text-white" for="confirm-password">Xác
+                        nhận mật khẩu mới</label>
+                      <input type="password"
+                        class="w-full bg-transparent placeholder:text-slate-400 text-slate-700 text-sm border border-slate-200 rounded-md pl-3 py-4 transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow dark:text-white"
+                        id="confirmPassword" placeholder="Xác nhận mật khẩu mới" />
+                      <!-- Eye icon for confirm password -->
+                      <span class="absolute right-3 top-9 cursor-pointer"
+                        onclick="togglePassword('confirmPassword', this)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none"
+                          viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M2.458 12C3.732 7.943 7.522 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.478 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </span>
+                    </div>
+                    <button
+                      class="rounded-md bg-slate-800 py-2 px-4 border border-transparent text-center text-sm text-white transition-all shadow-md hover:shadow-lg focus:bg-slate-700 focus:shadow-none active:bg-slate-700 hover:bg-slate-700 active:shadow-none disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none w-full dark:bg-neutral-700"
+                      type="submit">
+                      Xác nhận thay đổi mật khẩu
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <form id="matchJoinForm">
+    <div data-dialog-backdrop="match-join-dialog" data-dialog-backdrop-close="true"
+      class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300">
+      <div data-dialog="match-join-dialog"
+        class="relative mx-auto flex w-full max-w-[24rem] flex-col rounded-xl bg-white dark:bg-black dark:text-white bg-clip-border text-gray-700 shadow-md">
+        <div class="flex flex-col gap-4 p-6">
+          <h6 class="block -mb-2 text-base antialiased font-semibold leading-relaxed tracking-normal text-inherit">
+            Mã trận
+          </h6>
+          <div class="relative h-11 w-full min-w-[200px]">
+            <input
+              class="w-full h-full px-3 py-3 text-sm font-normal transition-all bg-transparent border rounded-md peer border-blue-gray-200 border-t-transparent text-blue-gray-700 dark:text-white outline outline-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50"
+              placeholder=" " id="matchId" name="matchId" required />
+            <label
+              class="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none !overflow-visible truncate text-[11px] font-normal leading-tight text-gray-500 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[4.1] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-gray-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:!border-gray-900 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:!border-gray-900 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500">
+              Mã trận
+            </label>
+          </div>
+          <h6 class="block -mb-2 text-base antialiased font-semibold leading-relaxed tracking-normal text-inherit">
+            Mật khẩu
+          </h6>
+          <div class="relative h-11 w-full min-w-[200px]">
+            <input
+              class="w-full h-full px-3 py-3 text-sm font-normal transition-all bg-transparent border rounded-md peer border-blue-gray-200 border-t-transparent text-blue-gray-700 dark:text-white outline outline-0 placeholder-shown:border placeholder-shown:border-blue-gray-200 placeholder-shown:border-t-blue-gray-200 focus:border-2 focus:border-gray-900 focus:border-t-transparent focus:outline-0 disabled:border-0 disabled:bg-blue-gray-50"
+              type="text" placeholder=" " id="matchPassword" name="matchPassword" required />
+            <label
+              class="before:content[' '] after:content[' '] pointer-events-none absolute left-0 -top-1.5 flex h-full w-full select-none !overflow-visible truncate text-[11px] font-normal leading-tight text-gray-500 transition-all before:pointer-events-none before:mt-[6.5px] before:mr-1 before:box-border before:block before:h-1.5 before:w-2.5 before:rounded-tl-md before:border-t before:border-l before:border-blue-gray-200 before:transition-all after:pointer-events-none after:mt-[6.5px] after:ml-1 after:box-border after:block after:h-1.5 after:w-2.5 after:flex-grow after:rounded-tr-md after:border-t after:border-r after:border-blue-gray-200 after:transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:leading-[4.1] peer-placeholder-shown:text-blue-gray-500 peer-placeholder-shown:before:border-transparent peer-placeholder-shown:after:border-transparent peer-focus:text-[11px] peer-focus:leading-tight peer-focus:text-gray-500 peer-focus:before:border-t-2 peer-focus:before:border-l-2 peer-focus:before:!border-gray-900 peer-focus:after:border-t-2 peer-focus:after:border-r-2 peer-focus:after:!border-gray-900 peer-disabled:text-transparent peer-disabled:before:border-transparent peer-disabled:after:border-transparent peer-disabled:peer-placeholder-shown:text-blue-gray-500">
+              Mật khẩu
+            </label>
+          </div>
+        </div>
+        <div class="p-6 pt-0">
+          <button
+            class="block w-full select-none rounded-lg bg-gradient-to-tr from-blue-500 to-blue-700 py-3 px-6 text-center align-middle text-xs font-bold uppercase text-white shadow-md shadow-gray-900/10 transition-all hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+            type="submit" data-ripple-dark="true" data-dialog-close="true">
+            THAM GIA
+          </button>
+          <button
+            class="mt-2 block w-full select-none rounded-lg bg-gradient-to-tr from-pink-500 to-orange-500 py-3 px-6 text-center align-middle text-xs font-bold uppercase text-white shadow-md shadow-gray-900/10 transition-all hover:shadow-lg hover:shadow-gray-900/20 active:opacity-[0.85] disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+            type="button" data-ripple-dark="true" data-dialog-close="true">
+            ĐÓNG
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+  <div data-dialog-backdrop="choose-positon-dialog" data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300">
+    <div class="relative m-4 w-2/4 rounded-lg bg-white shadow-sm dark:bg-neutral-900" role="dialog"
+      data-dialog="choose-positon-dialog">
+      <div class="flex items-center justify-between p-4">
+        <div class="flex items-center gap-3">
+          <img alt="tania andrew" src="img/appLogo.png"
+            class="relative inline-block h-9 w-9 rounded-full object-cover object-center" />
+          <div class="-mt-px flex flex-col">
+            <p class="text-sm text-slate-800 font-semibold dark:text-white" id="matchNameChoosePosition">
+              Đang tải...
+            </p>
+            <p class="text-xs font-normal text-slate-500 dark:text-gray" id="hostNameChoosePosition">
+              Đang tải...
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <p class="font-semibold dark:text-white">Tham gia trò chơi</p>
+        </div>
+      </div>
+      <div
+        class="relative border-b border-t border-b-blue-gray-100 border-t-blue-gray-100 p-0 text-base font-light leading-relaxed text-blue-gray-500 antialiased"
+        id="competition-container">
+        <!-- <div
+          class="competition-item flex flex-row items-center justify-between cursor-pointer text-slate-800 p-4 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-all"
+          data-value="1">
+          <div class="flex items-center space-x-2">
+            <img src="https://docs.material-tailwind.com/img/face-2.jpg" alt="avatar"
+              class="relative inline-block h-10 w-10 !rounded-full  object-cover object-center" />
+            <p class="dark:text-white font-semibold">Trương Anh Khoa</p>
+          </div>
+          <p class="font-semibold dark:text-white">Thí sinh 1</p>
+        </div> -->
+      </div>
+      <div class="flex shrink-0 flex-wrap items-center justify-between p-4 text-blue-gray-500">
+        <div class="flex items-center gap-16">
+          <button
+            class="flex items-center rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-red-800 hover:border-red-800 focus:text-white focus:bg-red-800 focus:border-red-800 active:border-red-800 active:text-white active:bg-red-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none dark:text-white"
+            type="button" data-ripple-dark="true" data-dialog-close="true">
+            <span class="material-icons">
+              close
+            </span>
+            Huỷ
+          </button>
+        </div>
+        <button
+          class="flex items-center rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 focus:text-white focus:bg-slate-800 focus:border-slate-800 active:border-slate-800 active:text-white active:bg-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none dark:text-white"
+          type="button" id="joinMatchButton">
+          <span class="material-icons">
+            check
+          </span>
+          Tham gia trò chơi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div data-dialog-backdrop="match-creation-modal" data-dialog-backdrop-close="true"
+    class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300">
+    <div data-dialog="match-creation-modal"
+      class="relative m-4 p-4 w-2/5 rounded-lg bg-white shadow-sm dark:bg-neutral-900">
+      <div class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800 dark:text-white">
+        Tạo trò chơi mới
+      </div>
+
+
+
+      <!-- Form Inputs Start -->
+      <form id="matchCreateForm" class="space-y-4">
+        <div>
+          <label for="matchshortname" class="block text-sm font-medium text-gray-700">Mã trận</label>
+          <input type="text" id="matchshortname" name="matchshortname"
+            class="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300 dark:bg-neutral-900 dark:text-white">
+        </div>
+        <div>
+          <label for="matchfullname" class="block text-sm font-medium text-gray-700">Tên trận</label>
+          <input type="text" id="matchfullname" name="matchfullname"
+            class="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300 dark:bg-neutral-900 dark:text-white">
+        </div>
+        <div>
+          <label for="matchpassword" class="block text-sm font-medium text-gray-700">Mât khẩu</label>
+          <input type="text" id="matchpassword" name="matchpassword"
+            class="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300 dark:bg-neutral-900 dark:text-white">
+        </div>
+        <div>
+          <button type="submit" data-ripple-dark="true" data-dialog-close="true"
+            class="w-full bg-black text-white p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:bg-black focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300">Tạo
+            trò chơi mới</button>
+        </div>
+      </form>
+      <!-- Form Inputs End -->
+      <!-- 
+      <div class="flex shrink-0 flex-wrap items-center pt-4 justify-end">
+
+      </div> -->
+    </div>
+  </div>
+</body>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-functions.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+<script src="js/Utilities.js"></script>
+<!-- <script src="https://unpkg.com/@material-tailwind/html@latest/scripts/tabs.js"></script> -->
+<script src="js/components/ripple/ripple.js"></script>
+<script type="module" src="js/components/popover/popover.js"></script>
+<script type="module" src="js/components/tooltip/tooltip.js"></script>
+<script src="js/components/dialog/dialog.js"></script>
+<script src="js/components/collapse/collapse.js"></script>
+<!-- <script src="https://unpkg.com/@material-tailwind/html@latest/scripts/collapse.js"></script> -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"
+  integrity="sha512-JyCZjCOZoyeQZSd5+YEAcFgz2fowJ1F1hyJOXgtKu4llIa0KneLcidn5bwfutiehUTiOuK87A986BZJMko0eWQ=="
+  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="js/firebaseConfig.js"></script>
+<script src="js/main/firebaseDefenition.js"></script>
+<script src="js/authentication/UserLoggedin.js"></script>
+<script src="js/main/matchCodeHandler.js"></script>
+<script src="js/main/matchJoinHandler.js"></script>
+<script src="js/main/profile.js"></script>
+<script src="js/main/promotion.js"></script>
+<script src="js/main/matchManagement.js"></script>
+<script src="js/components/toast/toast.js"></script>
+<script src="js/main/intro.js"></script>
+<script src="js/blockConsole.js"></script>
+<script src="js/Theme.js"></script>
+
+</html>

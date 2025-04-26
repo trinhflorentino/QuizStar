@@ -370,14 +370,14 @@ function ViewStudentResponse() {
                 <>
                   <div className="ml-8 mb-4">
                     <p className="font-medium text-gray-700 mb-2">Câu trả lời của học sinh:</p>
-                    {userAnswer && userAnswer.selectedAnswer !== undefined ? (
+                    {userAnswer && userAnswer.selectedAnswer !== undefined && userAnswer.selectedAnswer !== null ? (
                       <div className="p-3 bg-blue-50 rounded-md">
                         <p className="text-blue-800">
                           {String.fromCharCode(65 + userAnswer.selectedAnswer)}
                         </p>
                       </div>
                     ) : (
-                      <p className="text-gray-500 italic">Không trả lời</p>
+                      <p className="text-gray-500 italic">Không chọn</p>
                     )}
                   </div>
                   {renderCorrectMCQAnswer(index)}
@@ -388,7 +388,7 @@ function ViewStudentResponse() {
                 <>
                   <div className="ml-8 mb-4">
                     <p className="font-medium text-gray-700 mb-2">Câu trả lời của học sinh:</p>
-                    {userAnswer && Array.isArray(userAnswer.selectedAnswer) ? (
+                    {userAnswer && Array.isArray(userAnswer.selectedAnswer) && userAnswer.selectedAnswer.length > 0 ? (
                       <div className="p-3 bg-blue-50 rounded-md">
                         <ul className="list-disc pl-5">
                           {question.options.map((option, idx) => (
@@ -399,7 +399,7 @@ function ViewStudentResponse() {
                         </ul>
                       </div>
                     ) : (
-                      <p className="text-gray-500 italic">Không trả lời</p>
+                      <p className="text-gray-500 italic">Không chọn</p>
                     )}
                   </div>
                   {renderCorrectTrueFalseAnswer(index)}

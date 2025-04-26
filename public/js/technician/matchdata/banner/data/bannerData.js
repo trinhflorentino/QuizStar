@@ -1,1 +1,69 @@
-const a0_0x60373=a0_0x277a;(function(_0x342356,_0x4ea3d5){const _0x32cf32=a0_0x277a,_0x509c2a=_0x342356();while(!![]){try{const _0xa3ccb2=-parseInt(_0x32cf32(0xe6))/0x1+parseInt(_0x32cf32(0xee))/0x2*(-parseInt(_0x32cf32(0xd8))/0x3)+parseInt(_0x32cf32(0xd9))/0x4*(-parseInt(_0x32cf32(0xe8))/0x5)+parseInt(_0x32cf32(0xe3))/0x6+-parseInt(_0x32cf32(0xda))/0x7+parseInt(_0x32cf32(0xd4))/0x8+parseInt(_0x32cf32(0xde))/0x9;if(_0xa3ccb2===_0x4ea3d5)break;else _0x509c2a['push'](_0x509c2a['shift']());}catch(_0x76d61b){_0x509c2a['push'](_0x509c2a['shift']());}}}(a0_0x13a4,0x3a4d7),auth[a0_0x60373(0xe7)](_0x46a95b=>{const _0x48e14c=a0_0x60373;if(!_0x46a95b)return;const _0x61684b=firestoreDB['collection'](_0x48e14c(0xf6))[_0x48e14c(0xec)](auth[_0x48e14c(0xc8)][_0x48e14c(0xe1)]);_0x61684b[_0x48e14c(0xe2)](_0x180851=>{const _0x4520e3=_0x48e14c;if(!_0x180851[_0x4520e3(0xd7)])return;const _0x5d9f7c=_0x180851['data']()['match'],_0x58ed6f=realtimeDB['ref'](_0x5d9f7c+'/Banner'),_0x5ccf6c=realtimeDB['ref'](_0x5d9f7c+'/match');_0x58ed6f['on'](_0x4520e3(0xf4),_0x2e1554=>{const _0xff150b=_0x4520e3,_0x31b542=_0x2e1554['val'](),_0x6a3e45=_0x31b542['Elements']['MatchName'],_0x596d3c=_0x31b542[_0xff150b(0xd0)][_0xff150b(0xcf)],_0x457776=_0x31b542['Elements'][_0xff150b(0xe4)],_0x1fe397=_0x31b542['Elements'][_0xff150b(0xed)],_0x1a8755=[_0xff150b(0xcc),_0xff150b(0xcb),'Advisor3',_0xff150b(0xd1),_0xff150b(0xd3)];let _0x3c01da=![];_0x1a8755[_0xff150b(0xd5)]((_0x4565e2,_0x8c217d)=>{const _0x29b569=_0xff150b;_0x31b542[_0x29b569(0xe5)][_0x4565e2]==!![]&&(_0x373ed7(_0x29b569(0xeb)+(_0x8c217d+0x1)),_0x3c01da=!![]);});const _0x4744ca=['ContestantIntroduction',_0xff150b(0xce),_0xff150b(0xcd),'MC',_0xff150b(0xea),_0xff150b(0xe9),_0xff150b(0xd6),'Place3rd',_0xff150b(0xef)],_0x4bd877={'ContestantIntroduction':_0xff150b(0xf0),'End':_0xff150b(0xd2),'GivingPrize':_0xff150b(0xdd),'MC':_0xff150b(0xca),'TenseMoments':'Khoảnh\x20khắc\x20căng\x20thẳng','Place1st':'Vị\x20trí\x201','Place2nd':_0xff150b(0xf3),'Place3rd':_0xff150b(0xdb),'Place4th':_0xff150b(0xdf)};_0x4744ca[_0xff150b(0xd5)](_0x34fcd2=>{const _0xcf3635=_0xff150b;_0x31b542[_0xcf3635(0xe5)][_0x34fcd2]==!![]&&(_0x373ed7(_0xcf3635(0xf2)+_0x4bd877[_0x34fcd2]),_0x3c01da=!![]);});!_0x3c01da&&_0x373ed7(_0xff150b(0xf5));function _0x373ed7(_0x28b33d){document['getElementById']('bannerMusicText')['innerHTML']=_0x28b33d;}console[_0xff150b(0xc9)](_0x31b542),_0x6a3e45==!![]&&_0x5ccf6c['on'](_0xff150b(0xf4),_0x460d7f=>{const _0x2cba8d=_0xff150b,_0x377eda=_0x460d7f['val']();document[_0x2cba8d(0xe0)](_0x2cba8d(0xf1))['innerText']=_0x377eda;}),_0x596d3c==!![]&&(document['getElementById']('bannerText')[_0xff150b(0xc7)]=_0xff150b(0xdc)),_0x457776==!![]&&(document[_0xff150b(0xe0)](_0xff150b(0xf1))['innerText']=_0x1fe397),_0x6a3e45==![]&&_0x596d3c==![]&&_0x457776==![]&&(document[_0xff150b(0xe0)](_0xff150b(0xf1))['innerText']='');});});}));function a0_0x277a(_0x153b75,_0xb1680b){const _0x13a4cf=a0_0x13a4();return a0_0x277a=function(_0x277a75,_0x48ad2f){_0x277a75=_0x277a75-0xc7;let _0x337592=_0x13a4cf[_0x277a75];return _0x337592;},a0_0x277a(_0x153b75,_0xb1680b);}function a0_0x13a4(){const _0x22e79b=['bannerText','Đang\x20phát\x20âm\x20thanh:\x20','Vị\x20trí\x202','value','Đang\x20không\x20phát\x20âm\x20thanh','match','innerText','currentUser','log','Giới\x20thiệu\x20MC','Advisor2','Advisor1','GivingPrize','End','ContestantList','Elements','Advisor4','Kết\x20thúc','Advisor5','2670560tHCffg','forEach','Place2nd','exists','3vHpVzc','124PJHJMI','1377432DjZjmx','Vị\x20trí\x203','Đang\x20hiển\x20thị\x20danh\x20sách\x20thí\x20sinh','Trao\x20giải','6790770dFitCQ','Vị\x20trí\x204','getElementById','uid','onSnapshot','609612FZRblH','CustomText','Music','168203xsyXmH','onAuthStateChanged','67415wWznBF','Place1st','TenseMoments','Đang\x20phát\x20âm\x20thanh:\x20Cố\x20vấn\x20','doc','CustomTextContent','336386RzIMRP','Place4th','Giới\x20thiệu\x20thí\x20sinh'];a0_0x13a4=function(){return _0x22e79b;};return a0_0x13a4();}
+auth.onAuthStateChanged(_0x51dc23 => {
+    if (!_0x51dc23) {
+      return;
+    }
+    const _0x4a2fac = firestoreDB.collection("match").doc(auth.currentUser.uid);
+    _0x4a2fac.onSnapshot(_0x4e4d1c => {
+      if (!_0x4e4d1c.exists) {
+        return;
+      }
+      const _0x53bee9 = _0x4e4d1c.data().match;
+      const _0x1b802e = realtimeDB.ref(_0x53bee9 + "/Banner");
+      const _0x30d406 = realtimeDB.ref(_0x53bee9 + '/match');
+      _0x1b802e.on('value', _0x5b42e4 => {
+        const _0x25e39c = _0x5b42e4.val();
+        const _0x23bbbe = _0x25e39c.Elements.MatchName;
+        const _0x2f4c2c = _0x25e39c.Elements.ContestantList;
+        const _0x165f44 = _0x25e39c.Elements.CustomText;
+        const _0x1e122d = _0x25e39c.Elements.CustomTextContent;
+        const _0xde3add = ["Advisor1", "Advisor2", "Advisor3", "Advisor4", "Advisor5"];
+        let _0xe442e8 = false;
+        _0xde3add.forEach((_0x58d1f8, _0x2675cd) => {
+          if (_0x25e39c.Music[_0x58d1f8] == true) {
+            _0x164c88("Đang phát âm thanh: Cố vấn " + (_0x2675cd + 0x1));
+            _0xe442e8 = true;
+          }
+        });
+        const _0x84e7a1 = ["ContestantIntroduction", 'End', "GivingPrize", 'MC', 'TenseMoments', "Place1st", "Place2nd", "Place3rd", "Place4th"];
+        const _0x4db8c0 = {
+          'ContestantIntroduction': "Giới thiệu thí sinh",
+          'End': "Kết thúc",
+          'GivingPrize': "Trao giải",
+          'MC': "Giới thiệu MC",
+          'TenseMoments': "Khoảnh khắc căng thẳng",
+          'Place1st': "Vị trí 1",
+          'Place2nd': "Vị trí 2",
+          'Place3rd': "Vị trí 3",
+          'Place4th': "Vị trí 4"
+        };
+        _0x84e7a1.forEach(_0x531bae => {
+          if (_0x25e39c.Music[_0x531bae] == true) {
+            _0x164c88("Đang phát âm thanh: " + _0x4db8c0[_0x531bae]);
+            _0xe442e8 = true;
+          }
+        });
+        if (!_0xe442e8) {
+          _0x164c88("Đang không phát âm thanh");
+        }
+        function _0x164c88(_0xee1722) {
+          document.getElementById("bannerMusicText").innerHTML = _0xee1722;
+        }
+        console.log(_0x25e39c);
+        if (_0x23bbbe == true) {
+          _0x30d406.on('value', _0x5a67c3 => {
+            const _0x2d1e12 = _0x5a67c3.val();
+            document.getElementById("bannerText").innerText = _0x2d1e12;
+          });
+        }
+        if (_0x2f4c2c == true) {
+          document.getElementById("bannerText").innerText = "Đang hiển thị danh sách thí sinh";
+        }
+        if (_0x165f44 == true) {
+          document.getElementById("bannerText").innerText = _0x1e122d;
+        }
+        if (_0x23bbbe == false && _0x2f4c2c == false && _0x165f44 == false) {
+          document.getElementById("bannerText").innerText = '';
+        }
+      });
+    });
+  });
