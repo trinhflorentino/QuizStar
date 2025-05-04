@@ -1,27 +1,12 @@
-import { getAuth } from "firebase/auth";
-import { useEffect, useState } from "react";
-import { Stater } from "../services/firebaseConfig";
-import React from 'react'
+import React from 'react';
 import { useNavigate } from "react-router-dom";
 import { RiBookOpenLine, RiFileTextLine, RiGameLine } from "react-icons/ri";
+import { useAuth } from "../contexts/AuthContext";
 // import { BiSolidGame } from "react-icons/bi";
 
 function Dashboard() {
-  const [user, setUser] = useState(false);
-  const funct = new Stater();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    getAuth().onAuthStateChanged(function (user) {
-      if (user) {
-        setUser(true);
-      } else {
-        setUser(false);
-      }
-    });
-  }, []);
-
-  useEffect(() => {}, [user]);
+  const { currentUser } = useAuth();
 
   const menuItems = [
     { title: "Quản lý đề thi", icon: RiFileTextLine, path: "/TestManagement" },
@@ -30,7 +15,11 @@ function Dashboard() {
   ];
 
   const handleNavigate = (path) => {
-    navigate(path);
+    if (path === "/Main") {
+      window.location.href = "/Main.html";
+    } else {
+      navigate(path);
+    }
   };
 
   return (
@@ -40,6 +29,9 @@ function Dashboard() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-800 mb-2">QuizStar</h1>
           <p className="text-gray-600">Nền tảng tạo và quản lý bài kiểm tra trực tuyến.</p>
+          {currentUser && (
+            <p className="mt-2 text-blue-600">Xin chào, {currentUser.displayName}!</p>
+          )}
         </div>
         {/* Main Features Section */}
         <div className="mb-8">

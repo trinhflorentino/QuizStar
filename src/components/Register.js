@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { auth } from '../services/firebaseConfig';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, updateProfile } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 
-const Login = () => {
+const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [errors, setErrors] = useState({});
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { currentUser, signIn } = useAuth();
+  const { currentUser, signUp } = useAuth();
   const { error: showError, success: showSuccess } = useNotification();
 
   useEffect(() => {
@@ -25,14 +27,12 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Reset validation state
-    setError('');
-    setErrors({});
-    
     // Validate form
     const newErrors = {};
+    if (!username) newErrors.username = 'Vui lòng nhập họ tên';
     if (!email) newErrors.email = 'Vui lòng nhập email';
     if (!password) newErrors.password = 'Vui lòng nhập mật khẩu';
+    if (password !== confirmPassword) newErrors.confirmPassword = 'Mật khẩu nhập lại không khớp';
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -42,21 +42,19 @@ const Login = () => {
     setLoading(true);
     
     try {
-      await signIn(email, password);
-      showSuccess('Đăng nhập thành công');
-      navigate('/Dashboard');
+      await signUp(email, password, username);
+      showSuccess('Đăng ký thành công!');
+      navigate('/dashboard');
     } catch (error) {
-      console.error('Đăng nhập thất bại:', error);
-      if (error.code === 'auth/invalid-credential') {
-        showError('Email hoặc mật khẩu không chính xác');
-      } else if (error.code === 'auth/user-not-found') {
-        showError('Không tìm thấy tài khoản với email này');
-      } else if (error.code === 'auth/wrong-password') {
-        showError('Mật khẩu không chính xác');
-      } else if (error.code === 'auth/too-many-requests') {
-        showError('Quá nhiều lần đăng nhập thất bại. Vui lòng thử lại sau');
+      console.error('Đăng ký thất bại:', error);
+      if (error.code === 'auth/email-already-in-use') {
+        showError('Email đã được sử dụng');
+      } else if (error.code === 'auth/invalid-email') {
+        showError('Email không hợp lệ');
+      } else if (error.code === 'auth/weak-password') {
+        showError('Mật khẩu quá yếu, vui lòng chọn mật khẩu khác');
       } else {
-        showError('Đăng nhập thất bại. Vui lòng thử lại');
+        showError('Đăng ký thất bại, vui lòng thử lại');
       }
     } finally {
       setLoading(false);
@@ -106,7 +104,7 @@ const Login = () => {
       <div className="w-full bg-white lg:w-1/2 flex items-center justify-center">
         <div className="max-w-md w-full p-6">
           <h1 className="text-3xl font-bold mb-6 text-black text-center">QuizStar</h1>
-          <h1 className="text-sm font-semibold mb-6 text-gray-500 text-center">Đăng nhập một cách nhanh chóng với</h1>
+          <h1 className="text-sm font-semibold mb-6 text-gray-500 text-center">Đăng ký QuizStar với</h1>
           
           <div className="mt-4 flex flex-col lg:flex-row items-center justify-between">
             <div className="w-full lg:w-full mb-2 lg:mb-0">
@@ -139,6 +137,20 @@ const Login = () => {
           
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
             <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">Họ và tên</label>
+              <input
+                type="text"
+                id="username"
+                name="fullname"
+                autoComplete="name"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="border-0 mt-1 p-2 w-full rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"
+                required
+              />
+            </div>
+            
+            <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
               <input
                 type="email"
@@ -150,7 +162,6 @@ const Login = () => {
                 className="border-0 mt-1 p-2 w-full rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"
                 required
               />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
             </div>
             
             <div>
@@ -158,6 +169,8 @@ const Login = () => {
               <input
                 type="password"
                 id="password"
+                name="password"
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="border-0 mt-1 p-2 w-full rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"
@@ -166,31 +179,41 @@ const Login = () => {
             </div>
             
             <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">Xác nhận mật khẩu</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                autoComplete="new-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="border-0 mt-1 p-2 w-full rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300"
+                required
+              />
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
+              )}
+            </div>
+            
+            <div>
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full bg-black text-white p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:bg-black focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300"
               >
-                {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                {loading ? 'Đang đăng ký...' : 'Đăng ký'}
               </button>
             </div>
           </form>
           
-          <button
-            onClick={() => navigate('/Register')}
-            className="w-full bg-blue-700 text-white p-2 rounded-md hover:bg-blue-900 focus:outline-none focus:bg-black focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300 mt-2"
-          >
-            Đăng ký tài khoản mới
-          </button>
-          
           <div className="mt-4 text-sm text-gray-600 text-center">
             <p>
-              Quên mật khẩu? 
+              Bạn đã có tài khoản? 
               <button 
-                onClick={() => navigate('/ForgotPassword')} 
+                onClick={() => navigate('/Login')} 
                 className="text-black hover:underline ml-1"
               >
-                Tìm mật khẩu tại đây
+                Đăng nhập tại đây
               </button>
             </p>
           </div>
@@ -200,4 +223,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register; 
