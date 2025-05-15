@@ -42,31 +42,55 @@ function Home() {
               : "Bắt đầu đăng nhập để khám phá"}
           </p>
 
-          <button
-            onClick={
-              user === true
-                ? () => navigate("/Dashboard")
-                : () => navigate("/Login")
-            }
-            className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-[#1A2B3B] rounded-xl overflow-hidden transition-all duration-300 ease-out hover:bg-[#2C4159] hover:scale-105 transform"
-          >
-            <span className="relative">
-              {user === true ? "Khám phá ngay" : "Đăng nhập"}
-            </span>
-            <svg
-              className="w-5 h-5 ml-2 transform transition-transform group-hover:translate-x-1"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div className="flex flex-col md:flex-row gap-4">
+            <button
+              onClick={
+                user === true
+                  ? () => navigate("/Dashboard")
+                  : () => navigate("/Login")
+              }
+              className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-white bg-[#1A2B3B] rounded-xl overflow-hidden transition-all duration-300 ease-out hover:bg-[#2C4159] hover:scale-105 transform"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M13 7l5 5m0 0l-5 5m5-5H6"
-              />
-            </svg>
-          </button>
+              <span className="relative">
+                {user === true ? "Khám phá ngay" : "Đăng nhập"}
+              </span>
+              <svg
+                className="w-5 h-5 ml-2 transform transition-transform group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </button>
+
+            <button
+              onClick={() => navigate("/pinverify")}
+              className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-medium text-[#1A2B3B] bg-white border-2 border-[#1A2B3B] rounded-xl overflow-hidden transition-all duration-300 ease-out hover:bg-gray-100 hover:scale-105 transform"
+            >
+              <span className="relative">
+                Tham gia bài thi
+              </span>
+              <svg
+                className="w-5 h-5 ml-2 transform transition-transform group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
 
         {/* Right Image */}

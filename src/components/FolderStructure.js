@@ -466,7 +466,7 @@ const FolderStructure = ({ searchTerm }) => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold text-gray-800">Thư viện đề thi</h2>
         <div className="flex items-center space-x-2">
-          {currentPath.length > 0 && (
+          {/* {currentPath.length > 0 && (
             <button
               onClick={addExamToCurrentFolderModal}
               className="flex items-center space-x-1 bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md transition-colors"
@@ -474,7 +474,7 @@ const FolderStructure = ({ searchTerm }) => {
               <FaPlus size={14} />
               <span>Thêm đề thi</span>
             </button>
-          )}
+          )} */}
           <button
             onClick={createNewFolder}
             className="flex items-center space-x-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md transition-colors"
@@ -592,7 +592,7 @@ const FolderStructure = ({ searchTerm }) => {
       )}
       
       <div className="grid grid-cols-12 py-2 px-3 border-b border-gray-200 bg-gray-50 font-medium text-gray-700 rounded-t-md">
-        <div className="col-span-1">
+        <div className="col-span-1 pr-2">
           <input 
             type="checkbox" 
             className="w-4 h-4"
@@ -610,13 +610,13 @@ const FolderStructure = ({ searchTerm }) => {
             return (
               <div 
                 key={item.id}
-                className={`grid grid-cols-12 p-3 ${isItemSelected(item) ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                className={`grid grid-cols-12 p-3 ${isItemSelected(item) ? 'bg-blue-50' : 'hover:bg-gray-50'} cursor-pointer`}
                 onClick={() => {
                   setSelectedItem({ id: item.id, type: 'folder' });
                   openFolder(item);
                 }}
               >
-                <div className="col-span-1">
+                <div className="col-span-1 pr-2">
                   <input 
                     type="checkbox" 
                     className="w-4 h-4"
@@ -641,16 +641,6 @@ const FolderStructure = ({ searchTerm }) => {
                     
                     {showFolderMenu === item.id && (
                       <div className="absolute right-0 top-full mt-1 bg-white shadow-lg rounded-md py-1 z-10 w-44">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            createNewFolder();
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center"
-                        >
-                          <FaPlus size={12} className="mr-2" />
-                          <span>Tạo thư mục con</span>
-                        </button>
                         <button 
                           onClick={(e) => {
                             e.stopPropagation();
@@ -681,10 +671,13 @@ const FolderStructure = ({ searchTerm }) => {
             return (
               <div 
                 key={item.id}
-                className={`grid grid-cols-12 p-3 ${isItemSelected(item) ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
-                onClick={() => setSelectedItem({ id: item.id, type: 'exam' })}
+                className={`grid grid-cols-12 p-3 ${isItemSelected(item) ? 'bg-blue-50' : 'hover:bg-gray-50'} cursor-pointer`}
+                onClick={() => {
+                  setSelectedItem({ id: item.id, type: 'exam' });
+                  viewExamDetails(item.id);
+                }}
               >
-                <div className="col-span-1">
+                <div className="col-span-1 pr-2">
                   <input 
                     type="checkbox" 
                     className="w-4 h-4"

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getDoc, doc, collection, getDocs } from 'firebase/firestore/lite';
-import db from '../../services/firebaseConfig';
+import db from '../services/firebaseConfig';
 import { MathJaxContext, MathJax } from 'better-react-mathjax';
 
 const MemoizedMathJax = React.memo(({ children, ...props }) => (
@@ -36,79 +36,34 @@ function ViewStudentResponse() {
         
         // 1. Get Quiz Questions
         try {
-          // Get all documents from the Question_Papers_MCQ collection
-          const questionsSnapshot = await getDocs(
-            collection(db, "Paper_Setters", pin, "Question_Papers_MCQ")
+          const quizDoc = await getDoc(
+            doc(db, "Paper_Setters", pin, "Question_Papers_MCQ", "questionsTest")
           );
           
-          if (questionsSnapshot.empty) {
+          if (!quizDoc.exists()) {
             throw new Error('Không tìm thấy đề thi');
           }
           
-          // Find the document that contains the questions
-          let quizData = null;
-          let title = 'Chi tiết bài làm';
-          let answersData = null;
-          
-          for (const doc of questionsSnapshot.docs) {
-            const data = doc.data();
-            
-            // If this document has questions, use it
-            if (data.question_question && Array.isArray(data.question_question)) {
-              quizData = data;
-              title = doc.id;
-            }
-            
-            // If this document has answers, store them
-            if (data.answer_answer && Array.isArray(data.answer_answer)) {
-              answersData = data;
-            }
-          }
-          
-          if (!quizData) {
-            throw new Error('Không tìm thấy câu hỏi trong đề thi');
-          }
-          
+          const quizData = quizDoc.data();
           setQuestions(quizData.question_question || []);
-          setExamTitle(quizData.title || title);
-          
-          // If we found answers in the same loop, use them
-          if (answersData) {
-            setAnswers(answersData.answer_answer || []);
-          }
-          
+          setExamTitle(quizData.title || 'Chi tiết bài làm');
         } catch (error) {
           console.error('Error fetching questions:', error);
           throw new Error('Không thể tải thông tin đề thi');
         }
         
-        // Only try to get answers separately if we haven't already found them
-        if (answers.length === 0) {
-          try {
-            // Try to find answer sheet with various possible naming patterns
-            const answerPatterns = ['_answerSheet', 'answerSheet', 'Answers', 'answers'];
-            let answersFound = false;
-            
-            for (const pattern of answerPatterns) {
-              // Look for documents matching possible answer sheet naming patterns
-              const answersSnapshot = await getDocs(
-                collection(db, "Paper_Setters", pin, "Question_Papers_MCQ")
-              );
-              
-              for (const doc of answersSnapshot.docs) {
-                if (doc.id.includes(pattern) || doc.data().answer_answer) {
-                  setAnswers(doc.data().answer_answer || []);
-                  answersFound = true;
-                  break;
-                }
-              }
-              
-              if (answersFound) break;
-            }
-          } catch (error) {
-            console.error('Error fetching answers:', error);
-            // Continue anyway - we can show student response without answers
+        // 2. Get Answer Key
+        try {
+          const answerDoc = await getDoc(
+            doc(db, "Paper_Setters", pin, "Question_Papers_MCQ", "answersTest_answerSheet")
+          );
+          
+          if (answerDoc.exists()) {
+            setAnswers(answerDoc.data().answer_answer || []);
           }
+        } catch (error) {
+          console.error('Error fetching answers:', error);
+          // Continue anyway - we can show student response without answers
         }
         
         // 3. Get Student Response
@@ -323,30 +278,10 @@ function ViewStudentResponse() {
                 <div className="space-y-3 pl-8">
                   {question.options.map((option, oIndex) => {
                     const correctAnswer = answers[qIndex]?.answer;
-                    // Ensure we have a valid student answer
-                    const hasStudentAnswer = studentAnswers[qIndex] && 
-                                            studentAnswers[qIndex].selectedAnswer !== undefined && 
-                                            studentAnswers[qIndex].selectedAnswer !== null;
-                    const studentAnswer = hasStudentAnswer ? studentAnswers[qIndex].selectedAnswer : null;
+                    const studentAnswer = studentAnswers[qIndex]?.selectedAnswer;
                     
-                    // Form.js uses 0-based indexes for selected answers
-                    // but correct answers are 1-based in the database
-                    // We need to adjust the comparison accordingly
-                    const isCorrect = correctAnswer !== undefined && parseInt(correctAnswer) === oIndex + 1;
-                    
-                    // Only consider it selected if student explicitly chose this option
-                    const isSelected = hasStudentAnswer && parseInt(studentAnswer) === oIndex;
-                    
-                    // This is for logging only 
-                    if (qIndex < 3) {
-                      console.log(`Question ${qIndex}, Option ${oIndex}:`, { 
-                        correctAnswer, 
-                        studentAnswer,
-                        hasStudentAnswer, 
-                        isCorrect, 
-                        isSelected 
-                      });
-                    }
+                    const isCorrect = parseInt(correctAnswer) === oIndex + 1;
+                    const isSelected = parseInt(studentAnswer) === oIndex;
                     
                     return (
                       <div 
@@ -368,117 +303,67 @@ function ViewStudentResponse() {
                           <div className="flex-grow">
                             <MemoizedMathJax>{option.option}</MemoizedMathJax>
                           </div>
-                          {isCorrect && isSelected && (
+                          {isCorrect && (
                             <span className="text-green-600 ml-2">✓</span>
                           )}
                           {isSelected && !isCorrect && (
                             <span className="text-red-600 ml-2">✗</span>
                           )}
-                          {isCorrect && !isSelected && (
-                            <span className="text-green-600 ml-2 opacity-50">✓</span>
-                          )}
                         </div>
                       </div>
                     );
                   })}
-                  
-                  {/* Hiển thị đáp án của học sinh */}
-                  <div className="mt-4 pt-3 border-t border-gray-200">
-                    <p className="font-medium">
-                      Đáp án của học sinh: {
-                        (() => {
-                          const hasStudentAnswer = studentAnswers[qIndex] && 
-                                                 studentAnswers[qIndex].selectedAnswer !== undefined && 
-                                                 studentAnswers[qIndex].selectedAnswer !== null;
-                          
-                          if (!hasStudentAnswer) {
-                            return <span className="text-gray-500">Chưa trả lời</span>;
-                          }
-                          
-                          const studentAnswer = parseInt(studentAnswers[qIndex].selectedAnswer);
-                          const correctAnswer = answers[qIndex]?.answer;
-                          const isCorrect = correctAnswer !== undefined && 
-                                           studentAnswer === parseInt(correctAnswer) - 1;
-                          
-                          return (
-                            <span className={isCorrect ? "text-green-600 font-bold" : "text-red-600"}>
-                              {String.fromCharCode(65 + studentAnswer)}
-                            </span>
-                          );
-                        })()
-                      }
-                    </p>
-                  </div>
                 </div>
               )}
               
               {question.type === 'truefalse' && (
                 <div className="space-y-4 pl-8">
                   {question.options.map((option, oIndex) => {
+                    const correctAnswer = answers[qIndex]?.answer[oIndex];
+                    const studentAnswer = studentAnswers[qIndex]?.selectedAnswer?.[oIndex];
+                    
                     return (
                       <div key={oIndex} className="mb-3">
                         <div className="mb-2 font-medium">
                           <MemoizedMathJax>{`${String.fromCharCode(97 + oIndex)}. ${option.option}`}</MemoizedMathJax>
                         </div>
+                        <div className="flex ml-8 space-x-4">
+                          <div 
+                            className={`px-4 py-2 rounded-lg border ${
+                              studentAnswer === true 
+                                ? correctAnswer === true 
+                                  ? 'bg-green-100 border-green-500' 
+                                  : 'bg-red-100 border-red-500' 
+                                : correctAnswer === true 
+                                  ? 'border-green-500' 
+                                  : 'border-gray-300'
+                            }`}
+                          >
+                            Đúng
+                            {correctAnswer === true && (
+                              <span className="text-green-600 ml-2">✓</span>
+                            )}
+                          </div>
+                          <div 
+                            className={`px-4 py-2 rounded-lg border ${
+                              studentAnswer === false 
+                                ? correctAnswer === false 
+                                  ? 'bg-green-100 border-green-500' 
+                                  : 'bg-red-100 border-red-500' 
+                                : correctAnswer === false 
+                                  ? 'border-green-500' 
+                                  : 'border-gray-300'
+                            }`}
+                          >
+                            Sai
+                            {correctAnswer === false && (
+                              <span className="text-green-600 ml-2">✓</span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     );
                   })}
-                  
-                  {/* Hiển thị tổng hợp đáp án */}
-                  <div className="mt-4 pt-3 border-t border-gray-200">
-                    <p className="font-medium mb-2">
-                      Đáp án của học sinh: {
-                        (() => {
-                          if (!studentAnswers[qIndex] || !Array.isArray(studentAnswers[qIndex].selectedAnswer)) {
-                            return <span className="text-gray-500">Chưa trả lời</span>;
-                          }
-                          
-                          return question.options.map((option, oIndex) => {
-                            const hasAnswer = studentAnswers[qIndex].selectedAnswer[oIndex] !== undefined && 
-                                             studentAnswers[qIndex].selectedAnswer[oIndex] !== null;
-                            
-                            if (!hasAnswer) {
-                              return (
-                                <span key={oIndex} className="text-gray-500">
-                                  {oIndex > 0 && "; "}
-                                  {String.fromCharCode(97 + oIndex)}) Chưa trả lời
-                                </span>
-                              );
-                            }
-                            
-                            const studentAnswer = studentAnswers[qIndex].selectedAnswer[oIndex];
-                            const correctAnswer = answers[qIndex]?.answer[oIndex];
-                            const isCorrect = studentAnswer === correctAnswer;
-                            
-                            return (
-                              <span 
-                                key={oIndex} 
-                                className={isCorrect ? "text-green-600" : "text-red-600"}
-                              >
-                                {oIndex > 0 && "; "}
-                                {String.fromCharCode(97 + oIndex)}) {studentAnswer ? "Đúng" : "Sai"}
-                              </span>
-                            );
-                          });
-                        })()
-                      }
-                    </p>
-                    
-                    <p className="font-medium">
-                      Đáp án đúng: {
-                        question.options.map((option, oIndex) => {
-                          const correctAnswer = answers[qIndex]?.answer[oIndex];
-                          
-                          return (
-                            <span key={oIndex} className="text-green-600">
-                              {oIndex > 0 && "; "}
-                              {String.fromCharCode(97 + oIndex)}) {correctAnswer ? "Đúng" : "Sai"}
-                            </span>
-                          );
-                        })
-                      }
-                    </p>
-                  </div>
                 </div>
               )}
               
@@ -486,20 +371,8 @@ function ViewStudentResponse() {
                 <div className="pl-8">
                   <div className="mb-4">
                     <p className="font-medium mb-1">Câu trả lời của học sinh:</p>
-                    <div className={`p-3 border rounded-lg ${
-                      studentAnswers[qIndex]?.selectedAnswer 
-                        ? studentAnswers[qIndex]?.selectedAnswer === answers[qIndex]?.answer
-                          ? 'bg-green-50 border-green-300'
-                          : 'bg-gray-50'
-                        : 'bg-gray-50 text-gray-400 italic'
-                    }`}>
-                      {studentAnswers[qIndex]?.selectedAnswer 
-                        ? studentAnswers[qIndex].selectedAnswer 
-                        : "Chưa trả lời"}
-                      
-                      {studentAnswers[qIndex]?.selectedAnswer === answers[qIndex]?.answer && (
-                        <span className="text-green-600 ml-2">✓</span>
-                      )}
+                    <div className="p-3 border rounded-lg bg-gray-50">
+                      {studentAnswers[qIndex]?.selectedAnswer || "Chưa trả lời"}
                     </div>
                   </div>
                   <div>
@@ -508,30 +381,6 @@ function ViewStudentResponse() {
                       {answers[qIndex]?.answer || "Không có đáp án"}
                     </div>
                   </div>
-                  
-                  {/* Hiển thị tổng hợp đáp án */}
-                  {/* <div className="mt-4 pt-3 border-t border-gray-200">
-                    <p className="font-medium">
-                      Đáp án của học sinh: {
-                        (() => {
-                          if (!studentAnswers[qIndex] || studentAnswers[qIndex].selectedAnswer === undefined || 
-                              studentAnswers[qIndex].selectedAnswer === null || studentAnswers[qIndex].selectedAnswer === '') {
-                            return <span className="text-gray-500">Không trả lời</span>;
-                          }
-                          
-                          const studentAnswer = studentAnswers[qIndex].selectedAnswer;
-                          const correctAnswer = answers[qIndex]?.answer;
-                          const isCorrect = studentAnswer === correctAnswer;
-                          
-                          return (
-                            <span className={isCorrect ? "text-green-600 font-bold" : "text-red-600"}>
-                              {studentAnswer} {isCorrect && "✓"}
-                            </span>
-                          );
-                        })()
-                      }
-                    </p>
-                  </div> */}
                 </div>
               )}
             </div>

@@ -24,13 +24,13 @@ function TestManagement() {
             onClick={() => navigate("/FormMaker")}
             className="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors duration-300"
           >
-            <FaPlus className='inline mr-2'/>Tạo đề thi
+            <FaPlus className='inline mr-2'/>Tạo đề thi mới
           </button>
           <button
             onClick={() => navigate("/QuestionBank")}
             className="bg-amber-400 text-white px-6 py-2 rounded-md hover:bg-amber-600 transition-colors duration-300"
           >
-            <PiBankBold className='inline mr-2'/> Tạo ngân hàng câu hỏi
+            <PiBankBold className='inline mr-2'/> Ngân hàng câu hỏi
           </button>
           {/* <button
             onClick={() => navigate("/ExamLibrary")}

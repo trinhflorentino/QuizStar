@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import React from 'react';
 import {
   collection,
@@ -11,21 +11,24 @@ import {
 import db from "../../services/firebaseConfig";
 import { getAuth } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import { MathJaxContext, MathJax } from 'better-react-mathjax';
+
+const MemoizedMathJax = ({ children, ...props }) => (
+  <MathJax {...props}>{children}</MathJax>
+);
+
 function ResultFetch() {
-  let { pin } = useParams();
-  let { email } = useParams();
-  const navigate = useNavigate();
-  const [answers, setAnswers] = useState(() => []);
-  const [selectedAnswers, setSelectedAnswers] = useState(() => []);
-  const [score, setScore] = useState(0);
-  const [scoreQ, setScoreQ] = useState(0);
-  const [scoreAll, setScoreAll] = useState(0);
-  const [scoreQuestions, setScoreQuestions] = useState(() => []);
-  const [studInfo, setStudInfo] = useState(() => []);
-  const [click, setClick] = useState(false);
+  const [questionsTemp, setQuestionsTemp] = useState(() => []);
+  const [answersTemp, setAnswersTemp] = useState(() => []);
+  const [studentAnswers, setStudentAnswers] = useState(() => []);
+  const [score, setScore] = useState(() => "");
+  const [responseDoc, setResponseDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [title, setTitle] = useState("");
+  
+  let { pin, studentEmail, attemptId } = useParams();
+  const navigate = useNavigate();
+
   // Authentication check
   useEffect(() => {
     const auth = getAuth();
@@ -34,7 +37,7 @@ function ResultFetch() {
         navigate("/login");
         return;
       }
-      if (user.email !== email) {
+      if (user.email !== studentEmail) {
         navigate("/Dashboard");
         return;
       }
@@ -42,141 +45,125 @@ function ResultFetch() {
     });
 
     return () => unsubscribe();
-  }, [email, navigate]);
+  }, [studentEmail, navigate]);
 
   // Data fetching
   useEffect(() => {
     if (loading) return;
     async function fetchData() {
       try {
-        const getAnswers = async () => {
-          const settersCollectionRef = collection(
-            db,
-            "Paper_Setters",
-            pin.toString(),
-            "Question_Papers_MCQ"
-          );
-          const docos = await getDocs(settersCollectionRef);
-          if (docos.empty) {
-            throw new Error("Không có dữ liệu câu hỏi.");
-          }
-          setTitle(docos.id);
-          const docosData = docos.docs.map((docs) => docs.data());
-          console.log(docosData);
-          setAnswers(docosData[1]["answer_answer"].map((doc) => doc));
-          setScoreQuestions(docosData[0]["question_question"].map((doc) => doc));
-        };
-
-        const getSelectedAnswers = async () => {
-          const docRef = doc(db, "Paper_Setters", pin.toString(), "Responses", email);
-          const docSnap = await getDoc(docRef);
-          if (!docSnap.exists()) {
-            throw new Error("No response data found");
-          }
-          setSelectedAnswers(docSnap.data()["selected_answers"]);
-          setStudInfo(docSnap.data()["stud_info"]);
-        };
-
-        await Promise.all([getAnswers(), getSelectedAnswers()]);
-      } catch (err) {
-        setError(err.message);
-        console.error("Error fetching data:", err);
-      }
-    }
-    fetchData();
-  }, [pin, email, loading]);
-
-  // Score calculation
-  useEffect(() => {
-    if (!answers.length || !selectedAnswers.length) return;
-    setScore(0);
-    setScoreQ(0);
-    setScoreAll(0);
-    for (let i = 0; i < answers.length; i++) {
-      const question = scoreQuestions[i];
-      const userAnswer = selectedAnswers[i];
-      const correctAnswer = answers[i];
-      setScoreAll((prevScore) => prevScore + parseFloat(question["score"]));
-      console.log(question, userAnswer, correctAnswer);
-      if (question.type === "mcq" || question.type === "shortanswer") {
-        if (parseInt(correctAnswer["answer"]) === parseInt(userAnswer["selectedAnswer"])) {
-          setScore((prevScore) => prevScore + 1);
-          setScoreQ((prevScore) => prevScore + parseFloat(question["score"]));
-        }
-      } 
-      else if (question.type === "truefalse") {
-        const correctOptions = correctAnswer["answer"];
-        const selectedOptions = userAnswer["selectedAnswer"];
+        setLoading(true);
+        // Get question data
+        const questionsDoc = await getDoc(
+          doc(db, "Paper_Setters", pin, "Question_Papers_MCQ", "questionsTest")
+        );
         
-        let matchingCount = 0;
-        for (let i = 0; i < correctOptions.length; i++) {
-          if (correctOptions[i] === selectedOptions[i]) {
-            matchingCount++;
+        if (!questionsDoc.exists()) {
+          setError("Không tìm thấy đề thi");
+          setLoading(false);
+          return;
+        }
+        
+        setQuestionsTemp(questionsDoc.data().question_question);
+        
+        // Get answer key
+        const answerDocs = await getDoc(
+          doc(db, "Paper_Setters", pin, "Question_Papers_MCQ", "answersTest_answerSheet")
+        );
+        
+        if (answerDocs.exists()) {
+          setAnswersTemp(answerDocs.data().answer_answer);
+        }
+        
+        // Get student response - with attempt ID if available
+        let responseDocRef;
+        if (attemptId) {
+          // New format with attempt ID
+          responseDocRef = doc(
+            db, 
+            "Paper_Setters", 
+            pin, 
+            "Responses", 
+            `${studentEmail}_${attemptId}`
+          );
+        } else {
+          // Legacy format without attempt ID
+          responseDocRef = doc(
+            db, 
+            "Paper_Setters", 
+            pin, 
+            "Responses", 
+            studentEmail
+          );
+        }
+        
+        const response = await getDoc(responseDocRef);
+        
+        if (!response.exists()) {
+          // Try alternative format if the first attempt fails
+          if (!attemptId) {
+            // If we don't have an attemptId, search for any responses with this email prefix
+            const alternativeResponse = await getDoc(
+              doc(db, "Paper_Setters", pin, "Responses", studentEmail)
+            );
+            
+            if (alternativeResponse.exists()) {
+              const data = alternativeResponse.data();
+              setStudentAnswers(data.selected_answers || []);
+              setScore(data.score || "0/0");
+              setResponseDoc(data);
+              setLoading(false);
+              return;
+            }
           }
+          
+          setError("Không tìm thấy bài làm của học sinh");
+          setLoading(false);
+          return;
         }
-
-        let percentScore = 0;
-        switch(matchingCount) {
-          case 0:
-            percentScore = 0; // 0%
-            break;
-          case 1:
-            percentScore = 0.1; // 10%
-            break;
-          case 2:
-            percentScore = 0.25; // 25%
-            break;
-          case 3:
-            percentScore = 0.5; // 50%
-            break;
-          case 4:
-            percentScore = 1; // 100%
-            break;
-          default:
-            percentScore = 1;
-        }
-
-        if (percentScore > 0) {
-          // setScore((prevScore) => prevScore + percentScore);
-          setScoreQ((prevScore) => prevScore + (parseFloat(question["score"]) * percentScore));
-        }
+        
+        const data = response.data();
+        setStudentAnswers(data.selected_answers || []);
+        setScore(data.score || "0/0");
+        setResponseDoc(data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching results:", error);
+        setError("Đã xảy ra lỗi khi tải kết quả bài thi");
+        setLoading(false);
       }
     }
-    console.log(scoreAll, scoreQ);
-  }, [answers, selectedAnswers, scoreQuestions]);
+    
+    fetchData();
+  }, [pin, studentEmail, attemptId]);
 
-  // Score update
-  useEffect(() => {
-    if (!answers.length) return;
-    const auth = getAuth();
-    const unsubscribe = auth.onAuthStateChanged(function (user) {
-      if (user) {
-        Promise.all([
-          setDoc(
-            doc(db, "Users", user.uid, "Exams_Attempted", pin),
-            { score: `${score}/${answers.length}` },
-            { merge: true }
-          ),
-          setDoc(
-            doc(db, "Paper_Setters", pin, "Responses", user.email),
-            { score: `${score}/${answers.length}` },
-            { merge: true }
-          ),
-          setDoc(
-            doc(db, "Paper_Setters", pin, "Responses", user.email),
-            { scoreQ: `${scoreQ}/${scoreAll}` },
-            { merge: true }
-          ),
-          setDoc(
-            doc(db, "Users", user.uid, "Exams_Attempted", pin),
-            { scoreQ: `${scoreQ}/${scoreAll}` },
-            { merge: true }
-          )
-        ]).catch(err => console.error("Error updating score:", err));
-      }
-    });
-    return () => unsubscribe();
-  }, [score, answers, pin]);
+  // Format the timestamp to a readable date
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'N/A';
+    
+    // Convert Firebase timestamp to JavaScript Date
+    let date;
+    if (timestamp.toDate) {
+      date = timestamp.toDate();
+    } else if (timestamp.seconds) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      date = new Date(timestamp);
+    }
+    
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  };
+
+  const determineUserType = () => {
+    if (!responseDoc) return 'Unknown';
+    
+    if (responseDoc.isGuest || (responseDoc.stud_info && responseDoc.stud_info.email && 
+        responseDoc.stud_info.email.startsWith('guest_'))) {
+      return 'Khách';
+    }
+    
+    return 'Đã đăng ký';
+  };
 
   // Conditional renders
   if (loading) {
@@ -195,90 +182,207 @@ function ResultFetch() {
     );
   }
 
-  if (!answers.length || !selectedAnswers.length) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-xl">Không tìm thấy dữ liệu</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-8">
-        {title}
-      </h1>
-      
-      <div className="flex justify-center mb-8">
-        <button
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105"
-          onClick={() => setClick(true)}
-        >
-          Xem kết quả
-        </button>
-      </div>
-
-      {click && (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          {/* Thông tin điểm số */}
-          <div className="mb-8 text-center">
-            <div className="relative inline-flex items-center justify-center mb-4">
-              <div className="w-32 h-32 rounded-full border-8 border-gray-200">
-                <div className="w-full h-full rounded-full border-8 border-blue-500 flex items-center justify-center"
-                     style={{ transform: `rotate(${(scoreQ/scoreAll) * 360}deg)` }}>
-                  <span className="text-3xl font-bold text-blue-600">
-                    {Math.round((scoreQ/scoreAll) * 100)}%
-                  </span>
+    <MathJaxContext>
+      <div className="container mx-auto p-4 md:p-8">
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <h1 className="text-2xl font-bold mb-2">Kết quả bài thi</h1>
+          
+          {responseDoc && responseDoc.stud_info && (
+            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+              <h2 className="text-lg font-semibold mb-2">Thông tin học sinh</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-gray-600">Họ và tên:</p>
+                  <p className="font-medium">{responseDoc.stud_info.name}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Lớp:</p>
+                  <p className="font-medium">{responseDoc.stud_info.class}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Trường:</p>
+                  <p className="font-medium">{responseDoc.stud_info.school}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Loại tài khoản:</p>
+                  <p className="font-medium">
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      determineUserType() === 'Khách' 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {determineUserType()}
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Thời gian nộp bài:</p>
+                  <p className="font-medium">{formatDate(responseDoc.submittedAt)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Lần thi số:</p>
+                  <p className="font-medium">#{responseDoc.attemptNumber || 1}</p>
                 </div>
               </div>
             </div>
-            <p className="text-xl font-semibold text-gray-700">
-              Số điểm: {scoreQ}/{scoreAll}
-            </p>
-            {/* <p className="text-xl font-semibold text-gray-700">
-              Thời gian làm bài: {studInfo["timeSpent"]} phút
-            </p> */}
-          </div>
-
-          {/* Thông tin thí sinh */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <div className="space-y-3">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">Họ và tên</p>
-                <p className="font-medium text-gray-900">{studInfo["name"]}</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">Lớp</p>
-                <p className="font-medium text-gray-900">{studInfo["class"]}</p>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">Trường</p>
-                <p className="font-medium text-gray-900">{studInfo["roll_no"]}</p>
-              </div>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="font-medium text-gray-900">{studInfo["email"]}</p>
-              </div>
+          )}
+          
+          <div className="mb-6">
+            <div className="bg-blue-50 p-4 rounded-lg text-center">
+              <p className="text-lg">Điểm số của bạn:</p>
+              <p className="text-3xl font-bold text-blue-600">{score}</p>
             </div>
           </div>
-
-          {/* Nút tải kết quả */}
-          <div className="flex justify-center">
-            <button
-              className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg transition duration-300 ease-in-out flex items-center gap-2"
-              onClick={() => window.print()}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              Tải về kết quả
-            </button>
-          </div>
+          
+          <Link
+            to={`/pinverify/Form/${pin}`}
+            className="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors mb-8"
+          >
+            Về trang chính
+          </Link>
+          
+          {responseDoc && responseDoc.attemptId && (
+            <div className="mt-4">
+              <Link
+                to={`/pinverify/Form/${pin}/ResultFetch/${studentEmail}`}
+                className="text-blue-600 hover:underline"
+              >
+                Xem tất cả các lần làm bài
+              </Link>
+            </div>
+          )}
         </div>
-      )}
-    </div>
+        
+        <div className="space-y-8">
+          {questionsTemp.map((question, index) => (
+            <div 
+              key={index} 
+              className="bg-white rounded-lg shadow-md p-6"
+            >
+              <div className="flex items-start mb-4">
+                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded mr-2 text-sm">
+                  Câu {index + 1}
+                </span>
+                <div className="text-lg font-medium">
+                  <MemoizedMathJax>{question.question}</MemoizedMathJax>
+                </div>
+              </div>
+              
+              {question.type === "mcq" && (
+                <div className="space-y-3 pl-8">
+                  {question.options.map((option, optIndex) => {
+                    const correctOptionIndex = answersTemp[index]?.answer;
+                    const studentSelectedOptionIndex = studentAnswers[index]?.selectedAnswer;
+                    
+                    const isCorrect = parseInt(correctOptionIndex) === optIndex + 1;
+                    const isSelected = parseInt(studentSelectedOptionIndex) === optIndex;
+                    
+                    return (
+                      <div 
+                        key={optIndex}
+                        className={`p-3 rounded-lg border ${
+                          isCorrect && isSelected 
+                            ? 'bg-green-100 border-green-500' 
+                            : isSelected && !isCorrect 
+                              ? 'bg-red-100 border-red-500' 
+                              : isCorrect 
+                                ? 'border-green-500' 
+                                : 'border-gray-300'
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          <span className="w-8 h-8 flex items-center justify-center rounded-full border-2 font-medium text-lg mr-3">
+                            {String.fromCharCode(65 + optIndex)}
+                          </span>
+                          <div className="flex-grow">
+                            <MemoizedMathJax inline>{option.option}</MemoizedMathJax>
+                          </div>
+                          {isCorrect && (
+                            <span className="text-green-600 ml-2">✓</span>
+                          )}
+                          {isSelected && !isCorrect && (
+                            <span className="text-red-600 ml-2">✗</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {question.type === "truefalse" && (
+                <div className="space-y-4 pl-8">
+                  {question.options.map((option, optIndex) => {
+                    const correctAnswer = answersTemp[index]?.answer[optIndex];
+                    const studentAnswer = studentAnswers[index]?.selectedAnswer?.[optIndex];
+                    
+                    return (
+                      <div key={optIndex} className="mb-3">
+                        <div className="mb-2 font-medium">
+                          <MemoizedMathJax inline>{`${String.fromCharCode(97 + optIndex)}. ${option.option}`}</MemoizedMathJax>
+                        </div>
+                        <div className="flex ml-8 space-x-4">
+                          <div 
+                            className={`px-4 py-2 rounded-lg border ${
+                              studentAnswer === true 
+                                ? correctAnswer === true 
+                                  ? 'bg-green-100 border-green-500' 
+                                  : 'bg-red-100 border-red-500' 
+                                : correctAnswer === true 
+                                  ? 'border-green-500' 
+                                  : 'border-gray-300'
+                            }`}
+                          >
+                            Đúng
+                            {correctAnswer === true && (
+                              <span className="text-green-600 ml-2">✓</span>
+                            )}
+                          </div>
+                          <div 
+                            className={`px-4 py-2 rounded-lg border ${
+                              studentAnswer === false 
+                                ? correctAnswer === false 
+                                  ? 'bg-green-100 border-green-500' 
+                                  : 'bg-red-100 border-red-500' 
+                                : correctAnswer === false 
+                                  ? 'border-green-500' 
+                                  : 'border-gray-300'
+                            }`}
+                          >
+                            Sai
+                            {correctAnswer === false && (
+                              <span className="text-green-600 ml-2">✓</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {question.type === "shortanswer" && (
+                <div className="pl-8">
+                  <div className="mb-4">
+                    <p className="font-medium mb-1">Câu trả lời của bạn:</p>
+                    <div className="p-3 border rounded-lg bg-gray-50">
+                      {studentAnswers[index]?.selectedAnswer || "Chưa trả lời"}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="font-medium mb-1">Đáp án đúng:</p>
+                    <div className="p-3 border rounded-lg bg-green-50 border-green-200">
+                      {answersTemp[index]?.answer || "Không có đáp án"}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </MathJaxContext>
   );
 }
 

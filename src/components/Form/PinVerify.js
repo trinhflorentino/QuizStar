@@ -39,7 +39,7 @@ function PinVerify() {
             className="sub_btn_actual faintShadow hov mr-2"
             type="button"
             value="Quay lại"
-            onClick={() => navigate('/Dashboard')}
+            onClick={() => navigate('/')}
           />
         <input
           className="sub_btn_actual faintShadow hov"

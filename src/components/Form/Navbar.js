@@ -129,6 +129,18 @@ const Navbar = () => {
                   Trang chủ
                 </NavLink>
               </li>
+              <li className="NavLink">
+                <NavLink 
+                  to="/pinverify"
+                  className={({ isActive }) => 
+                    isActive 
+                      ? "inline-block px-4 py-2 cursor-pointer text-blue-600 border-b-2 border-blue-600"
+                      : "inline-block px-4 py-2 cursor-pointer hover:text-blue-600"
+                  }
+                >
+                  Tham gia bài thi
+                </NavLink>
+              </li>
               {currentUser && (
                 <>
                   <li className="NavLink">
@@ -141,18 +153,6 @@ const Navbar = () => {
                       }
                     >
                       Quản lý đề thi
-                    </NavLink>
-                  </li>
-                  <li className="NavLink">
-                    <NavLink 
-                      to="/pinverify"
-                      className={({ isActive }) => 
-                        isActive 
-                          ? "inline-block px-4 py-2 cursor-pointer text-blue-600 border-b-2 border-blue-600"
-                          : "inline-block px-4 py-2 cursor-pointer hover:text-blue-600"
-                      }
-                    >
-                      Tham gia bài thi
                     </NavLink>
                   </li>
                   <li className="NavLink">
@@ -247,14 +247,13 @@ const Navbar = () => {
                 <li className="NavLink">
                   <a onClick={() => handleNavigation('/')} className="block px-4 py-2 rounded-md hover:bg-gray-100">Trang chủ</a>
                 </li>
-                
+                <li className="NavLink">
+                  <a onClick={() => handleNavigation('/ExamAccess')} className="block px-4 py-2 rounded-md hover:bg-gray-100">Tham gia bài thi</a>
+                </li>
                 {currentUser && (
                   <>
                     <li className="NavLink">
                       <a onClick={() => handleNavigation('/TestManagement')} className="block px-4 py-2 rounded-md hover:bg-gray-100">Quản lý đề thi</a>
-                    </li>
-                    <li className="NavLink">
-                      <a onClick={() => handleNavigation('/pinverify')} className="block px-4 py-2 rounded-md hover:bg-gray-100">Tham gia bài thi</a>
                     </li>
                     <li className="NavLink">
                       <a onClick={() => window.location.href = "/Main.html"} className="block px-4 py-2 rounded-md hover:bg-gray-100">Tạo và tham gia trò chơi</a>

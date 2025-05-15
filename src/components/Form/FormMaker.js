@@ -621,11 +621,65 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
     }
     setIsLoading(true);
     try {
-      const prompt = "Phân tích nội dung file được cung cấp. Trích xuất tất cả các câu hỏi thuộc loại 'mcq', 'truefalse', và 'shortanswer'.\n\n**YÊU CẦU OUTPUT JSON NGHIÊM NGẶT:**\n\n1.  **Định dạng & Cú pháp:** Output *phải* là một chuỗi JSON hợp lệ duy nhất. Tất cả tên thuộc tính (keys) và giá trị chuỗi (strings) **BẮT BUỘC** phải được đặt trong dấu ngoặc kép (`\"`). Tuân thủ `responseSchema`.\n2.  **Bỏ qua trường Null:** **Nếu một trường (ví dụ: `\"answer\"` hoặc `\"options\"`) không có giá trị hợp lệ hoặc giá trị của nó sẽ là `null`, thì trường đó (cả key và value) phải được bỏ qua hoàn toàn, KHÔNG được xuất hiện trong đối tượng JSON của câu hỏi đó.**\n3.  **Loại câu hỏi:** Chỉ trích xuất 'mcq', 'truefalse', 'shortanswer'.\n4.  **Ngôn ngữ & Công thức:** Giữ nguyên ngôn ngữ gốc. Chuyển đổi công thức sang LaTeX. Loại bỏ HTML.\n\n**QUY TẮC XỬ LÝ ĐÁP ÁN (`answer`):**\n\n5.  **Tìm kiếm trong File:** Tìm các dấu hiệu đáp án trong file (đánh dấu, chỉ định, bảng đáp án).\n6.  **Nếu Tìm Thấy Đáp Án:**\n    *   Bao gồm trường `\"answer\"` trong output JSON.\n    *   Định dạng giá trị `\"answer\"` như sau:\n        *   MCQ: Ký tự đáp án đúng (ví dụ: `\"A\"`).\n        *   True/False: Chuỗi JSON biểu diễn mảng boolean (ví dụ: `\"[true, false, true]\"`).\n        *   Short Answer: Chuỗi đáp án ngắn hoặc chuỗi JSON biểu diễn mảng boolean (ví dụ: `\"[true, false]\"`).\n7.  **Nếu KHÔNG Tìm Thấy Đáp Án:** **KHÔNG được bao gồm trường `\"answer\"` trong output JSON cho câu hỏi đó.**\n\n**QUY TẮC XỬ LÝ LỰA CHỌN (`options`):**\n\n8.  **Áp dụng cho MCQ/TrueFalse:** Trường `\"options\"` chỉ áp dụng cho loại `\"mcq\"` và `\"truefalse\"`.\n9.  **Nếu có Lựa chọn/Mệnh đề:**\n    *   Bao gồm trường `\"options\"` trong output JSON.\n    *   Giá trị phải là một mảng các chuỗi (ví dụ: `[\"Lựa chọn 1\", \"Mệnh đề A\"]`).\n10. **Nếu là ShortAnswer hoặc không có Lựa chọn/Mệnh đề:** **KHÔNG được bao gồm trường `\"options\"` trong output JSON cho câu hỏi đó.**\n\n**CHI TIẾT CÁC LOẠI CÂU HỎI (Tóm tắt):**\n\n11. **MCQ:** Bao gồm `\"question\"`, `\"type\": \"mcq\"`. Bao gồm `\"options\"` (mảng chuỗi) và `\"answer\"` (chuỗi ký tự) *chỉ khi* chúng có giá trị/được tìm thấy.\n12. **True/False:** Bao gồm `\"question\"`, `\"type\": \"truefalse\"`. Bao gồm `\"options\"` (mảng chuỗi mệnh đề) và `\"answer\"` (chuỗi JSON mảng boolean) *chỉ khi* chúng có giá trị/được tìm thấy.\n13. **Short Answer:** Bao gồm `\"question\"`, `\"type\": \"shortanswer\"`. Bao gồm `\"answer\"` (chuỗi hoặc chuỗi JSON mảng boolean) *chỉ khi* nó được tìm thấy. **Không bao giờ** bao gồm `\"options\"`.\n\n14. **Tính rõ ràng:** Chỉ trích xuất các câu hỏi hoàn chỉnh, rõ ràng.";
+      const prompt = `Phân tích nội dung file được cung cấp. Trích xuất tất cả các câu hỏi thuộc loại 'mcq', 'truefalse', và 'shortanswer' cùng với các đáp án được chỉ định cho chúng trong file.
+LƯU Ý QUAN TRỌNG:
+Mục tiêu chính là trích xuất thông tin: Nhiệm vụ của bạn là xác định và trích xuất câu hỏi và các dấu hiệu đáp án như chúng xuất hiện trong file.
+KHÔNG đánh giá nội dung: AI KHÔNG được đánh giá, kiểm tra tính đúng đắn về mặt học thuật, ngữ pháp, hay logic của nội dung câu hỏi hoặc đáp án. Chỉ trích xuất những gì được cung cấp.
+KHÔNG sửa đổi nội dung: KHÔNG được tự ý sửa đổi, thêm bớt, hay diễn giải lại nội dung của câu hỏi hoặc đáp án đã trích xuất, trừ khi cần thiết cho việc định dạng (ví dụ: LaTeX, loại bỏ HTML).
+YÊU CẦU OUTPUT JSON NGHIÊM NGẶT:
+Định dạng & Cú pháp: Output phải là một chuỗi JSON hợp lệ duy nhất. Tất cả tên thuộc tính (keys) và giá trị chuỗi (strings) BẮT BUỘC phải được đặt trong dấu ngoặc kép (\"). Tuân thủ responseSchema.
+Bỏ qua trường Null: Nếu một trường (ví dụ: \"answer\" hoặc \"options\") không có giá trị hợp lệ hoặc giá trị của nó sẽ là null, thì trường đó (cả key và value) phải được bỏ qua hoàn toàn, KHÔNG được xuất hiện trong đối tượng JSON của câu hỏi đó.
+Loại câu hỏi: Chỉ trích xuất 'mcq', 'truefalse', 'shortanswer'.
+Ngôn ngữ & Công thức: Giữ nguyên ngôn ngữ gốc của văn bản. Chuyển đổi công thức toán học sang định dạng LaTeX. Loại bỏ các thẻ HTML khỏi nội dung.
+QUY TẮC TRÍCH XUẤT ĐÁP ÁN (answer):
+Ưu tiên tìm kiếm và trích xuất các dấu hiệu chỉ định đáp án theo thứ tự sau đây. Nếu dấu hiệu đáp án được tìm thấy bằng một phương thức, các phương thức có độ ưu tiên thấp hơn sẽ không cần xét cho câu hỏi đó.
+Phương thức 1: BẢNG ĐÁP ÁN (Ưu tiên cao nhất)
+Tìm kiếm mục có tiêu đề "BẢNG ĐÁP ÁN" (tiếng Việt) hoặc "ANSWER KEY" (tiếng Anh) trong tài liệu. Mục này thường xuất hiện sau khi kết thúc phần đề bài.
+Câu trắc nghiệm (MCQ):
+Nhận dạng các dòng có định dạng như [số câu]-A, [số câu]A, hoặc [số câu].A (ví dụ: 1-A, 2B, 3.C).
+Trích xuất ký tự được chỉ định làm đáp án (ví dụ: \"A\", \"B\").
+Câu điền từ (Short Answer):
+Nhận dạng các dòng có định dạng như [số câu]-[nội dung đáp án] hoặc [số câu].[nội dung đáp án] (ví dụ: 1-hello world, 2.apple).
+Nếu có nhiều nội dung đáp án được cung cấp cho cùng một câu và được phân tách bởi dấu | (ví dụ: 1.hello|hi|hey), giá trị \"answer\" phải là một mảng chuỗi JSON (ví dụ: [\"hello\", \"hi\", \"hey\"]).
+Nếu chỉ có một nội dung đáp án được cung cấp, giá trị \"answer\" là một chuỗi đơn (ví dụ: \"hello world\").
+Câu True/False (nếu có trong bảng đáp án):
+Nếu bảng đáp án chỉ định trực tiếp các giá trị true hoặc false cho các mệnh đề của câu hỏi True/False (ví dụ: 1. True | False | True), thì giá trị \"answer\" sẽ là một mảng boolean JSON (ví dụ: [true, false, true]).
+Phương thức 2: BÔI MÀU ĐÁP ÁN
+Kiểm tra xem có phương án trả lời (A, B, C, D,...) hoặc toàn bộ nội dung của một phương án trả lời nào được bôi màu khác biệt so với màu văn bản chung hay không.
+Nếu có, ký tự của phương án được bôi màu đó (ví dụ: "A", "B") được coi là đáp án chỉ định cho câu hỏi trắc nghiệm.
+Phương thức 3: GẠCH CHÂN ĐÁP ÁN
+Kiểm tra xem có phương án trả lời (A, B, C, D,...) hoặc toàn bộ nội dung của một phương án trả lời nào được gạch chân hay không.
+Nếu có, ký tự của phương án được gạch chân đó (ví dụ: "A", "B") được coi là đáp án chỉ định cho câu hỏi trắc nghiệm.
+Phương thức 4: ĐÁP ÁN TRONG PHẦN LỜI GIẢI
+Nếu các phương thức trên không cung cấp dấu hiệu đáp án, tìm kiếm trong phần lời giải chi tiết (nếu có) các chỉ dấu rõ ràng về đáp án được cung cấp cho câu hỏi đó (ví dụ: "Đáp án: A", "Câu trả lời là True", "Phần điền từ: photosynthesis").
+Đối với câu True/False, nếu lời giải cung cấp các giá trị True/False cho từng mệnh đề, hãy trích xuất chúng để xây dựng mảng boolean.
+Xử lý giá trị answer:
+Nếu Dấu Hiệu Đáp Án Được Tìm Thấy (bằng một trong các phương thức trên):
+Bao gồm trường \"answer\" trong output JSON.
+Định dạng giá trị \"answer\" như sau:
+MCQ: Ký tự được chỉ định làm đáp án (ví dụ: \"A\").
+True/False: Một mảng boolean JSON trực tiếp (ví dụ: [true, false, true]). Đây là một mảng các giá trị boolean, không phải là một chuỗi.
+Short Answer:
+Một chuỗi được chỉ định làm đáp án (ví dụ: \"photosynthesis\").
+Hoặc, một mảng chuỗi JSON nếu nhiều đáp án điền từ được cung cấp và phân tách bởi | trong bảng đáp án (ví dụ: [\"hello\", \"hi\"]).
+Nếu KHÔNG Tìm Thấy Dấu Hiệu Đáp Án (sau khi đã thử tất cả các phương thức): KHÔNG được bao gồm trường \"answer\" trong output JSON cho câu hỏi đó.
+QUY TẮC XỬ LÝ LỰA CHỌN (options):
+Áp dụng cho MCQ/TrueFalse: Trường \"options\" chỉ áp dụng cho loại \"mcq\" và \"truefalse\".
+Nếu có Lựa chọn/Mệnh đề được trình bày:
+Bao gồm trường \"options\" trong output JSON.
+Giá trị phải là một mảng các chuỗi (ví dụ: [\"Lựa chọn 1\", \"Mệnh đề A\"]), trích xuất nguyên văn các lựa chọn/mệnh đề đó.
+Nếu là ShortAnswer hoặc không có Lựa chọn/Mệnh đề được trình bày: KHÔNG được bao gồm trường \"options\" trong output JSON cho câu hỏi đó.
+CHI TIẾT CÁC LOẠI CÂU HỎI (Tóm tắt):
+MCQ: Bao gồm \"question\", \"type\": \"mcq\". Bao gồm \"options\" (mảng chuỗi) và \"answer\" (chuỗi ký tự) chỉ khi chúng có giá trị/dấu hiệu được tìm thấy theo các quy tắc trên.
+True/False: Bao gồm \"question\", \"type\": \"truefalse\". Bao gồm \"options\" (mảng chuỗi mệnh đề) và \"answer\" (một mảng boolean JSON trực tiếp, ví dụ: [true, false, true]) chỉ khi chúng có giá trị/dấu hiệu được tìm thấy.
+Short Answer: Bao gồm \"question\", \"type\": \"shortanswer\". Bao gồm \"answer\" (chuỗi hoặc mảng chuỗi JSON) chỉ khi dấu hiệu của nó được tìm thấy theo các quy tắc trên. Không bao giờ bao gồm \"options\".
+Tính rõ ràng: Chỉ trích xuất các câu hỏi có cấu trúc rõ ràng.
+`;
 
       const ketQua = await extractQuestionsJSON(file, prompt);
       console.log("Original Extracted Data:", ketQua);
       if (ketQua) {
+        console.log("ketQua", ketQua);
         const parsedData = JSON.parse(ketQua);
         validateQuestionsArray(parsedData);
         const convertedData = convertAnswers(parsedData);
@@ -1413,7 +1467,7 @@ async function uploadImage(file, examPin, questionId) {
                 </div>
                 {question.type !== 'shortanswer' && (
                   <div className="ml-4 space-y-1">
-                    {paginatedPreviewOptions[currentPreviewPage * questionsPerPage + index].map((option, optIndex) => (
+                    {paginatedPreviewOptions[index].map((option, optIndex) => (
                       <div key={option.id} className="flex items-center gap-2">
                         <span className="font-medium">
                           {question.type === 'truefalse' 

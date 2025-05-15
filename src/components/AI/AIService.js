@@ -9,13 +9,11 @@ const responseSchema = {
   description: "Một mảng các đối tượng câu hỏi được trích xuất từ file.",
   items: {
     type: Type.OBJECT,
-    description: "Đại diện cho một câu hỏi duy nhất được trích xuất. Các trường có giá trị null sẽ bị bỏ qua.",
+    description: "Đại diện cho một câu hỏi duy nhất được trích xuất. Các trường không có giá trị, có giá trị null, hoặc không tìm thấy sẽ bị bỏ qua hoàn toàn khỏi đối tượng JSON.",
     required: ["question", "type"],
     properties: {
       answer: {
-        type: Type.STRING,
-        description: "Đáp án được trích xuất từ file nếu có (ký tự MCQ, chuỗi JSON mảng boolean T/F, chuỗi text SA). Trường này sẽ bị bỏ qua nếu không tìm thấy đáp án.",
-        nullable: "True",
+        nullable: "True", 
       },
       question: {
         type: Type.STRING,
@@ -37,9 +35,7 @@ const responseSchema = {
       },
     },
   },
-};
-
-// {
+};// {
 //   "type": "ARRAY",
 //   "description": "Một mảng các đối tượng câu hỏi được trích xuất từ file.",
 //   "items": {
@@ -78,7 +74,7 @@ const responseSchema = {
 const model20flash = {
   model: "gemini-2.5-flash-preview-04-17",
   config: {
-    temperature: 0.2,
+    temperature: 0.3,
     responseMimeType: 'application/json',
     thinkingConfig: {
       thinkingBudget: 0,

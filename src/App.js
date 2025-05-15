@@ -121,16 +121,19 @@ function App() {
                           <Route path="/" element={<Home />} />
                           <Route path="/About" element={<About />} />
                           <Route path="/pinverify" element={<PinVerify />} />
+                          {/* <Route path="/ExamAccess" element={<PinVerify />} /> */}
                           <Route path="/pinverify/Form/:pin" element={<Form />} />
                           
                           {/* Protected Routes */}
                           <Route path="/FormMaker" element={<ProtectedRoute><FormMaker /></ProtectedRoute>} />
                           <Route path="/FormMaker/DisplayPin/:pin" element={<ProtectedRoute><DisplayPin /></ProtectedRoute>} />
-                          <Route path="/pinverify/Form/:pin/ResultFetch/:email" element={<ProtectedRoute><ResultFetch /></ProtectedRoute>} />
+                          <Route path="/pinverify/Form/:pin/ResultFetch/:studentEmail" element={<ResultFetch />} />
+                          <Route path="/pinverify/Form/:pin/ResultFetch/:studentEmail/:attemptId" element={<ResultFetch />} />
                           <Route path="/ExamsCreated" element={<ProtectedRoute><ExamsCreated /></ProtectedRoute>} />
                           <Route path="/ExamsAttempted" element={<ProtectedRoute><ExamsAttempted /></ProtectedRoute>} />
                           <Route path="/ExamsCreated/ExamResults/:pin" element={<ProtectedRoute><DisplayResponses /></ProtectedRoute>} />
-                          <Route path="/ExamsCreated/ExamResults/:pin/ViewStudentResponse/:email" element={<ProtectedRoute><ViewStudentResponse /></ProtectedRoute>} />
+                          <Route path="/ExamsCreated/ExamResults/:pin/ViewStudentResponse/:studentEmail" element={<ProtectedRoute><ViewStudentResponse /></ProtectedRoute>} />
+                          <Route path="/ExamsCreated/ExamResults/:pin/ViewStudentResponse/:studentEmail/:attemptId" element={<ProtectedRoute><ViewStudentResponse /></ProtectedRoute>} />
                           <Route path="/ExamsCreated/ExamResults/:pin/AnalyzeKnowledge" element={<ProtectedRoute><h1>Tính năng này đang được phát triển...</h1></ProtectedRoute>} />
                           <Route path="/ExamsCreated/ExamResults/:pin/QuestionsDetail" element={<ProtectedRoute><QuestionDetails /></ProtectedRoute>} />
                           <Route path="/ExamsCreated/ExamResults/:pin/ExportExam" element={<ProtectedRoute><ExportExam /></ProtectedRoute>} />
