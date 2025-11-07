@@ -1,7 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import mammoth from 'mammoth';
 
-const apiKey = "AIzaSyAeMN1c914F4WzgwKKbr4C29KbYx76h5a4";
+const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "AIzaSyAeMN1c914F4WzgwKKbr4C29KbYx76h5a4";
 const ai = new GoogleGenAI({ apiKey });
 
 const responseSchema = {
@@ -70,37 +70,44 @@ const responseSchema = {
 //     "propertyOrdering": ["answer", "type", "question", "options", "answer"] 
 //   }
 // }
+const tools = [
+  { codeExecution: {} },
+];
+const config = {
+  temperature: 0.3,
+  topP: 1,
+  thinkingConfig: {
+    thinkingBudget: -1,
+  },
+  imageConfig: {
+    imageSize: '1K',
+  },
+  tools,
+};
 
 const model20flash = {
-  model: "gemini-2.5-flash-preview-04-17",
+  model: "gemini-flash-latest",
   config: {
     temperature: 0.3,
-    responseMimeType: 'application/json',
     thinkingConfig: {
       thinkingBudget: 0,
-    },
-    responseSchema: responseSchema
+    }
   }
 };
 
-const model1206 = {
-  model: "gemini-exp-1206",
-  config: {
-    responseMimeType: "application/json",
-    temperature: 0.6,
-    topP: 0.95,
-    topK: 40,
-    maxOutputTokens: 8192
-  }
-};
 
 const model15pro = {
-  model: "learnlm-1.5-pro-experimental",
+  model: "gemini-2.5-pro",
   config: {
-    responseMimeType: "application/json",
-    temperature: 2,
-    responseSchema: responseSchema
-  }
+    temperature: 0.3,
+    topP: 1,
+    thinkingConfig: {
+      thinkingBudget: -1,
+    },
+    imageConfig: {
+      imageSize: '1K',
+    },
+}
 };
 
 export async function extractQuestionsJSON(file, prompt) {

@@ -88,9 +88,22 @@ function ExportExam() {
         );
       
       case "shortanswer":
+        const validAnswers = Array.isArray(answer.answer) 
+          ? answer.answer 
+          : [answer.answer].filter(a => a);
         return (
           <div className="text-green-600 font-medium mt-2">
-            Đáp án: {answer.answer}
+            <div>Đáp án hợp lệ:</div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {validAnswers.map((ans, ansIndex) => (
+                <span 
+                  key={ansIndex}
+                  className="px-3 py-1.5 bg-green-100 text-green-800 rounded-md border border-green-300 text-sm font-medium"
+                >
+                  {String(ans).trim()}
+                </span>
+              ))}
+            </div>
           </div>
         );
       

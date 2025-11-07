@@ -6,6 +6,7 @@ module.exports = {
     filename: 'navbar.bundle.js',
     path: path.resolve(__dirname, 'public/dist'),
   },
+  devtool: false, // Disable source maps
   module: {
     rules: [
       {

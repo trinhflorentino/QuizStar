@@ -25,6 +25,7 @@ function ResultFetch() {
   const [responseDoc, setResponseDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [questionScores, setQuestionScores] = useState([]);
   
   let { pin, studentEmail, attemptId } = useParams();
   const navigate = useNavigate();
@@ -126,6 +127,15 @@ function ResultFetch() {
         setStudentAnswers(data.selected_answers || []);
         setScore(data.score || "0/0");
         setResponseDoc(data);
+        
+        // Calculate scores for each question
+        const scores = calculateQuestionScores(
+          questionsDoc.data().question_question,
+          answersTemp,
+          data.selected_answers || []
+        );
+        setQuestionScores(scores);
+        
         setLoading(false);
       } catch (error) {
         console.error("Error fetching results:", error);
@@ -163,6 +173,80 @@ function ResultFetch() {
     }
     
     return 'Đã đăng ký';
+  };
+
+  // Calculate score for each question
+  const calculateQuestionScores = (questions, correctAnswers, studentAnswers) => {
+    if (!questions || !correctAnswers || !studentAnswers) return [];
+    
+    return questions.map((question, index) => {
+      if (question.type === 'textblock') {
+        return { score: 0, maxScore: 0, isCorrect: null };
+      }
+      
+      const userAnswer = studentAnswers[index];
+      const correctAnswer = correctAnswers[index];
+      const questionScore = parseFloat(question.score || 1);
+      
+      if (!userAnswer || !correctAnswer) {
+        return { score: 0, maxScore: questionScore, isCorrect: false };
+      }
+      
+      let isCorrect = false;
+      let earnedScore = 0;
+      
+      if (question.type === "mcq") {
+        // MCQ answer is stored as index (0-based), but correctAnswer.answer might be 1-based
+        const correctIndex = parseInt(correctAnswer.answer);
+        const studentIndex = parseInt(userAnswer.selectedAnswer);
+        // Handle both 0-based and 1-based indexing
+        isCorrect = correctIndex === studentIndex || (correctIndex === studentIndex + 1) || (correctIndex + 1 === studentIndex);
+        earnedScore = isCorrect ? questionScore : 0;
+      } else if (question.type === "shortanswer") {
+        const validAnswers = Array.isArray(correctAnswer.answer) 
+          ? correctAnswer.answer 
+          : [correctAnswer.answer].filter(a => a);
+        const userAnswerTrimmed = String(userAnswer.selectedAnswer || '').trim().toLowerCase();
+        isCorrect = validAnswers.some(ans => 
+          String(ans).trim().toLowerCase() === userAnswerTrimmed
+        );
+        earnedScore = isCorrect ? questionScore : 0;
+      } else if (question.type === "truefalse") {
+        const correctOptions = correctAnswer.answer;
+        const selectedOptions = userAnswer.selectedAnswer;
+        
+        if (Array.isArray(correctOptions) && Array.isArray(selectedOptions)) {
+          let matchingCount = 0;
+          for (let j = 0; j < correctOptions.length; j++) {
+            if (correctOptions[j] === selectedOptions[j]) {
+              matchingCount++;
+            }
+          }
+          
+          // Partial scoring for true/false questions
+          let percentScore = 0;
+          if (correctOptions.length > 0) {
+            switch(matchingCount) {
+              case 0: percentScore = 0; break;
+              case 1: percentScore = correctOptions.length <= 2 ? 0.5 : 0.1; break;
+              case 2: percentScore = correctOptions.length <= 3 ? 0.75 : 0.25; break;
+              case 3: percentScore = 0.5; break;
+              case 4: percentScore = 1; break;
+              default: percentScore = matchingCount / correctOptions.length;
+            }
+          }
+          
+          earnedScore = questionScore * percentScore;
+          isCorrect = percentScore === 1;
+        }
+      }
+      
+      return { 
+        score: earnedScore, 
+        maxScore: questionScore, 
+        isCorrect: isCorrect 
+      };
+    });
   };
 
   // Conditional renders
@@ -235,6 +319,39 @@ function ResultFetch() {
             </div>
           </div>
           
+          {/* Summary of results */}
+          {questionScores.length > 0 && (
+            <div className="mb-6 bg-gray-50 p-4 rounded-lg">
+              <h2 className="text-lg font-semibold mb-3">Tổng hợp kết quả</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-600">
+                    {questionScores.filter(q => q.isCorrect === true).length}
+                  </p>
+                  <p className="text-sm text-gray-600">Câu đúng</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-red-600">
+                    {questionScores.filter(q => q.isCorrect === false).length}
+                  </p>
+                  <p className="text-sm text-gray-600">Câu sai</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-gray-600">
+                    {questionScores.filter(q => q.isCorrect === null).length}
+                  </p>
+                  <p className="text-sm text-gray-600">Chưa làm</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-600">
+                    {questionScores.reduce((sum, q) => sum + q.score, 0).toFixed(2)} / {questionScores.reduce((sum, q) => sum + q.maxScore, 0).toFixed(2)}
+                  </p>
+                  <p className="text-sm text-gray-600">Tổng điểm</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <Link
             to={`/pinverify/Form/${pin}`}
             className="inline-block bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors mb-8"
@@ -258,51 +375,144 @@ function ResultFetch() {
           {questionsTemp.map((question, index) => (
             <div 
               key={index} 
-              className="bg-white rounded-lg shadow-md p-6"
+              className={`bg-white rounded-lg shadow-md p-6 border-l-4 ${
+                questionScores[index]?.isCorrect === true 
+                  ? 'border-green-500' 
+                  : questionScores[index]?.isCorrect === false 
+                    ? 'border-red-500' 
+                    : 'border-gray-300'
+              }`}
             >
-              <div className="flex items-start mb-4">
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded mr-2 text-sm">
-                  Câu {index + 1}
-                </span>
-                <div className="text-lg font-medium">
-                  <MemoizedMathJax>{question.question}</MemoizedMathJax>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start">
+                  <span className={`px-2 py-1 rounded mr-2 text-sm font-medium ${
+                    questionScores[index]?.isCorrect === true 
+                      ? 'bg-green-100 text-green-800' 
+                      : questionScores[index]?.isCorrect === false 
+                        ? 'bg-red-100 text-red-800' 
+                        : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    Câu {index + 1}
+                  </span>
+                  <div className="text-lg font-medium">
+                    <MemoizedMathJax>{question.question}</MemoizedMathJax>
+                  </div>
                 </div>
+                {questionScores[index] && questionScores[index].maxScore > 0 && (
+                  <div className={`px-3 py-1 rounded-lg text-sm font-semibold ${
+                    questionScores[index].isCorrect === true
+                      ? 'bg-green-100 text-green-800'
+                      : questionScores[index].isCorrect === false
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {questionScores[index].score.toFixed(2)} / {questionScores[index].maxScore.toFixed(2)} điểm
+                  </div>
+                )}
               </div>
+              
+              {/* Result indicator */}
+              {questionScores[index] && (
+                <div className={`mb-4 p-3 rounded-lg ${
+                  questionScores[index].isCorrect === true
+                    ? 'bg-green-50 border border-green-200'
+                    : questionScores[index].isCorrect === false
+                      ? 'bg-red-50 border border-red-200'
+                      : 'bg-gray-50 border border-gray-200'
+                }`}>
+                  <div className="flex items-center">
+                    {questionScores[index].isCorrect === true ? (
+                      <>
+                        <span className="text-green-600 text-xl mr-2">✓</span>
+                        <span className="text-green-800 font-medium">Câu trả lời đúng</span>
+                      </>
+                    ) : questionScores[index].isCorrect === false ? (
+                      <>
+                        <span className="text-red-600 text-xl mr-2">✗</span>
+                        <span className="text-red-800 font-medium">Câu trả lời sai</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-gray-600 text-xl mr-2">○</span>
+                        <span className="text-gray-800 font-medium">Chưa trả lời</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
               
               {question.type === "mcq" && (
                 <div className="space-y-3 pl-8">
+                  {/* Show correct answer summary */}
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="font-medium text-green-800 mb-1">
+                      Đáp án đúng: <span className="font-bold">
+                        {(() => {
+                          const correctAns = parseInt(answersTemp[index]?.answer || 0);
+                          // Handle both 0-based and 1-based indexing
+                          const letterIndex = correctAns >= 0 && correctAns < question.options.length 
+                            ? correctAns 
+                            : Math.max(0, correctAns - 1);
+                          return String.fromCharCode(65 + letterIndex);
+                        })()}
+                      </span>
+                    </p>
+                    {studentAnswers[index]?.selectedAnswer !== undefined && studentAnswers[index]?.selectedAnswer !== null && (
+                      <p className={`text-sm ${
+                        (() => {
+                          const correctAns = parseInt(answersTemp[index]?.answer || -1);
+                          const studentAns = parseInt(studentAnswers[index]?.selectedAnswer || -1);
+                          return correctAns === studentAns || (correctAns === studentAns + 1) || (correctAns + 1 === studentAns);
+                        })()
+                          ? 'text-green-700'
+                          : 'text-red-700'
+                      }`}>
+                        Đáp án của bạn: <span className="font-bold">
+                          {String.fromCharCode(65 + Math.max(0, parseInt(studentAnswers[index]?.selectedAnswer || 0)))}
+                        </span>
+                      </p>
+                    )}
+                  </div>
+                  
                   {question.options.map((option, optIndex) => {
-                    const correctOptionIndex = answersTemp[index]?.answer;
-                    const studentSelectedOptionIndex = studentAnswers[index]?.selectedAnswer;
+                    const correctOptionIndex = parseInt(answersTemp[index]?.answer || -1);
+                    const studentSelectedOptionIndex = parseInt(studentAnswers[index]?.selectedAnswer || -1);
                     
-                    const isCorrect = parseInt(correctOptionIndex) === optIndex + 1;
-                    const isSelected = parseInt(studentSelectedOptionIndex) === optIndex;
+                    // Handle both 0-based and 1-based indexing
+                    const isCorrect = correctOptionIndex === optIndex || correctOptionIndex === optIndex + 1;
+                    const isSelected = studentSelectedOptionIndex === optIndex || studentSelectedOptionIndex === optIndex - 1;
                     
                     return (
                       <div 
                         key={optIndex}
-                        className={`p-3 rounded-lg border ${
+                        className={`p-3 rounded-lg border-2 ${
                           isCorrect && isSelected 
                             ? 'bg-green-100 border-green-500' 
                             : isSelected && !isCorrect 
                               ? 'bg-red-100 border-red-500' 
                               : isCorrect 
-                                ? 'border-green-500' 
-                                : 'border-gray-300'
+                                ? 'bg-green-50 border-green-300' 
+                                : 'border-gray-300 bg-white'
                         }`}
                       >
                         <div className="flex items-center">
-                          <span className="w-8 h-8 flex items-center justify-center rounded-full border-2 font-medium text-lg mr-3">
+                          <span className={`w-8 h-8 flex items-center justify-center rounded-full border-2 font-medium text-lg mr-3 ${
+                            isCorrect 
+                              ? 'border-green-600 bg-green-100 text-green-800'
+                              : isSelected
+                                ? 'border-red-600 bg-red-100 text-red-800'
+                                : 'border-gray-400'
+                          }`}>
                             {String.fromCharCode(65 + optIndex)}
                           </span>
                           <div className="flex-grow">
                             <MemoizedMathJax inline>{option.option}</MemoizedMathJax>
                           </div>
                           {isCorrect && (
-                            <span className="text-green-600 ml-2">✓</span>
+                            <span className="text-green-600 ml-2 text-xl font-bold">✓ Đúng</span>
                           )}
                           {isSelected && !isCorrect && (
-                            <span className="text-red-600 ml-2">✗</span>
+                            <span className="text-red-600 ml-2 text-xl font-bold">✗ Bạn chọn</span>
                           )}
                         </div>
                       </div>
@@ -313,9 +523,59 @@ function ResultFetch() {
               
               {question.type === "truefalse" && (
                 <div className="space-y-4 pl-8">
+                  {/* Show answer summary */}
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="font-medium text-green-800 mb-2">Đáp án đúng:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {question.options.map((_, optIndex) => {
+                        const correctAnswer = answersTemp[index]?.answer?.[optIndex];
+                        return (
+                          <span key={optIndex} className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">
+                            {String.fromCharCode(97 + optIndex)}: {correctAnswer === true ? 'Đúng' : 'Sai'}
+                          </span>
+                        );
+                      })}
+                    </div>
+                    {studentAnswers[index]?.selectedAnswer && (
+                      <p className="font-medium text-gray-800 mt-2 mb-1">Đáp án của bạn:</p>
+                    )}
+                    {studentAnswers[index]?.selectedAnswer && (
+                      <div className="flex flex-wrap gap-2">
+                        {question.options.map((_, optIndex) => {
+                          const studentAnswer = studentAnswers[index]?.selectedAnswer?.[optIndex];
+                          const correctAnswer = answersTemp[index]?.answer?.[optIndex];
+                          const isCorrect = studentAnswer === correctAnswer;
+                          
+                          if (studentAnswer === undefined || studentAnswer === null) {
+                            return (
+                              <span key={optIndex} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-sm">
+                                {String.fromCharCode(97 + optIndex)}: Chưa trả lời
+                              </span>
+                            );
+                          }
+                          
+                          return (
+                            <span 
+                              key={optIndex} 
+                              className={`px-2 py-1 rounded text-sm ${
+                                isCorrect 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-red-100 text-red-800'
+                              }`}
+                            >
+                              {String.fromCharCode(97 + optIndex)}: {studentAnswer === true ? 'Đúng' : 'Sai'} 
+                              {isCorrect ? ' ✓' : ' ✗'}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                  
                   {question.options.map((option, optIndex) => {
-                    const correctAnswer = answersTemp[index]?.answer[optIndex];
+                    const correctAnswer = answersTemp[index]?.answer?.[optIndex];
                     const studentAnswer = studentAnswers[index]?.selectedAnswer?.[optIndex];
+                    const isCorrect = studentAnswer === correctAnswer;
                     
                     return (
                       <div key={optIndex} className="mb-3">
@@ -324,36 +584,46 @@ function ResultFetch() {
                         </div>
                         <div className="flex ml-8 space-x-4">
                           <div 
-                            className={`px-4 py-2 rounded-lg border ${
+                            className={`px-4 py-2 rounded-lg border-2 ${
                               studentAnswer === true 
                                 ? correctAnswer === true 
                                   ? 'bg-green-100 border-green-500' 
                                   : 'bg-red-100 border-red-500' 
                                 : correctAnswer === true 
-                                  ? 'border-green-500' 
-                                  : 'border-gray-300'
+                                  ? 'bg-green-50 border-green-300' 
+                                  : 'border-gray-300 bg-white'
                             }`}
                           >
-                            Đúng
-                            {correctAnswer === true && (
-                              <span className="text-green-600 ml-2">✓</span>
-                            )}
+                            <div className="flex items-center">
+                              <span>Đúng</span>
+                              {correctAnswer === true && (
+                                <span className="text-green-600 ml-2 text-xl font-bold">✓</span>
+                              )}
+                              {studentAnswer === true && !isCorrect && (
+                                <span className="text-red-600 ml-2 text-xl font-bold">✗ Bạn chọn</span>
+                              )}
+                            </div>
                           </div>
                           <div 
-                            className={`px-4 py-2 rounded-lg border ${
+                            className={`px-4 py-2 rounded-lg border-2 ${
                               studentAnswer === false 
                                 ? correctAnswer === false 
                                   ? 'bg-green-100 border-green-500' 
                                   : 'bg-red-100 border-red-500' 
                                 : correctAnswer === false 
-                                  ? 'border-green-500' 
-                                  : 'border-gray-300'
+                                  ? 'bg-green-50 border-green-300' 
+                                  : 'border-gray-300 bg-white'
                             }`}
                           >
-                            Sai
-                            {correctAnswer === false && (
-                              <span className="text-green-600 ml-2">✓</span>
-                            )}
+                            <div className="flex items-center">
+                              <span>Sai</span>
+                              {correctAnswer === false && (
+                                <span className="text-green-600 ml-2 text-xl font-bold">✓</span>
+                              )}
+                              {studentAnswer === false && !isCorrect && (
+                                <span className="text-red-600 ml-2 text-xl font-bold">✗ Bạn chọn</span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -364,16 +634,64 @@ function ResultFetch() {
               
               {question.type === "shortanswer" && (
                 <div className="pl-8">
-                  <div className="mb-4">
-                    <p className="font-medium mb-1">Câu trả lời của bạn:</p>
-                    <div className="p-3 border rounded-lg bg-gray-50">
-                      {studentAnswers[index]?.selectedAnswer || "Chưa trả lời"}
+                  {/* Answer summary */}
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <p className="font-medium text-green-800 mb-2">Đáp án hợp lệ:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(() => {
+                        const correctAnswers = Array.isArray(answersTemp[index]?.answer) 
+                          ? answersTemp[index].answer 
+                          : [answersTemp[index]?.answer].filter(a => a);
+                        if (correctAnswers.length === 0) return <span className="text-gray-600">Không có đáp án</span>;
+                        return correctAnswers.map((ans, ansIndex) => (
+                          <span 
+                            key={ansIndex}
+                            className="px-3 py-1.5 bg-green-100 text-green-800 rounded-md border border-green-300 text-sm font-medium"
+                          >
+                            {String(ans).trim()}
+                          </span>
+                        ));
+                      })()}
                     </div>
                   </div>
-                  <div>
-                    <p className="font-medium mb-1">Đáp án đúng:</p>
-                    <div className="p-3 border rounded-lg bg-green-50 border-green-200">
-                      {answersTemp[index]?.answer || "Không có đáp án"}
+                  
+                  <div className="mb-4">
+                    <p className="font-medium mb-1">Câu trả lời của bạn:</p>
+                    <div className={`p-3 border-2 rounded-lg ${
+                      (() => {
+                        const correctAnswers = Array.isArray(answersTemp[index]?.answer) 
+                          ? answersTemp[index].answer 
+                          : [answersTemp[index]?.answer].filter(a => a);
+                        const studentAnswer = studentAnswers[index]?.selectedAnswer?.trim();
+                        const isCorrect = studentAnswer && correctAnswers.some(ans => 
+                          String(ans).trim().toLowerCase() === studentAnswer.toLowerCase()
+                        );
+                        return isCorrect 
+                          ? 'bg-green-50 border-green-300' 
+                          : studentAnswer 
+                            ? 'bg-red-50 border-red-300' 
+                            : 'bg-gray-50 border-gray-300';
+                      })()
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className={studentAnswers[index]?.selectedAnswer ? '' : 'text-gray-500 italic'}>
+                          {studentAnswers[index]?.selectedAnswer || "Chưa trả lời"}
+                        </span>
+                        {(() => {
+                          const correctAnswers = Array.isArray(answersTemp[index]?.answer) 
+                            ? answersTemp[index].answer 
+                            : [answersTemp[index]?.answer].filter(a => a);
+                          const studentAnswer = studentAnswers[index]?.selectedAnswer?.trim();
+                          const isCorrect = studentAnswer && correctAnswers.some(ans => 
+                            String(ans).trim().toLowerCase() === studentAnswer.toLowerCase()
+                          );
+                          return isCorrect ? (
+                            <span className="text-green-600 ml-2 text-xl font-bold">✓ Đúng</span>
+                          ) : studentAnswer ? (
+                            <span className="text-red-600 ml-2 text-xl font-bold">✗ Sai</span>
+                          ) : null;
+                        })()}
+                      </div>
                     </div>
                   </div>
                 </div>

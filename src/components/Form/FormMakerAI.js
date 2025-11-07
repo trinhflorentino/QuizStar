@@ -294,7 +294,7 @@ function FormMaker() {
   // }
 
   async function extractQuestionsJSON(file) {
-    const apiKey = "AIzaSyBha8XFvoYiAXXHYPjPIAwBwlkqNpq4m9w"; 
+    const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "AIzaSyBha8XFvoYiAXXHYPjPIAwBwlkqNpq4m9w"; 
     const genAI = new GoogleGenerativeAI(apiKey);
     // const schema = {
     //   description: "List of questions",

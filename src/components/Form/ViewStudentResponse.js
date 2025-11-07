@@ -488,24 +488,55 @@ function ViewStudentResponse() {
                     <p className="font-medium mb-1">Câu trả lời của học sinh:</p>
                     <div className={`p-3 border rounded-lg ${
                       studentAnswers[qIndex]?.selectedAnswer 
-                        ? studentAnswers[qIndex]?.selectedAnswer === answers[qIndex]?.answer
-                          ? 'bg-green-50 border-green-300'
-                          : 'bg-gray-50'
+                        ? (() => {
+                            const correctAnswers = Array.isArray(answers[qIndex]?.answer) 
+                              ? answers[qIndex].answer 
+                              : [answers[qIndex]?.answer].filter(a => a);
+                            const studentAnswer = studentAnswers[qIndex].selectedAnswer.trim();
+                            const isCorrect = correctAnswers.some(ans => 
+                              String(ans).trim().toLowerCase() === studentAnswer.toLowerCase()
+                            );
+                            return isCorrect ? 'bg-green-50 border-green-300' : 'bg-gray-50';
+                          })()
                         : 'bg-gray-50 text-gray-400 italic'
                     }`}>
                       {studentAnswers[qIndex]?.selectedAnswer 
                         ? studentAnswers[qIndex].selectedAnswer 
                         : "Chưa trả lời"}
                       
-                      {studentAnswers[qIndex]?.selectedAnswer === answers[qIndex]?.answer && (
-                        <span className="text-green-600 ml-2">✓</span>
-                      )}
+                      {(() => {
+                        const correctAnswers = Array.isArray(answers[qIndex]?.answer) 
+                          ? answers[qIndex].answer 
+                          : [answers[qIndex]?.answer].filter(a => a);
+                        const studentAnswer = studentAnswers[qIndex]?.selectedAnswer?.trim();
+                        const isCorrect = studentAnswer && correctAnswers.some(ans => 
+                          String(ans).trim().toLowerCase() === studentAnswer.toLowerCase()
+                        );
+                        return isCorrect ? <span className="text-green-600 ml-2">✓</span> : null;
+                      })()}
                     </div>
                   </div>
                   <div>
-                    <p className="font-medium mb-1">Đáp án đúng:</p>
+                    <p className="font-medium mb-1">Đáp án hợp lệ:</p>
                     <div className="p-3 border rounded-lg bg-green-50 border-green-200">
-                      {answers[qIndex]?.answer || "Không có đáp án"}
+                      {(() => {
+                        const correctAnswers = Array.isArray(answers[qIndex]?.answer) 
+                          ? answers[qIndex].answer 
+                          : [answers[qIndex]?.answer].filter(a => a);
+                        if (correctAnswers.length === 0) return "Không có đáp án";
+                        return (
+                          <div className="flex flex-wrap gap-2">
+                            {correctAnswers.map((ans, ansIndex) => (
+                              <span 
+                                key={ansIndex}
+                                className="px-3 py-1.5 bg-green-100 text-green-800 rounded-md border border-green-300 text-sm font-medium"
+                              >
+                                {String(ans).trim()}
+                              </span>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                   

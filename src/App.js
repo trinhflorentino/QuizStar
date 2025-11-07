@@ -32,6 +32,9 @@ const FormEdit = lazy(() => import("./components/Form/FormEdit"));
 const QuestionDetails = lazy(() => import("./components/Form/QuestionDetails"));
 const ExportExam = lazy(() => import("./components/Form/ExportExam"));
 const ExamLibrary = lazy(() => import("./pages/ExamLibrary"));
+const QuestionBank = lazy(() => import("./pages/QuestionBank"));
+const QuestionBankDetail = lazy(() => import("./pages/QuestionBankDetail"));
+const ImportExamQuestions = lazy(() => import("./pages/ImportExamQuestions"));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -141,7 +144,9 @@ function App() {
                           <Route path="/TestManagement" element={<ProtectedRoute><TestManagement /></ProtectedRoute>} />
                           <Route path="/Profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                           <Route path="/FormEdit/:pin" element={<ProtectedRoute><FormEdit /></ProtectedRoute>} />
-                          <Route path="/QuestionBank" element={<ProtectedRoute><h1>Tính năng này đang được phát triển...</h1></ProtectedRoute>} />
+                          <Route path="/QuestionBank" element={<ProtectedRoute><QuestionBank /></ProtectedRoute>} />
+                          <Route path="/QuestionBank/:bankId" element={<ProtectedRoute><QuestionBankDetail /></ProtectedRoute>} />
+                          <Route path="/QuestionBank/:bankId/ImportExamQuestions" element={<ProtectedRoute><ImportExamQuestions /></ProtectedRoute>} />
                           <Route path="/ExamLibrary" element={<ProtectedRoute><ExamLibrary /></ProtectedRoute>} />
                           
                           <Route path="/Main" element={<LegacyRedirect />} />

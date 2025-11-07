@@ -4,7 +4,23 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**",
+      "**/src/**",
+      "**/*.ts",
+      "**/*.tsx",
+      "**/*.jsx",
+      "**/*.map",
+      "**/*.scss",
+      "**/*.sass",
+      "**/*.less",
+      "**/webpack.config.js",
+      "**/tailwind.config.js",
+      "**/postcss.config.js",
+      "**/package.json",
+      "**/package-lock.json",
+      "**/tsconfig.json",
+      "**/.eslintrc*",
+      "**/README.md"
     ],
     "rewrites": [
       {

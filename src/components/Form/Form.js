@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo, useCallback, useReducer } from "react";
 import { v4 as uuid } from "uuid";
 import React from 'react';
 import { useParams, useNavigate } from "react-router-dom";
-import db from "../../services/firebaseConfig";
+import db, { realtimeDatabase } from "../../services/firebaseConfig";
 import { getAuth } from "firebase/auth";
 import {
   collection,
@@ -13,6 +13,15 @@ import {
   updateDoc,
   writeBatch,
 } from "firebase/firestore/lite";
+import {
+  ref,
+  set,
+  update,
+  get,
+  onValue,
+  off,
+  serverTimestamp as rtdbServerTimestamp
+} from "firebase/database";
 import { MathJaxContext, MathJax } from 'better-react-mathjax';
 // import { info } from "autoprefixer";
 // import { MathJaxContext, MathJax } from 'better-react-mathjax';
@@ -32,6 +41,15 @@ const getUserIdentifier = () => {
   const auth = getAuth();
   if (auth.currentUser && auth.currentUser.email) {
     return auth.currentUser.email;
+  }
+  return getGuestId();
+};
+
+// Get user ID (UID) or guest ID for path identification in Realtime Database
+const getUserIdForPath = () => {
+  const auth = getAuth();
+  if (auth.currentUser && auth.currentUser.uid) {
+    return auth.currentUser.uid;
   }
   return getGuestId();
 };
@@ -193,23 +211,41 @@ const MCQOption = React.memo(({
   isSelected, 
   onSelect 
 }) => {
+  const optionStr = JSON.stringify(option);
+  console.log(`🔍 [DEBUG MCQOption] Rendering option ${optionIndex} for question ${questionIndex}:`, {
+    option: option,
+    optionOption: option?.option,
+    optionOptionFull: option?.option,
+    optionType: typeof option?.option,
+    optionKeys: Object.keys(option || {}),
+    optionStringified: optionStr,
+    isSelected: isSelected
+  });
+  console.log(`📦 [DEBUG MCQOption] Full option JSON for Q${questionIndex} Opt${optionIndex}:`, optionStr);
+  
   return (
-    <div key={uuid()} className="mb-3">
-      <button
+    <div key={uuid()} className="mb-2">
+      <div
         id={`${questionIndex}-${optionIndex}`}
-        type="button"
-        className={`w-full p-3 rounded-lg border transition-colors flex items-center space-x-3 ${
+        className={`flex items-start p-2 rounded cursor-pointer transition-colors ${
           isSelected
-            ? 'bg-blue-100 border-blue-500 text-blue-700'
-            : 'hover:bg-gray-50 border-gray-300 text-gray-700'
+            ? 'bg-blue-100 border border-blue-300'
+            : 'bg-white border border-gray-200 hover:bg-gray-50'
         }`}
         onClick={() => onSelect(questionIndex, optionIndex)}
       >
-        <span className="w-8 h-8 flex items-center justify-center rounded-full border-2 font-medium text-lg">
-          {String.fromCharCode(65 + optionIndex)}
-        </span>
-        <MemoizedMathJax inline dynamic className="text-gray-700">{option.option}</MemoizedMathJax>
-      </button>
+        <span className="font-medium mr-2 flex-shrink-0">{String.fromCharCode(65 + optionIndex)}.</span>
+        <div className="prose-sm max-w-none flex-1 text-gray-700">
+          {option.option && option.option.trim() ? (
+            <MemoizedMathJax inline dynamic>{option.option}</MemoizedMathJax>
+          ) : (
+            <span className="text-gray-400 italic">Chưa có nội dung lựa chọn</span>
+          )}
+        </div>
+        {isSelected && (
+          <span className="ml-2 text-blue-600 font-semibold text-sm flex-shrink-0">✓</span>
+        )}
+      </div>
       <input
         type="radio"
         className="hidden"
@@ -431,6 +467,12 @@ function Form() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [canResume, setCanResume] = useState(false);
   const [previousAttemptData, setPreviousAttemptData] = useState(null);
+  
+  // Result state
+  const [showResult, setShowResult] = useState(false);
+  const [resultData, setResultData] = useState(null);
+  const [questionResults, setQuestionResults] = useState([]);
+  const [viewMode, setViewMode] = useState('answers'); // 'answers' or 'mywork'
 
   // New state for retakes and history
   const [previousAttempts, setPreviousAttempts] = useState([]);
@@ -505,6 +547,75 @@ function Form() {
     };
   }, []);
 
+  // Calculate results for each question
+  const calculateQuestionResults = useCallback((studentAnswers, correctAnswers, quizQuestions) => {
+    if (!studentAnswers || !correctAnswers || !quizQuestions) return [];
+    
+    return quizQuestions.map((question, index) => {
+      if (question.type === 'textblock') {
+        return { isCorrect: null, score: 0, maxScore: 0 };
+      }
+      
+      const userAnswer = studentAnswers[index];
+      const correctAnswer = correctAnswers[index];
+      const questionScore = parseFloat(question.score || 1);
+      
+      if (!userAnswer || !correctAnswer) {
+        return { isCorrect: false, score: 0, maxScore: questionScore };
+      }
+      
+      let isCorrect = false;
+      let earnedScore = 0;
+      
+      if (question.type === "mcq") {
+        isCorrect = parseInt(correctAnswer.answer) === parseInt(userAnswer.selectedAnswer);
+        earnedScore = isCorrect ? questionScore : 0;
+      } else if (question.type === "shortanswer") {
+        const validAnswers = Array.isArray(correctAnswer.answer) 
+          ? correctAnswer.answer 
+          : [correctAnswer.answer].filter(a => a);
+        const userAnswerTrimmed = String(userAnswer.selectedAnswer || '').trim().toLowerCase();
+        isCorrect = validAnswers.some(ans => 
+          String(ans).trim().toLowerCase() === userAnswerTrimmed
+        );
+        earnedScore = isCorrect ? questionScore : 0;
+      } else if (question.type === "truefalse") {
+        const correctOptions = correctAnswer.answer;
+        const selectedOptions = userAnswer.selectedAnswer;
+        
+        if (Array.isArray(correctOptions) && Array.isArray(selectedOptions)) {
+          let matchingCount = 0;
+          for (let j = 0; j < correctOptions.length; j++) {
+            if (correctOptions[j] === selectedOptions[j]) {
+              matchingCount++;
+            }
+          }
+          
+          let percentScore = 0;
+          if (correctOptions.length > 0) {
+            switch(matchingCount) {
+              case 0: percentScore = 0; break;
+              case 1: percentScore = correctOptions.length <= 2 ? 0.5 : 0.1; break;
+              case 2: percentScore = correctOptions.length <= 3 ? 0.75 : 0.25; break;
+              case 3: percentScore = 0.5; break;
+              case 4: percentScore = 1; break;
+              default: percentScore = matchingCount / correctOptions.length;
+            }
+          }
+          
+          earnedScore = questionScore * percentScore;
+          isCorrect = percentScore === 1;
+        }
+      }
+      
+      return { 
+        isCorrect: isCorrect, 
+        score: earnedScore, 
+        maxScore: questionScore 
+      };
+    });
+  }, []);
+
   // Calculate score based on student answers
   const calculateScore = useCallback((studentAnswers, correctAnswers, quizQuestions) => {
     if (!studentAnswers || !correctAnswers || !quizQuestions) {
@@ -523,8 +634,20 @@ function Form() {
       
       totalScore += parseFloat(question.score || 1);
       
-      if (question.type === "mcq" || question.type === "shortanswer") {
+      if (question.type === "mcq") {
         if (parseInt(correctAnswer.answer) === parseInt(userAnswer.selectedAnswer)) {
+          earnedScore += parseFloat(question.score || 1);
+        }
+      } else if (question.type === "shortanswer") {
+        // Check if user answer matches any of the valid answers (case-insensitive)
+        const validAnswers = Array.isArray(correctAnswer.answer) 
+          ? correctAnswer.answer 
+          : [correctAnswer.answer].filter(a => a);
+        const userAnswerTrimmed = String(userAnswer.selectedAnswer || '').trim().toLowerCase();
+        const isCorrect = validAnswers.some(ans => 
+          String(ans).trim().toLowerCase() === userAnswerTrimmed
+        );
+        if (isCorrect) {
           earnedScore += parseFloat(question.score || 1);
         }
       } 
@@ -568,18 +691,37 @@ function Form() {
 
   // Restore previous answers to UI state
   const restorePreviousAnswers = useCallback((previousAnswers, orderMapping) => {
-    if (!previousAnswers || !Array.isArray(previousAnswers)) return;
+    if (!previousAnswers || !Array.isArray(previousAnswers)) {
+      console.log('⚠️ restorePreviousAnswers: Invalid previousAnswers', previousAnswers);
+      return;
+    }
+    
+    console.log('🔄 Restoring answers:', {
+      answersCount: previousAnswers.length,
+      orderMappingKeys: Object.keys(orderMapping || {}).length
+    });
     
     const restoredAnswers = {};
+    let restoredCount = 0;
     
     previousAnswers.forEach((answer, originalIndex) => {
-      if (!answer || answer.selectedAnswer === undefined || answer.selectedAnswer === null) return;
+      // Skip if answer is null/undefined
+      if (!answer) return;
+      
+      // Skip if selectedAnswer is undefined (but allow null and empty string for short answers)
+      if (answer.selectedAnswer === undefined) return;
       
       const newQuestionIndex = orderMapping[originalIndex]?.newIndex;
-      if (newQuestionIndex === undefined) return;
+      if (newQuestionIndex === undefined) {
+        console.log(`⚠️ No mapping found for originalIndex ${originalIndex}`);
+        return;
+      }
       
       const question = originalQuestions[originalIndex];
-      if (!question) return;
+      if (!question) {
+        console.log(`⚠️ No question found for originalIndex ${originalIndex}`);
+        return;
+      }
       
       if (question.type === "mcq") {
         const optionMapping = orderMapping[originalIndex]?.optionMapping || {};
@@ -596,19 +738,176 @@ function Form() {
         
         if (newOptionIndex !== null) {
           restoredAnswers[newQuestionIndex] = newOptionIndex;
+          restoredCount++;
+          console.log(`✅ Restored MCQ Q${originalIndex} -> Q${newQuestionIndex}, Option ${newOptionIndex}`);
         }
       } else if (question.type === "truefalse" && Array.isArray(answer.selectedAnswer)) {
         answer.selectedAnswer.forEach((tfAnswer, optionIndex) => {
-          if (tfAnswer !== null) {
+          if (tfAnswer !== null && tfAnswer !== undefined) {
             restoredAnswers[`tf_${newQuestionIndex}_${optionIndex}`] = tfAnswer;
+            restoredCount++;
           }
         });
+        if (answer.selectedAnswer.length > 0) {
+          console.log(`✅ Restored True/False Q${originalIndex} -> Q${newQuestionIndex}`);
+        }
+      } else if (question.type === "shortanswer") {
+        // Short answer is already in selectedList, just need to ensure it's set
+        restoredCount++;
+        console.log(`✅ Restored Short Answer Q${originalIndex} -> Q${newQuestionIndex}: "${answer.selectedAnswer}"`);
       }
     });
     
+    console.log(`✅ Restored ${restoredCount} answers total`);
     dispatchSelectedAnswers({ type: 'RESTORE_ANSWERS', answers: restoredAnswers });
+    
+    // Ensure selectedList is set with all answers (including short answers)
     setSelectedList(previousAnswers);
   }, [originalQuestions]);
+
+  // Helper function to clean data before saving (remove undefined values)
+  const cleanDataForFirestore = useCallback((data) => {
+    if (Array.isArray(data)) {
+      return data.map(item => {
+        if (item === null || item === undefined) {
+          return null; // Keep null but remove undefined
+        }
+        if (typeof item === 'object') {
+          const cleaned = {};
+          for (const [key, value] of Object.entries(item)) {
+            if (value !== undefined) {
+              cleaned[key] = value;
+            }
+          }
+          return cleaned;
+        }
+        return item;
+      });
+    }
+    if (typeof data === 'object' && data !== null) {
+      const cleaned = {};
+      for (const [key, value] of Object.entries(data)) {
+        if (value !== undefined) {
+          cleaned[key] = value;
+        }
+      }
+      return cleaned;
+    }
+    return data;
+  }, []);
+
+  // Save current progress with debounce (realtime) - Using Realtime Database
+  const saveCurrentProgress = useCallback(
+    debounce(async () => {
+      if (isStudentInfoSubmitted && studInfo.email && currentAttemptId) {
+        try {
+          // Clean data to remove undefined values
+          const cleanedSelectedList = cleanDataForFirestore(selectedList);
+          const cleanedOrderMapping = cleanDataForFirestore(originalOrder);
+          
+          // Save to Realtime Database (realtime sync)
+          // Use user ID (UID) instead of email for path to avoid special characters
+          const userId = getUserIdForPath();
+          const progressPath = `quiz_progress/${pin}/${userId}/${currentAttemptId}`;
+          const progressRef = ref(realtimeDatabase, progressPath);
+          
+          await set(progressRef, {
+            selected_answers: cleanedSelectedList,
+            orderMapping: cleanedOrderMapping,
+            email: studInfo.email, // Store email in data, not in path
+            lastUpdated: Date.now(),
+            timestamp: rtdbServerTimestamp()
+          });
+          
+          // Also save to localStorage as backup
+          const progressData = {
+            selected_answers: cleanedSelectedList,
+            orderMapping: cleanedOrderMapping,
+            attemptId: currentAttemptId,
+            pin: pin.toString(),
+            timestamp: new Date().toISOString()
+          };
+          localStorage.setItem(`quiz_progress_${pin}_${currentAttemptId}`, JSON.stringify(progressData));
+          
+          console.log('✅ Progress saved to Realtime Database successfully');
+        } catch (error) {
+          console.error("Error saving progress to Realtime Database:", error);
+          // Try to save to localStorage even if Realtime DB fails
+          try {
+            const cleanedSelectedList = cleanDataForFirestore(selectedList);
+            const cleanedOrderMapping = cleanDataForFirestore(originalOrder);
+            const progressData = {
+              selected_answers: cleanedSelectedList,
+              orderMapping: cleanedOrderMapping,
+              attemptId: currentAttemptId,
+              pin: pin.toString(),
+              timestamp: new Date().toISOString()
+            };
+            localStorage.setItem(`quiz_progress_${pin}_${currentAttemptId}`, JSON.stringify(progressData));
+            console.log('✅ Progress saved to localStorage as backup');
+          } catch (localError) {
+            console.error("Error saving to localStorage:", localError);
+          }
+        }
+      }
+    }, 500), // Reduced debounce to 500ms for more realtime feel with Realtime DB
+    [selectedList, isStudentInfoSubmitted, studInfo.email, pin, currentAttemptId, originalOrder, cleanDataForFirestore]
+  );
+
+  // Immediate save (no debounce) for critical operations - Using Realtime Database
+  const saveProgressImmediate = useCallback(async () => {
+    if (isStudentInfoSubmitted && studInfo.email && currentAttemptId) {
+      try {
+        // Clean data to remove undefined values
+        const cleanedSelectedList = cleanDataForFirestore(selectedList);
+        const cleanedOrderMapping = cleanDataForFirestore(originalOrder);
+        
+        // Save to Realtime Database immediately
+        // Use user ID (UID) instead of email for path to avoid special characters
+        const userId = getUserIdForPath();
+        const progressPath = `quiz_progress/${pin}/${userId}/${currentAttemptId}`;
+        const progressRef = ref(realtimeDatabase, progressPath);
+        
+        await set(progressRef, {
+          selected_answers: cleanedSelectedList,
+          orderMapping: cleanedOrderMapping,
+          email: studInfo.email, // Store email in data, not in path
+          lastUpdated: Date.now(),
+          timestamp: rtdbServerTimestamp()
+        });
+        
+        // Also save to localStorage
+        const progressData = {
+          selected_answers: cleanedSelectedList,
+          orderMapping: cleanedOrderMapping,
+          attemptId: currentAttemptId,
+          pin: pin.toString(),
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem(`quiz_progress_${pin}_${currentAttemptId}`, JSON.stringify(progressData));
+        
+        console.log('✅ Progress saved to Realtime Database immediately');
+      } catch (error) {
+        console.error("Error saving progress immediately to Realtime Database:", error);
+        // Try to save to localStorage even if Realtime DB fails
+        try {
+          const cleanedSelectedList = cleanDataForFirestore(selectedList);
+          const cleanedOrderMapping = cleanDataForFirestore(originalOrder);
+          const progressData = {
+            selected_answers: cleanedSelectedList,
+            orderMapping: cleanedOrderMapping,
+            attemptId: currentAttemptId,
+            pin: pin.toString(),
+            timestamp: new Date().toISOString()
+          };
+          localStorage.setItem(`quiz_progress_${pin}_${currentAttemptId}`, JSON.stringify(progressData));
+          console.log('✅ Progress saved to localStorage as backup');
+        } catch (localError) {
+          console.error("Error saving to localStorage:", localError);
+        }
+      }
+    }
+  }, [selectedList, isStudentInfoSubmitted, studInfo.email, pin, currentAttemptId, originalOrder, cleanDataForFirestore]);
 
   // Load quiz data and check for previous attempts
   useEffect(() => {
@@ -644,10 +943,27 @@ function Form() {
                 const inProgressAttempt = attempts.find(a => a.status === "in_progress");
                 
                 if (inProgressAttempt) {
-                // Get the response document to check progress
+                // Get the response document to check progress (from Firestore for initial data)
                 const responseDoc = await getDoc(
                     doc(db, "Paper_Setters", pin.toString(), "Responses", `${user.email}_${inProgressAttempt.id}`)
                 );
+                
+                // Also try to get progress from Realtime Database
+                // Use user ID (UID) instead of email for path
+                const userId = user.uid;
+                const progressPath = `quiz_progress/${pin}/${userId}/${inProgressAttempt.id}`;
+                const progressRef = ref(realtimeDatabase, progressPath);
+                let realtimeProgress = null;
+                
+                try {
+                  const progressSnapshot = await get(progressRef);
+                  if (progressSnapshot.exists()) {
+                    realtimeProgress = progressSnapshot.val();
+                    console.log('📦 Found progress in Realtime Database:', realtimeProgress);
+                  }
+                } catch (rtdbError) {
+                  console.log('⚠️ Could not read from Realtime Database, using Firestore only');
+                }
                 
                 if (responseDoc.exists()) {
                   const responseData = responseDoc.data();
@@ -656,15 +972,19 @@ function Form() {
                   
                   // If there's time left, allow resuming
                   if (remainingTime > 0) {
+                    // Prefer Realtime Database progress if available (more up-to-date)
+                    const selectedAnswers = realtimeProgress?.selected_answers || responseData.selected_answers || [];
+                    const orderMapping = realtimeProgress?.orderMapping || responseData.orderMapping;
+                    
                     res({ 
                       attempted: true, 
                       canResume: true, 
                       startTime: responseData.startedAt,
                       remainingTime: remainingTime,
                       studInfo: responseData.stud_info,
-                      selected_answers: responseData.selected_answers || [],
-                        orderMapping: responseData.orderMapping,
-                        attemptId: inProgressAttempt.id
+                      selected_answers: selectedAnswers,
+                      orderMapping: orderMapping,
+                      attemptId: inProgressAttempt.id
                     });
                   } else {
                       // Time expired, finalize this attempt
@@ -774,8 +1094,36 @@ function Form() {
                 setCurrentAttemptId(attemptStatus.attemptId);
               
               // Restore previous answers
-              if (Array.isArray(attemptStatus.selected_answers)) {
+              console.log('🔄 Attempting to restore answers...', {
+                hasSelectedAnswers: !!attemptStatus.selected_answers,
+                selectedAnswersLength: attemptStatus.selected_answers?.length,
+                hasOrderMapping: !!attemptStatus.orderMapping
+              });
+              
+              if (Array.isArray(attemptStatus.selected_answers) && attemptStatus.selected_answers.length > 0) {
+                console.log('✅ Restoring from Firestore:', attemptStatus.selected_answers);
                 restorePreviousAnswers(attemptStatus.selected_answers, shuffledData.orderMapping);
+              } else {
+                // Try to restore from localStorage as backup
+                console.log('⚠️ No Firestore data, trying localStorage...');
+                try {
+                  const backupKey = `quiz_progress_${pin}_${attemptStatus.attemptId}`;
+                  const backupData = localStorage.getItem(backupKey);
+                  if (backupData) {
+                    const parsed = JSON.parse(backupData);
+                    console.log('📦 Found localStorage backup:', parsed);
+                    if (parsed.selected_answers && Array.isArray(parsed.selected_answers) && parsed.selected_answers.length > 0) {
+                      console.log('✅ Restoring from localStorage:', parsed.selected_answers);
+                      restorePreviousAnswers(parsed.selected_answers, shuffledData.orderMapping);
+                    } else {
+                      console.log('⚠️ localStorage backup is empty or invalid');
+                    }
+                  } else {
+                    console.log('⚠️ No localStorage backup found');
+                  }
+                } catch (error) {
+                  console.error("Error restoring from localStorage:", error);
+                }
               }
             }
           } else {
@@ -901,6 +1249,8 @@ function Form() {
         
         if (remainingMinutes <= 0) {
             clearInterval(interval);
+          // Save progress before auto-submit
+          saveProgressImmediate();
           onSubmit();
         } else {
           setRemainingTime(remainingMinutes);
@@ -909,7 +1259,44 @@ function Form() {
       
       return () => clearInterval(interval);
     }
-  }, [startTime, duration]);
+  }, [startTime, duration, saveProgressImmediate]);
+
+  // Auto-save on page unload
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      // Save progress immediately when user is about to leave
+      if (isStudentInfoSubmitted && studInfo.email && currentAttemptId) {
+        // Use synchronous localStorage save as backup
+        const progressData = {
+          selected_answers: selectedList,
+          orderMapping: originalOrder,
+          attemptId: currentAttemptId,
+          pin: pin.toString(),
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem(`quiz_progress_${pin}_${currentAttemptId}`, JSON.stringify(progressData));
+        
+        // Try to save to Firestore (may not complete if page closes)
+        saveProgressImmediate();
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // Also save on visibility change (tab switch)
+    const handleVisibilityChange = () => {
+      if (document.hidden && isStudentInfoSubmitted && studInfo.email && currentAttemptId) {
+        saveProgressImmediate();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isStudentInfoSubmitted, studInfo.email, currentAttemptId, selectedList, originalOrder, pin, saveProgressImmediate]);
 
   // Handle answer selection
   const handleAnswerSelect = useCallback((questionIndex, optionIndex, isTrueFalse = false, isTrue = null) => {
@@ -935,7 +1322,12 @@ function Form() {
     if (originalQuestionIndex !== undefined) {
       if (isTrueFalse) {
         setSelectedList(prev => {
-          const newList = [...prev];
+          const newList = prev ? [...prev] : [];
+          // Ensure array is long enough
+          while (newList.length <= originalQuestionIndex) {
+            newList.push(null);
+          }
+          
           if (!newList[originalQuestionIndex]) {
             newList[originalQuestionIndex] = { selectedAnswer: [] };
           }
@@ -957,36 +1349,42 @@ function Form() {
         const originalOptionIndex = originalOrder[originalQuestionIndex]?.optionMapping?.[optionIndex] ?? optionIndex;
         
         setSelectedList(prev => {
-          const newList = [...prev];
+          const newList = prev ? [...prev] : [];
+          // Ensure array is long enough
+          while (newList.length <= originalQuestionIndex) {
+            newList.push(null);
+          }
           newList[originalQuestionIndex] = { selectedAnswer: originalOptionIndex };
           return newList;
         });
       }
       
-      // Save progress
+      // Save progress (realtime)
       saveCurrentProgress();
     }
-  }, [questionIndexMapping, originalOrder]);
+  }, [questionIndexMapping, originalOrder, saveCurrentProgress]);
 
-  // Save current progress with debounce
-  const saveCurrentProgress = useCallback(
-    debounce(async () => {
-      if (isStudentInfoSubmitted && studInfo.email && currentAttemptId) {
-        try {
-          await updateDoc(
-            doc(db, "Paper_Setters", pin.toString(), "Responses", `${studInfo.email}_${currentAttemptId}`),
-            {
-              selected_answers: selectedList,
-              lastUpdated: new Date()
-            }
-          );
-        } catch (error) {
-          console.error("Error saving progress:", error);
+  // Handle short answer input change (realtime save)
+  const handleShortAnswerChange = useCallback((questionIndex, value) => {
+    const originalQuestionIndex = questionIndexMapping[questionIndex];
+    
+    if (originalQuestionIndex !== undefined) {
+      setSelectedList(prev => {
+        const newList = prev ? [...prev] : [];
+        // Ensure array is long enough
+        while (newList.length <= originalQuestionIndex) {
+          newList.push(null);
         }
-      }
-    }, 2000),
-    [selectedList, isStudentInfoSubmitted, studInfo.email, pin, currentAttemptId]
-  );
+        newList[originalQuestionIndex] = { selectedAnswer: value || "" };
+        return newList;
+      });
+      
+      // Save progress immediately for short answers
+      setTimeout(() => {
+        saveCurrentProgress();
+      }, 500); // Small delay to avoid too frequent saves while typing
+    }
+  }, [questionIndexMapping, saveCurrentProgress]);
 
   // Handle quiz submission
   async function onSubmit() {
@@ -1098,8 +1496,15 @@ function Form() {
           });
         }
         
-        // Navigate to results with attempt ID
-        navigate(`/pinverify/Form/${pin}/ResultFetch/${studInfo.email}/${currentAttemptId}`);
+        // Navigate to result summary page
+        setIsSubmitting(false);
+        navigate(`/pinverify/Form/${pin}/ResultSummary/${studInfo.email}/${currentAttemptId}`, {
+          state: {
+            score: scoreData.score,
+            totalScore: scoreData.totalScore,
+            questionResults: calculateQuestionResults(selectedList, answers, originalQuestions)
+          }
+        });
       } catch (error) {
         console.error("Error submitting quiz:", error);
         alert("Đã xảy ra lỗi khi nộp bài thi. Vui lòng thử lại.");
@@ -1108,7 +1513,7 @@ function Form() {
     }
 
     submitExam();
-  }, [isSubmitting, answers, originalQuestions, pin, navigate, studInfo, selectedList, startTime, calculateScore, currentAttemptId]);
+  }, [isSubmitting, answers, originalQuestions, pin, navigate, studInfo, selectedList, startTime, calculateScore, currentAttemptId, calculateQuestionResults]);
 
   // Render questions - memoized to prevent re-renders
   const QuestionComponents = useMemo(() => {
@@ -1125,16 +1530,35 @@ function Form() {
           <MemoizedMathJax inline dynamic className="text-lg">{question.question}</MemoizedMathJax>
         </p>
         
-        {question.type === "mcq" && question.options.map((option, optionIndex) => (
-          <MCQOption
-            key={`mcq-${questionIndex}-${optionIndex}`}
-            questionIndex={questionIndex}
-            optionIndex={optionIndex}
-            option={option}
-            isSelected={selectedAnswers[questionIndex] === optionIndex}
-            onSelect={handleAnswerSelect}
-          />
-        ))}
+        {question.type === "mcq" && (() => {
+          const questionStr = JSON.stringify(question);
+          console.log(`🔍 [DEBUG MCQ] Question ${questionIndex}:`, {
+            question: question.question?.substring(0, 50),
+            optionsCount: question.options?.length,
+            options: question.options?.map((opt, idx) => ({
+              index: idx,
+              option: opt?.option,
+              optionFull: opt?.option,
+              optionType: typeof opt?.option,
+              optionKeys: Object.keys(opt || {}),
+              optionStringified: JSON.stringify(opt)
+            })),
+            selectedAnswer: selectedAnswers[questionIndex],
+            questionKeys: Object.keys(question),
+            questionStringified: questionStr
+          });
+          console.log(`📦 [DEBUG MCQ] Full question JSON for Q${questionIndex}:`, questionStr);
+          return question.options.map((option, optionIndex) => (
+            <MCQOption
+              key={`mcq-${questionIndex}-${optionIndex}`}
+              questionIndex={questionIndex}
+              optionIndex={optionIndex}
+              option={option}
+              isSelected={selectedAnswers[questionIndex] === optionIndex}
+              onSelect={handleAnswerSelect}
+            />
+          ));
+        })()}
         
         {question.type === "truefalse" && question.options.map((option, optionIndex) => (
           <TrueFalseOption
@@ -1155,12 +1579,38 @@ function Form() {
               placeholder="Nhập câu trả lời của bạn"
               className="w-full min-h-[100px] p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
               defaultValue={canResume && selectedList[questionIndexMapping[questionIndex]]?.selectedAnswer || ""}
+              onChange={(e) => handleShortAnswerChange(questionIndex, e.target.value)}
+              onBlur={(e) => {
+                handleShortAnswerChange(questionIndex, e.target.value);
+                saveProgressImmediate();
+              }}
             />
           </div>
         )}
       </div>
     ));
-  }, [questions, selectedAnswers, canResume, selectedList, questionIndexMapping, handleAnswerSelect]);
+  }, [questions, selectedAnswers, canResume, selectedList, questionIndexMapping, handleAnswerSelect, handleShortAnswerChange, saveProgressImmediate]);
+  
+  // Debug: Log whenever questions change
+  useEffect(() => {
+    console.log('🔍 [DEBUG Form] Questions changed:', {
+      questionsCount: questions?.length,
+      questions: questions?.map((q, idx) => ({
+        index: idx,
+        type: q?.type,
+        question: q?.question?.substring(0, 100),
+        hasOptions: !!q?.options,
+        optionsCount: q?.options?.length,
+        options: q?.options?.map((opt, optIdx) => ({
+          index: optIdx,
+          option: opt?.option?.substring(0, 50),
+          optionType: typeof opt?.option,
+          optionKeys: Object.keys(opt || {})
+        })),
+        questionKeys: Object.keys(q || {})
+      }))
+    });
+  }, [questions]);
 
   // Main render
     return (
@@ -1178,6 +1628,426 @@ function Form() {
                   setIsStudentInfoSubmitted(false);
                 }}
               />
+            ) : showResult ? (
+              // Result screen after submission
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+                  <h1 className="text-3xl font-bold text-center mb-6">Kết quả bài thi</h1>
+                  
+                  {/* Score display */}
+                  <div className="bg-blue-50 p-6 rounded-lg text-center mb-6">
+                    <p className="text-xl mb-2">Điểm số của bạn:</p>
+                    <p className="text-5xl font-bold text-blue-600">
+                      {resultData?.score.toFixed(2) || '0'} / {resultData?.totalScore.toFixed(2) || '0'}
+                    </p>
+                    <p className="text-lg text-gray-600 mt-2">
+                      Tỷ lệ: {resultData ? ((resultData.score / resultData.totalScore) * 100).toFixed(1) : 0}%
+                    </p>
+                  </div>
+                  
+                  {/* Summary */}
+                  {questionResults.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <p className="text-3xl font-bold text-green-600">
+                          {questionResults.filter(q => q.isCorrect === true).length}
+                        </p>
+                        <p className="text-sm text-gray-600">Câu đúng</p>
+                      </div>
+                      <div className="text-center p-4 bg-red-50 rounded-lg">
+                        <p className="text-3xl font-bold text-red-600">
+                          {questionResults.filter(q => q.isCorrect === false).length}
+                        </p>
+                        <p className="text-sm text-gray-600">Câu sai</p>
+                      </div>
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <p className="text-3xl font-bold text-gray-600">
+                          {questionResults.filter(q => q.isCorrect === null).length}
+                        </p>
+                        <p className="text-sm text-gray-600">Chưa làm</p>
+                      </div>
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <p className="text-3xl font-bold text-blue-600">{originalQuestions.length}</p>
+                        <p className="text-sm text-gray-600">Tổng câu</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* View mode toggle */}
+                  <div className="flex justify-center gap-4 mb-6">
+                    <button
+                      onClick={() => setViewMode('mywork')}
+                      className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                        viewMode === 'mywork'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      Xem bài làm của tôi
+                    </button>
+                    <button
+                      onClick={() => setViewMode('answers')}
+                      className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                        viewMode === 'answers'
+                          ? 'bg-green-600 text-white'
+                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                      }`}
+                    >
+                      Xem đáp án chi tiết
+                    </button>
+                  </div>
+                  
+                  {/* Action buttons */}
+                  <div className="flex justify-center gap-4">
+                    <button
+                      onClick={() => navigate(`/pinverify/Form/${pin}/ResultFetch/${studInfo.email}/${currentAttemptId}`)}
+                      className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg shadow hover:bg-green-700 transition-colors"
+                    >
+                      Xem kết quả đầy đủ
+                    </button>
+                    <button
+                      onClick={() => navigate(`/pinverify/Form/${pin}`)}
+                      className="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg shadow hover:bg-gray-700 transition-colors"
+                    >
+                      Về trang chính
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Questions display based on view mode */}
+                {viewMode === 'mywork' ? (
+                  <div className="space-y-6">
+                    <h2 className="text-2xl font-bold mb-4">Bài làm của bạn</h2>
+                    {QuestionComponents}
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <h2 className="text-2xl font-bold mb-4">Đáp án chi tiết</h2>
+                    {originalQuestions.map((originalQ, origIdx) => {
+                      // Skip text blocks
+                      if (!originalQ || originalQ.type === 'textblock') return null;
+                      
+                      // Find the shuffled index for this original question
+                      const shuffledIndex = originalOrder[origIdx]?.newIndex;
+                      const result = shuffledIndex !== undefined ? questionResults[shuffledIndex] : null;
+                      const correctAnswer = answers[origIdx];
+                      const studentAnswer = selectedList[origIdx];
+                      
+                      // Get the shuffled question for display (to show options in shuffled order if needed)
+                      const shuffledQuestion = shuffledIndex !== undefined ? questions[shuffledIndex] : null;
+                      const displayQuestion = shuffledQuestion || originalQ;
+                      
+                      return (
+                        <div 
+                          key={origIdx}
+                          className={`bg-white rounded-lg shadow-md p-6 border-l-4 ${
+                            result?.isCorrect === true 
+                              ? 'border-green-500' 
+                              : result?.isCorrect === false 
+                                ? 'border-red-500' 
+                                : 'border-gray-300'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-start flex-1">
+                              <span className={`px-2 py-1 rounded mr-2 text-sm font-medium ${
+                                result?.isCorrect === true 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : result?.isCorrect === false 
+                                    ? 'bg-red-100 text-red-800' 
+                                    : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                Câu {origIdx + 1}
+                              </span>
+                              <div className="text-lg font-medium flex-1">
+                                <MemoizedMathJax inline dynamic>{originalQ.question}</MemoizedMathJax>
+                              </div>
+                            </div>
+                            {result && result.maxScore > 0 && (
+                              <div className={`px-3 py-1 rounded-lg text-sm font-semibold ml-2 ${
+                                result.isCorrect === true
+                                  ? 'bg-green-100 text-green-800'
+                                  : result.isCorrect === false
+                                    ? 'bg-red-100 text-red-800'
+                                    : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {result.score.toFixed(2)} / {result.maxScore.toFixed(2)} điểm
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Answer comparison section */}
+                          {originalQ.type === "mcq" && (
+                            <div className="space-y-4 pl-8">
+                              {/* Answer summary box */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                  <p className="font-medium text-green-800 mb-1">Đáp án đúng:</p>
+                                  <p className="text-xl font-bold text-green-700">
+                                    {(() => {
+                                      // correctAnswer.answer is already in original index (from answer key)
+                                      const correctAnsIdx = parseInt(correctAnswer?.answer || 0);
+                                      return String.fromCharCode(65 + correctAnsIdx);
+                                    })()}
+                                  </p>
+                                </div>
+                                <div className={`p-3 border rounded-lg ${
+                                  result?.isCorrect === true
+                                    ? 'bg-green-50 border-green-200'
+                                    : 'bg-red-50 border-red-200'
+                                }`}>
+                                  <p className={`font-medium mb-1 ${
+                                    result?.isCorrect === true ? 'text-green-800' : 'text-red-800'
+                                  }`}>
+                                    Đáp án của bạn:
+                                  </p>
+                                  <p className={`text-xl font-bold ${
+                                    result?.isCorrect === true ? 'text-green-700' : 'text-red-700'
+                                  }`}>
+                                    {(() => {
+                                      if (studentAnswer?.selectedAnswer === undefined || studentAnswer?.selectedAnswer === null) {
+                                        return 'Chưa trả lời';
+                                      }
+                                      const selectedAnsIdx = parseInt(studentAnswer.selectedAnswer || 0);
+                                      // Map back to original option index if options were shuffled
+                                      const originalOptIdx = originalOrder[origIdx]?.optionMapping 
+                                        ? originalOrder[origIdx].optionMapping[selectedAnsIdx] 
+                                        : selectedAnsIdx;
+                                      return String.fromCharCode(65 + originalOptIdx);
+                                    })()}
+                                  </p>
+                                </div>
+                              </div>
+                              
+                              {/* Options display - show in original order */}
+                              {originalQ.options.map((option, optIndex) => {
+                                // Check if this option is correct (in original order)
+                                const isCorrect = parseInt(correctAnswer?.answer || -1) === optIndex;
+                                // Check if student selected this option (need to map from shuffled to original)
+                                let isSelected = false;
+                                if (studentAnswer?.selectedAnswer !== undefined && studentAnswer?.selectedAnswer !== null) {
+                                  const selectedShuffledIdx = parseInt(studentAnswer.selectedAnswer || -1);
+                                  // If options were shuffled, map back to original index
+                                  if (originalOrder[origIdx]?.optionMapping) {
+                                    const originalSelectedIdx = originalOrder[origIdx].optionMapping[selectedShuffledIdx];
+                                    isSelected = originalSelectedIdx === optIndex;
+                                  } else {
+                                    isSelected = selectedShuffledIdx === optIndex;
+                                  }
+                                }
+                                
+                                return (
+                                  <div 
+                                    key={optIndex}
+                                    className={`p-3 rounded-lg border-2 ${
+                                      isCorrect && isSelected 
+                                        ? 'bg-green-100 border-green-500' 
+                                        : isSelected && !isCorrect 
+                                          ? 'bg-red-100 border-red-500' 
+                                          : isCorrect 
+                                            ? 'bg-green-50 border-green-300' 
+                                            : 'border-gray-300 bg-white'
+                                    }`}
+                                  >
+                                    <div className="flex items-center">
+                                      <span className={`w-8 h-8 flex items-center justify-center rounded-full border-2 font-medium text-lg mr-3 ${
+                                        isCorrect 
+                                          ? 'border-green-600 bg-green-100 text-green-800'
+                                          : isSelected
+                                            ? 'border-red-600 bg-red-100 text-red-800'
+                                            : 'border-gray-400'
+                                      }`}>
+                                        {String.fromCharCode(65 + optIndex)}
+                                      </span>
+                                      <div className="flex-grow">
+                                        <MemoizedMathJax inline dynamic>{option.option}</MemoizedMathJax>
+                                      </div>
+                                      {isCorrect && (
+                                        <span className="text-green-600 ml-2 text-xl font-bold">✓ Đúng</span>
+                                      )}
+                                      {isSelected && !isCorrect && (
+                                        <span className="text-red-600 ml-2 text-xl font-bold">✗ Bạn chọn</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                          
+                          {originalQ.type === "truefalse" && (
+                            <div className="space-y-4 pl-8">
+                              {/* Answer summary */}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                  <p className="font-medium text-green-800 mb-2">Đáp án đúng:</p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {originalQ.options.map((_, optIndex) => {
+                                      const correctAns = correctAnswer?.answer?.[optIndex];
+                                      return (
+                                        <span key={optIndex} className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">
+                                          {String.fromCharCode(97 + optIndex)}: {correctAns === true ? 'Đúng' : 'Sai'}
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                                <div className={`p-3 border rounded-lg ${
+                                  result?.isCorrect === true
+                                    ? 'bg-green-50 border-green-200'
+                                    : 'bg-red-50 border-red-200'
+                                }`}>
+                                  <p className={`font-medium mb-2 ${
+                                    result?.isCorrect === true ? 'text-green-800' : 'text-red-800'
+                                  }`}>
+                                    Đáp án của bạn:
+                                  </p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {originalQ.options.map((_, optIndex) => {
+                                      const studentAns = studentAnswer?.selectedAnswer?.[optIndex];
+                                      const correctAns = correctAnswer?.answer?.[optIndex];
+                                      const isCorrect = studentAns === correctAns;
+                                      
+                                      if (studentAns === undefined || studentAns === null) {
+                                        return (
+                                          <span key={optIndex} className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-sm">
+                                            {String.fromCharCode(97 + optIndex)}: Chưa trả lời
+                                          </span>
+                                        );
+                                      }
+                                      
+                                      return (
+                                        <span 
+                                          key={optIndex} 
+                                          className={`px-2 py-1 rounded text-sm ${
+                                            isCorrect 
+                                              ? 'bg-green-100 text-green-800' 
+                                              : 'bg-red-100 text-red-800'
+                                          }`}
+                                        >
+                                          {String.fromCharCode(97 + optIndex)}: {studentAns === true ? 'Đúng' : 'Sai'} 
+                                          {isCorrect ? ' ✓' : ' ✗'}
+                                        </span>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Detailed options */}
+                              {originalQ.options.map((option, optIndex) => {
+                                const correctAns = correctAnswer?.answer?.[optIndex];
+                                const studentAns = studentAnswer?.selectedAnswer?.[optIndex];
+                                const isCorrect = studentAns === correctAns;
+                                
+                                return (
+                                  <div key={optIndex} className="mb-3">
+                                    <div className="mb-2 font-medium">
+                                      <MemoizedMathJax inline dynamic>{`${String.fromCharCode(97 + optIndex)}. ${option.option}`}</MemoizedMathJax>
+                                    </div>
+                                    <div className="flex ml-8 space-x-4">
+                                      <div 
+                                        className={`px-4 py-2 rounded-lg border-2 ${
+                                          studentAns === true 
+                                            ? correctAns === true 
+                                              ? 'bg-green-100 border-green-500' 
+                                              : 'bg-red-100 border-red-500' 
+                                            : correctAns === true 
+                                              ? 'bg-green-50 border-green-300' 
+                                              : 'border-gray-300 bg-white'
+                                        }`}
+                                      >
+                                        <div className="flex items-center">
+                                          <span>Đúng</span>
+                                          {correctAns === true && (
+                                            <span className="text-green-600 ml-2 text-xl font-bold">✓</span>
+                                          )}
+                                          {studentAns === true && !isCorrect && (
+                                            <span className="text-red-600 ml-2 text-xl font-bold">✗ Bạn chọn</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <div 
+                                        className={`px-4 py-2 rounded-lg border-2 ${
+                                          studentAns === false 
+                                            ? correctAns === false 
+                                              ? 'bg-green-100 border-green-500' 
+                                              : 'bg-red-100 border-red-500' 
+                                            : correctAns === false 
+                                              ? 'bg-green-50 border-green-300' 
+                                              : 'border-gray-300 bg-white'
+                                        }`}
+                                      >
+                                        <div className="flex items-center">
+                                          <span>Sai</span>
+                                          {correctAns === false && (
+                                            <span className="text-green-600 ml-2 text-xl font-bold">✓</span>
+                                          )}
+                                          {studentAns === false && !isCorrect && (
+                                            <span className="text-red-600 ml-2 text-xl font-bold">✗ Bạn chọn</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                          
+                          {originalQ.type === "shortanswer" && (
+                            <div className="pl-8">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                                  <p className="font-medium text-green-800 mb-2">Đáp án đúng:</p>
+                                  <div className="flex flex-wrap gap-2">
+                                    {(() => {
+                                      const validAnswers = Array.isArray(correctAnswer?.answer) 
+                                        ? correctAnswer.answer 
+                                        : [correctAnswer?.answer].filter(a => a);
+                                      return validAnswers.map((ans, ansIndex) => (
+                                        <span 
+                                          key={ansIndex}
+                                          className="px-3 py-1.5 bg-green-100 text-green-800 rounded-md border border-green-300 text-sm font-medium"
+                                        >
+                                          {String(ans).trim()}
+                                        </span>
+                                      ));
+                                    })()}
+                                  </div>
+                                </div>
+                                <div className={`p-3 border-2 rounded-lg ${
+                                  result?.isCorrect === true
+                                    ? 'bg-green-50 border-green-300' 
+                                    : studentAnswer?.selectedAnswer
+                                      ? 'bg-red-50 border-red-300' 
+                                      : 'bg-gray-50 border-gray-300'
+                                }`}>
+                                  <p className={`font-medium mb-2 ${
+                                    result?.isCorrect === true ? 'text-green-800' : 'text-red-800'
+                                  }`}>
+                                    Đáp án của bạn:
+                                  </p>
+                                  <div className="flex items-center justify-between">
+                                    <span className={studentAnswer?.selectedAnswer ? '' : 'text-gray-500 italic'}>
+                                      {studentAnswer?.selectedAnswer || "Chưa trả lời"}
+                                    </span>
+                                    {result?.isCorrect === true ? (
+                                      <span className="text-green-600 ml-2 text-xl font-bold">✓ Đúng</span>
+                                    ) : studentAnswer?.selectedAnswer ? (
+                                      <span className="text-red-600 ml-2 text-xl font-bold">✗ Sai</span>
+                                    ) : null}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             ) : (
             status !== "inactive" ? (
               !isStudentInfoSubmitted ? (
