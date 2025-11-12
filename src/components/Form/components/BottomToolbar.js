@@ -2,12 +2,14 @@ import React from 'react';
 import { MdCloudUpload } from "react-icons/md";
 import { RiAiGenerate2 } from "react-icons/ri";
 import { TbMatrix } from "react-icons/tb";
+import { FaMagic } from "react-icons/fa";
 
 function BottomToolbar({
   questionCount,
   onConfigClick,
   onFileUploadClick,
   onMatrixClick,
+  onAssembleClick,
   onGenerateClick,
   onClearClick,
   onSubmit,
@@ -56,6 +58,14 @@ function BottomToolbar({
             >
               <TbMatrix className="w-4 h-4"/>
               <span className="hidden md:inline">Ma trận</span>
+            </button>
+            <button
+              className="px-2 sm:px-3 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={onAssembleClick}
+              title="Sinh đề từ ngân hàng câu hỏi"
+            >
+              <FaMagic className="w-4 h-4" />
+              <span className="hidden md:inline">Ghép đề</span>
             </button>
             <button
               className="px-2 sm:px-3 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600 transition-colors flex items-center gap-1 sm:gap-2 text-xs sm:text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"

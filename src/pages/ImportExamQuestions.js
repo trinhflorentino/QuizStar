@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc, updateDoc, collection, getDocs } from "firebase/firestore/lite";
 import { getAuth } from "firebase/auth";
@@ -6,6 +6,8 @@ import { default as db } from "../services/firebaseConfig";
 import { IoChevronBack } from "react-icons/io5";
 import { FaFolder, FaFileAlt, FaArrowLeft, FaArrowRight, FaHome, FaChevronRight } from "react-icons/fa";
 import { MathJax, MathJaxContext } from "better-react-mathjax";
+import { suggestQuestionPlacement } from "../components/AI/AIService";
+import { calculateRequirementCoverage } from "../utils/questionBankUtils";
 
 function ImportExamQuestions() {
   const { bankId } = useParams();
@@ -22,13 +24,21 @@ function ImportExamQuestions() {
   
   // For the current folder view
   const [displayItems, setDisplayItems] = useState([]);
-  
+
   // For requirement selection UI
   const [expandedRequirements, setExpandedRequirements] = useState({});
-  
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+
   const navigate = useNavigate();
   const auth = getAuth();
   const ROOT_ID = '__root__';
+  const REQUIREMENT_KEYS = ['nhanBiet', 'thongHieu', 'vanDung', 'vanDungCao'];
+  const requirementLabels = {
+    nhanBiet: 'Nhận biết',
+    thongHieu: 'Thông hiểu',
+    vanDung: 'Vận dụng',
+    vanDungCao: 'Vận dụng cao'
+  };
   
   useEffect(() => {
     const fetchQuestionBank = async () => {
@@ -95,7 +105,7 @@ function ImportExamQuestions() {
     const calculateDisplayItems = () => {
       let items = [];
       const currentFolderId = currentPath.length > 0 ? currentPath[currentPath.length - 1].id : ROOT_ID;
-      
+
       // Add subfolders
       const subfolders = folders.filter(f => f.parent === currentFolderId);
       items.push(...subfolders);
@@ -109,6 +119,18 @@ function ImportExamQuestions() {
     
     setDisplayItems(calculateDisplayItems());
   }, [currentPath, folders, exams]);
+
+  const coverage = useMemo(() => calculateRequirementCoverage(questionBank, questionsToImport), [questionBank, questionsToImport]);
+
+  const isValidSuggestion = (suggestion) => {
+    if (!suggestion) return false;
+    const { chapterIndex, subContentIndex, requirement } = suggestion;
+    if (typeof chapterIndex !== 'number' || typeof subContentIndex !== 'number') return false;
+    if (!REQUIREMENT_KEYS.includes(requirement)) return false;
+    if (!questionBank?.chapters?.[chapterIndex]) return false;
+    if (!questionBank.chapters[chapterIndex].subContents?.[subContentIndex]) return false;
+    return true;
+  };
   
   const navigateToPath = (newPath) => {
     setCurrentPath(newPath);
@@ -127,11 +149,63 @@ function ImportExamQuestions() {
       setCurrentPath(currentPath.slice(0, -1));
     }
   };
-  
+
+  const generateSuggestionsForMappings = async (mappings) => {
+    if (!questionBank || !questionBank.chapters || questionBank.chapters.length === 0) {
+      return;
+    }
+
+    const structureForAI = questionBank.matrixTemplate ? { chapters: questionBank.matrixTemplate } : questionBank;
+    setSuggestionsLoading(true);
+
+    try {
+      const updated = [];
+      for (const mapping of mappings) {
+        try {
+          const suggestion = await suggestQuestionPlacement(mapping.question, structureForAI);
+          let nextMapping = { ...mapping, aiSuggestion: suggestion };
+          if (isValidSuggestion(suggestion)) {
+            nextMapping = {
+              ...nextMapping,
+              chapterIndex: suggestion.chapterIndex,
+              subContentIndex: suggestion.subContentIndex,
+              requirement: suggestion.requirement,
+              manualOverride: false
+            };
+          }
+          updated.push(nextMapping);
+        } catch (error) {
+          console.error("Error generating suggestion for question:", error);
+          updated.push({ ...mapping, aiSuggestion: null });
+        }
+      }
+
+      setQuestionsToImport(updated);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  };
+
+  const applySuggestionToQuestion = (questionId) => {
+    setQuestionsToImport(prev => prev.map(mapping => {
+      if (mapping.question.id !== questionId || !isValidSuggestion(mapping.aiSuggestion)) {
+        return mapping;
+      }
+      const suggestion = mapping.aiSuggestion;
+      return {
+        ...mapping,
+        chapterIndex: suggestion.chapterIndex,
+        subContentIndex: suggestion.subContentIndex,
+        requirement: suggestion.requirement,
+        manualOverride: false
+      };
+    }));
+  };
+
   const selectExam = async (exam) => {
     setSelectedExam(exam);
     setLoading(true);
-    
+
     try {
       // Fetch exam questions from collection
       const settersCollectionRef = collection(db, "Paper_Setters", exam.id, "Question_Papers_MCQ");
@@ -205,21 +279,24 @@ function ImportExamQuestions() {
       // Initialize questionsToImport with default mappings
       if (questionBank && questionBank.chapters && questionBank.chapters.length > 0) {
         const defaultChapter = questionBank.chapters[0];
-        const defaultSubContent = defaultChapter.subContents && defaultChapter.subContents.length > 0 
-          ? defaultChapter.subContents[0] 
+        const defaultSubContent = defaultChapter.subContents && defaultChapter.subContents.length > 0
+          ? defaultChapter.subContents[0]
           : null;
-        
+
         const initialMappings = questionsData.map(q => ({
           question: q,
           selected: true,
           chapterIndex: 0,
           subContentIndex: defaultSubContent ? 0 : null,
-          requirement: "nhanBiet" // Default requirement level
+          requirement: "nhanBiet", // Default requirement level
+          aiSuggestion: null,
+          manualOverride: false
         }));
-        
+
         setQuestionsToImport(initialMappings);
+        await generateSuggestionsForMappings(initialMappings);
       }
-      
+
       // Move to step 2
       setStep(2);
     } catch (error) {
@@ -242,10 +319,10 @@ function ImportExamQuestions() {
   };
   
   const updateQuestionMapping = (questionId, field, value) => {
-    setQuestionsToImport(prev => 
-      prev.map(q => 
-        q.question.id === questionId 
-          ? { ...q, [field]: value } 
+    setQuestionsToImport(prev =>
+      prev.map(q =>
+        q.question.id === questionId
+          ? { ...q, [field]: value, manualOverride: true }
           : q
       )
     );
@@ -281,9 +358,9 @@ function ImportExamQuestions() {
       Object.keys(questionsByChapterAndSubcontent).forEach(key => {
         const [chapterIndex, subContentIndex, requirement] = key.split('-');
         const mappings = questionsByChapterAndSubcontent[key];
-        
+
         // Skip if chapter or subcontent is invalid
-        if (!updatedChapters[chapterIndex] || 
+        if (!updatedChapters[chapterIndex] ||
             !updatedChapters[chapterIndex].subContents || 
             !updatedChapters[chapterIndex].subContents[subContentIndex]) {
           return;
@@ -307,7 +384,7 @@ function ImportExamQuestions() {
         // Add questions to the requirement
         mappings.forEach(mapping => {
           const question = mapping.question;
-          
+
           // Prepare question data for storage
           let questionData = {
             description: question.question_text || "Không có mô tả",
@@ -318,7 +395,18 @@ function ImportExamQuestions() {
               importDate: new Date().toISOString()
             }
           };
-          
+
+          questionData.classificationMeta = {
+            requirement: mapping.requirement,
+            chapterIndex: Number(chapterIndex),
+            subContentIndex: Number(subContentIndex),
+            suggestionConfidence: mapping.aiSuggestion?.confidence ?? null,
+            suggestionReason: mapping.aiSuggestion?.reason || null,
+            suggestedByAI: Boolean(mapping.aiSuggestion),
+            manualOverride: Boolean(mapping.manualOverride),
+            assignedAt: new Date().toISOString()
+          };
+
           // Store original format if available
           if (question.originalFormat) {
             // For Form.js format questions
@@ -397,15 +485,16 @@ function ImportExamQuestions() {
   
   // Select a specific requirement for a question
   const selectRequirement = (questionId, chapterIndex, subContentIndex, requirement) => {
-    setQuestionsToImport(prev => 
-      prev.map(q => 
-        q.question.id === questionId 
-          ? { 
-              ...q, 
-              chapterIndex, 
-              subContentIndex, 
-              requirement 
-            } 
+    setQuestionsToImport(prev =>
+      prev.map(q =>
+        q.question.id === questionId
+          ? {
+              ...q,
+              chapterIndex,
+              subContentIndex,
+              requirement,
+              manualOverride: true
+            }
           : q
       )
     );
@@ -535,7 +624,46 @@ function ImportExamQuestions() {
             Đã tìm thấy {examQuestions.length} câu hỏi từ đề thi này. Vui lòng chọn câu hỏi và yêu cầu tương ứng.
           </p>
         </div>
-        
+
+        {suggestionsLoading && (
+          <div className="mb-4 text-sm text-blue-600">
+            Đang gợi ý vị trí câu hỏi vào ngân hàng bằng AI...
+          </div>
+        )}
+
+        {coverage.summary && coverage.summary.length > 0 && (
+          <div className="mb-6 border border-gray-200 rounded-lg bg-gray-50 p-4">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">Độ phủ yêu cầu sau khi import</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-xs text-left text-gray-600">
+                <thead>
+                  <tr className="text-gray-500 uppercase tracking-wide border-b">
+                    <th className="py-2 pr-4">Chương / Nội dung</th>
+                    <th className="py-2 pr-4">Yêu cầu</th>
+                    <th className="py-2 pr-4">Hiện có</th>
+                    <th className="py-2 pr-4">Sẽ thêm</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {coverage.summary
+                    .filter(item => item.existing > 0 || item.incoming > 0)
+                    .map((item, index) => (
+                      <tr key={`${item.chapterIndex}-${item.subContentIndex}-${item.requirement}-${index}`} className="border-b last:border-b-0">
+                        <td className="py-2 pr-4">
+                          <div className="font-medium text-gray-800">{item.chapterName}</div>
+                          <div className="text-gray-500">{item.subContentName}</div>
+                        </td>
+                        <td className="py-2 pr-4">{requirementLabels[item.requirement] || item.requirement}</td>
+                        <td className="py-2 pr-4">{item.existing}</td>
+                        <td className="py-2 pr-4">{item.incoming}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
         <div className="mb-4 flex justify-between">
           <button
             onClick={() => setStep(1)}
@@ -586,7 +714,7 @@ function ImportExamQuestions() {
                   {mapping.selected ? (
                     <>
                       <span className="font-medium text-blue-600">
-                        {questionBank.chapters[mapping.chapterIndex]?.name || "Không xác định"} / 
+                        {questionBank.chapters[mapping.chapterIndex]?.name || "Không xác định"} /
                         {questionBank.chapters[mapping.chapterIndex]?.subContents?.[mapping.subContentIndex]?.name || "Không xác định"}
                       </span>
                       <span className="ml-2 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">
@@ -595,6 +723,35 @@ function ImportExamQuestions() {
                         {mapping.requirement === 'vanDung' && 'Vận dụng'}
                         {mapping.requirement === 'vanDungCao' && 'Vận dụng cao'}
                       </span>
+                      {mapping.aiSuggestion && (
+                        <div className="mt-1 text-xs text-gray-500">
+                          {isValidSuggestion(mapping.aiSuggestion) ? (
+                            <>
+                              Gợi ý AI: {questionBank.chapters[mapping.aiSuggestion.chapterIndex]?.name || 'Chương ?'} /
+                              {questionBank.chapters[mapping.aiSuggestion.chapterIndex]?.subContents?.[mapping.aiSuggestion.subContentIndex]?.name || 'Nội dung ?'}
+                              {' '}– {requirementLabels[mapping.aiSuggestion.requirement] || mapping.aiSuggestion.requirement}
+                              {' '}({Math.round((mapping.aiSuggestion.confidence || 0) * 100)}%)
+                              {mapping.manualOverride && !(
+                                mapping.chapterIndex === mapping.aiSuggestion.chapterIndex &&
+                                mapping.subContentIndex === mapping.aiSuggestion.subContentIndex &&
+                                mapping.requirement === mapping.aiSuggestion.requirement
+                              ) && (
+                                <button
+                                  className="ml-2 text-blue-600 hover:text-blue-800"
+                                  onClick={() => applySuggestionToQuestion(mapping.question.id)}
+                                >
+                                  Áp dụng gợi ý
+                                </button>
+                              )}
+                            </>
+                          ) : (
+                            <>Gợi ý AI: Không đủ dữ liệu để phân loại</>
+                          )}
+                          {mapping.aiSuggestion?.reason && (
+                            <div className="text-[11px] text-gray-400 mt-1">Lý do: {mapping.aiSuggestion.reason}</div>
+                          )}
+                        </div>
+                      )}
                     </>
                   ) : (
                     <span className="italic">Không được chọn</span>

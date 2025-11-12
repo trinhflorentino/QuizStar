@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc } from "firebase/firestore/lite";
+import { doc, getDoc, updateDoc, serverTimestamp } from "firebase/firestore/lite";
 import { getAuth } from "firebase/auth";
 import { default as db } from "../services/firebaseConfig";
 import { MathJax } from "better-react-mathjax";
 import { IoChevronBack, IoChevronDown, IoChevronForward, IoAddCircleOutline } from "react-icons/io5";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { FiUpload } from "react-icons/fi";
+import { matrixQuestionsJSONFromSnapshot } from "../components/AI/AIService";
+import { cleanMatrixResult, mergeTemplateWithExisting } from "../utils/questionBankUtils";
+import { PROMPT_VERSION as QUESTION_BANK_PROMPT_VERSION, MATRIX_ANALYSIS_PROMPT } from "./QuestionBank";
 
 function QuestionBankDetail() {
   const { bankId } = useParams();
@@ -22,7 +25,7 @@ function QuestionBankDetail() {
   const [deleteParentId, setDeleteParentId] = useState(null);
   const [deleteIndex, setDeleteIndex] = useState(null);
   const [deleteLevel, setDeleteLevel] = useState(null);
-  
+
   // Edit states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
@@ -40,9 +43,29 @@ function QuestionBankDetail() {
   const [addLevel, setAddLevel] = useState(null);
   const [addName, setAddName] = useState("");
   const [addDescription, setAddDescription] = useState("");
-  
+
+  const [isReanalyzing, setIsReanalyzing] = useState(false);
+  const [reanalyzeError, setReanalyzeError] = useState(null);
+  const [reanalyzePreview, setReanalyzePreview] = useState(null);
+
   const navigate = useNavigate();
   const auth = getAuth();
+
+  const getTimestampValue = (value) => {
+    if (!value) return 0;
+    if (typeof value.toMillis === "function") return value.toMillis();
+    if (value.seconds) return value.seconds * 1000;
+    if (value instanceof Date) return value.getTime();
+    if (typeof value === "number") return value;
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? 0 : parsed;
+  };
+
+  const formatTimestamp = (value) => {
+    const time = getTimestampValue(value);
+    if (!time) return "—";
+    return new Date(time).toLocaleString();
+  };
   
   useEffect(() => {
     const fetchQuestionBank = async () => {
@@ -234,7 +257,84 @@ function QuestionBankDetail() {
     setAddName("");
     setAddDescription("");
   };
-  
+
+  const handleReanalyze = async () => {
+    if (!questionBank?.matrixSource?.snapshot) {
+      alert("Ngân hàng này chưa lưu dữ liệu nguồn để phân tích lại.");
+      return;
+    }
+
+    setIsReanalyzing(true);
+    setReanalyzeError(null);
+
+    try {
+      const prompt = questionBank.matrixSource?.prompt || MATRIX_ANALYSIS_PROMPT;
+      const resultText = await matrixQuestionsJSONFromSnapshot(questionBank.matrixSource.snapshot, prompt);
+      let parsed;
+      try {
+        parsed = JSON.parse(resultText);
+      } catch (error) {
+        throw new Error("Không thể đọc kết quả phân tích mới");
+      }
+      const cleanResult = cleanMatrixResult(parsed, parsed?.title || questionBank.title);
+      setReanalyzePreview({
+        cleanResult,
+        rawResponse: resultText,
+        prompt
+      });
+    } catch (error) {
+      console.error("Lỗi khi phân tích lại:", error);
+      setReanalyzeError(error.message);
+    } finally {
+      setIsReanalyzing(false);
+    }
+  };
+
+  const applyReanalysis = async () => {
+    if (!reanalyzePreview || !auth.currentUser) return;
+
+    try {
+      const templateChapters = reanalyzePreview.cleanResult.chapters || [];
+      const mergedChapters = mergeTemplateWithExisting(questionBank.chapters, templateChapters);
+
+      const bankDocRef = doc(db, "users", auth.currentUser.uid, "questionBanks", bankId);
+      const updatedMatrixSource = {
+        ...(questionBank.matrixSource || {}),
+        prompt: reanalyzePreview.prompt || questionBank.matrixSource?.prompt || MATRIX_ANALYSIS_PROMPT,
+        promptVersion: QUESTION_BANK_PROMPT_VERSION,
+        rawResponse: reanalyzePreview.rawResponse,
+        snapshot: questionBank.matrixSource?.snapshot,
+        filename: questionBank.matrixSource?.filename || questionBank.filename,
+        processedAt: serverTimestamp(),
+        reanalyzedAt: serverTimestamp()
+      };
+
+      await updateDoc(bankDocRef, {
+        title: reanalyzePreview.cleanResult.title,
+        chapters: mergedChapters,
+        matrixTemplate: templateChapters,
+        matrixSource: updatedMatrixSource
+      });
+
+      setQuestionBank((prev) => ({
+        ...prev,
+        title: reanalyzePreview.cleanResult.title,
+        chapters: mergedChapters,
+        matrixTemplate: templateChapters,
+        matrixSource: {
+          ...updatedMatrixSource,
+          processedAt: new Date(),
+          reanalyzedAt: new Date()
+        }
+      }));
+
+      setReanalyzePreview(null);
+    } catch (error) {
+      console.error("Không thể áp dụng kết quả phân tích lại:", error);
+      alert("Có lỗi xảy ra khi cập nhật ngân hàng: " + error.message);
+    }
+  };
+
   const handleAdd = async () => {
     try {
       const bankDocRef = doc(db, "users", auth.currentUser.uid, "questionBanks", bankId);
@@ -385,7 +485,7 @@ function QuestionBankDetail() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center gap-4 mb-6">
-        <button 
+        <button
           onClick={() => navigate("/QuestionBank")}
           className="flex items-center gap-1 text-blue-600 hover:text-blue-800"
         >
@@ -401,11 +501,116 @@ function QuestionBankDetail() {
           <span>Import câu hỏi từ đề thi</span>
         </button>
       </div>
-      
+
+      {questionBank.matrixSource && (
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex flex-wrap justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-xl font-semibold">Thông tin phân tích</h2>
+              <p className="text-sm text-gray-500 mt-1">Nguồn: {questionBank.filename || questionBank.matrixSource.filename || "Không xác định"}</p>
+            </div>
+            <button
+              onClick={handleReanalyze}
+              disabled={isReanalyzing}
+              className={`px-3 py-1.5 rounded text-sm border ${
+                isReanalyzing ? "bg-gray-100 text-gray-400 border-gray-200" : "bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100"
+              }`}
+            >
+              {isReanalyzing ? "Đang phân tích lại..." : "Phân tích lại bằng AI"}
+            </button>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div>
+              <span className="font-medium">Phiên bản prompt:</span> {questionBank.matrixSource.promptVersion || "Không rõ"}
+            </div>
+            <div>
+              <span className="font-medium">Phân tích gần nhất:</span> {formatTimestamp(questionBank.matrixSource.processedAt || questionBank.createdAt)}
+            </div>
+            {questionBank.matrixSource.reanalyzedAt && (
+              <div>
+                <span className="font-medium">Phân tích lại:</span> {formatTimestamp(questionBank.matrixSource.reanalyzedAt)}
+              </div>
+            )}
+            {questionBank.matrixTemplate && (
+              <div>
+                <span className="font-medium">Số chương trong mẫu:</span> {questionBank.matrixTemplate.length}
+              </div>
+            )}
+          </div>
+          {reanalyzeError && (
+            <div className="mt-4 text-sm text-red-700 bg-red-50 border border-red-100 rounded p-3">
+              {reanalyzeError}
+            </div>
+          )}
+        </div>
+      )}
+
+      {reanalyzePreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h2 className="text-2xl font-bold">Cập nhật cấu trúc từ phân tích mới</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Đề xuất tiêu đề: <span className="font-medium">{reanalyzePreview.cleanResult.title}</span>
+                </p>
+              </div>
+              <button onClick={() => setReanalyzePreview(null)} className="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {reanalyzePreview.cleanResult.chapters?.map((chapter, chapterIndex) => (
+                <div key={chapterIndex} className="border border-gray-200 rounded-lg">
+                  <div className="px-4 py-2 bg-gray-100 font-semibold">
+                    Chương {chapterIndex + 1}: {chapter.name}
+                  </div>
+                  <div className="p-4 space-y-3 text-sm">
+                    {chapter.subContents?.map((sub, subIndex) => (
+                      <div key={subIndex} className="border border-gray-100 rounded-lg p-3">
+                        <div className="font-medium text-gray-800 mb-2">
+                          {chapterIndex + 1}.{subIndex + 1} {sub.name}
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                          {Object.entries(sub.requirements || {}).map(([level, items]) => (
+                            <div key={level} className="bg-gray-50 border border-gray-100 rounded p-2">
+                              <div className="uppercase tracking-wide text-[11px] text-gray-500">{level}</div>
+                              <div className="mt-1 text-gray-700">{items?.length || 0} yêu cầu</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 text-sm text-yellow-800 rounded p-3 mb-4">
+              Việc áp dụng sẽ giữ nguyên các câu hỏi hiện có và thêm lại mô tả yêu cầu từ bản phân tích mới.
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setReanalyzePreview(null)}
+                className="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={applyReanalysis}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              >
+                Áp dụng cấu trúc mới
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Nội dung theo chương/chủ đề</h2>
-          <button 
+          <button
             className="flex items-center text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1 rounded"
             onClick={() => openAddModal('chapter')}
           >

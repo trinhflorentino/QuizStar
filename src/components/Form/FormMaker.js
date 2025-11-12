@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore/lite';
+import { getAuth } from 'firebase/auth';
 import { useFormMaker } from './hooks/useFormMaker';
 import { useQuizSubmission } from './hooks/useQuizSubmission';
 import { useAIServices } from './hooks/useAIServices';
@@ -12,6 +14,8 @@ import FileUploadModal from './FileUploadModal';
 import MatrixUploadModal from './MatrixUploadModal';
 import QuestionGeneratorModal from './QuestionGeneratorModal';
 import ConfirmDialog from './components/ConfirmDialog';
+import MatrixAssemblyModal from './MatrixAssemblyModal';
+import db from '../../services/firebaseConfig';
 
 function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubmit }) {
   // Use custom hooks
@@ -44,6 +48,7 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
   const { isSubmitting, submitQuiz } = useQuizSubmission();
   const { isLoading, extractQuestions, matrixQuestion, createQuestions: generateQuestions } = useAIServices();
   const { success, warning } = useNotification();
+  const auth = getAuth();
 
   // Modal states
   const [showExerciseModal, setShowExerciseModal] = useState(false);
@@ -52,6 +57,7 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [showEquationModal, setShowEquationModal] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showAssemblyModal, setShowAssemblyModal] = useState(false);
 
   // Handle file upload
   const handleExtractQuestions = async () => {
@@ -81,6 +87,29 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
   const handleCreateQuestions = async () => {
     await generateQuestions(mcqRef, trueFalseRef, shortAnswerRef, list, optionList, setRawText);
     setShowModal(false);
+  };
+
+  const handleAssemblyComplete = async ({ bank, questions, coverage, text }) => {
+    if (text) {
+      setRawText(text);
+    }
+    setShowAssemblyModal(false);
+    success(`Đã sinh ${questions.length} câu hỏi từ ngân hàng "${bank.title}"`, 4000);
+
+    try {
+      if (auth.currentUser) {
+        const logRef = collection(db, 'users', auth.currentUser.uid, 'examGenerationLogs');
+        await addDoc(logRef, {
+          bankId: bank.id,
+          bankTitle: bank.title,
+          questionCount: questions.length,
+          coverage,
+          createdAt: serverTimestamp()
+        });
+      }
+    } catch (error) {
+      console.error('Không thể lưu log sinh đề:', error);
+    }
   };
 
   // Handle form submission
@@ -125,6 +154,7 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
         setShowMatrixModal(false);
         setShowModal(false);
         setShowConfirmDialog(false);
+        setShowAssemblyModal(false);
       }
     };
 
@@ -182,6 +212,7 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
         onConfigClick={() => setShowScoreModal(true)}
         onFileUploadClick={() => setShowExerciseModal(true)}
         onMatrixClick={() => setShowMatrixModal(true)}
+        onAssembleClick={() => setShowAssemblyModal(true)}
         onGenerateClick={() => setShowModal(true)}
         onClearClick={handleClear}
         onSubmit={handleSubmit}
@@ -221,6 +252,12 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
         mcqRef={mcqRef}
         trueFalseRef={trueFalseRef}
         shortAnswerRef={shortAnswerRef}
+      />
+
+      <MatrixAssemblyModal
+        isOpen={showAssemblyModal}
+        onClose={() => setShowAssemblyModal(false)}
+        onApply={handleAssemblyComplete}
       />
 
       {/* Confirm Dialog */}
