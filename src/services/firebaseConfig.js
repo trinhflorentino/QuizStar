@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore/lite";
+import { getDatabase } from "firebase/database";
 import { useEffect, useState } from "react";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { getStorage } from "firebase/storage";
@@ -18,6 +19,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 var db = getFirestore(app);
+var realtimeDb = getDatabase(app);
 
 const provider = new GoogleAuthProvider();
 
@@ -83,5 +85,6 @@ export function Stater() {
 // export default db;
 export var storage = getStorage(app);
 export var auth = getAuth(app);
+export var realtimeDatabase = realtimeDb;
 // export var firestore = db;
 export default db;

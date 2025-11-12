@@ -1,0 +1,166 @@
+body {
+    /* background-color: gray; */
+}
+
+.questionAppearAnimation {
+    animation: zoomIn 0.35s ease-out forwards;
+    transform-origin: top left;
+    transform: scaleY(0);
+    opacity: 0;
+    animation-delay: 1s;
+}
+
+
+.leftName {
+    animation: zoomIn 0.35s ease-out forwards;
+    transform-origin: bottom left;
+    transform: scaleY(0);
+    opacity: 0;
+}
+
+.leftAnswer {
+    animation: zoomIn 0.35s ease-out forwards;
+    transform-origin: top left;
+    transform: scaleY(0);
+    opacity: 0;
+}
+
+.rightName {
+    animation: zoomIn 0.35s ease-out forwards;
+    transform-origin: bottom right;
+    transform: scaleY(0);
+    opacity: 0;
+}
+
+.rightAnswer {
+    animation: zoomIn 0.35s ease-out forwards;
+    transform-origin: top right;
+    transform: scaleY(0);
+    opacity: 0;
+}
+
+.verticalLineAppear {
+    animation: wipeDown 0.5s ease-out forwards;
+    transform-origin: top;
+    transform: scaleY(0);
+    opacity: 0;
+    animation-delay: 0.5s;
+}
+
+
+@keyframes wipeDown {
+    0% {
+        transform: scaleY(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.accelerationQuestion {
+    animation: zoomIn 0.35s ease-out forwards;
+    transform-origin: top left;
+    transform: scaleY(0);
+    opacity: 0;
+    animation-delay: 0.5s;
+}
+
+.accelerationMedia {
+    animation: zoomIn 0.35s ease-out forwards;
+    transform-origin: center left;
+    transform: scaleY(0);
+    opacity: 0;
+    animation-delay: 0.5s;
+}
+
+.opacityAnimation {
+    animation: fadeIn 0.25s ease-out forwards;
+    animation-delay: 1.5s;
+    opacity: 0;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Fly In Animation */
+@keyframes flyIn {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Fly Out Animation */
+@keyframes flyOut {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+/* Apply fly-in animation */
+.fly-in {
+    opacity: 0;
+    animation: flyIn 0.25s ease-out forwards;
+}
+
+/* Apply fly-out animation */
+.fly-out {
+    opacity: 0;
+    animation: flyOut 0.5s ease-in forwards;
+}
+
+/* 
+.entranceAnimation {
+    animation: entrance 1.5s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  }
+
+  @keyframes entrance {
+    0% {
+      opacity: 0;
+      transform: translateY(100px) scale(0.7) rotate(10deg);
+    }
+    60% {
+      opacity: 1;
+      transform: translateY(-20px) scale(1.05) rotate(-2deg);
+    }
+    80% {
+      transform: translateY(10px) scale(0.95) rotate(1deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1) rotate(0deg);
+    }
+  } */

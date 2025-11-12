@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Vượt chướng ngại vật</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="icon" type="image/png" href="img/Logo.png" />
+    <link rel='stylesheet' type='text/css' media='screen' href='css/Obstacle.css'>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-9BZ1P9KSJR');
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+</head>
+
+<body style="font-family: 'Cabin', sans-serif;">
+    <!-- <p id="blur-notify">Mở chế độ toàn màn hình bằng cách ấn phím F11 để tiếp tục..</p> -->
+    <div>
+        <p class="competition-name" id="competition-name">VƯỢT<br></br>CHƯỚNG NGẠI VẬT</p>
+    </div>
+    <div class="competition-ui" id="competition-ui">
+        <div style="display: flex;">
+            <div id="vcnvimages" class="container">
+                <img id="vcnvimage" draggable="false">
+                <div class="overlay top-left" id="vcnvoverlay1"></div>
+                <div class="overlay top-right" id="vcnvoverlay2"></div>
+                <div class="overlay bottom-left" id="vcnvoverlay3"></div>
+                <div class="overlay bottom-right" id="vcnvoverlay4"></div>
+                <!-- <div class="overlay center" id="vcnvoverlaycenter"></div> -->
+            </div>
+            <div class="showdapan" id="showdapan1">
+
+            </div>
+
+            <div class="vcnv-row" id="vcnvrow">
+                <p id="cnvdapan">Chướng ngại vật có
+                    <a id="sochucai"></a> <a id="ktype">ký tự</a>
+                </p>
+                <!-- <div class="obstacle-row"> -->
+                <div class="hangngang">
+                    <div class="obstacle-row">
+                        <div class="HN" id="HN1">
+                        </div>
+                        <div class="obstacle-row-number-object">
+                            <span class="obstacle-row-number">1</span>
+                        </div>
+                    </div>
+                    <div class="obstacle-row">
+                        <div class="HN" id="HN2">
+                        </div>
+                        <div class="obstacle-row-number-object">
+                            <span class="obstacle-row-number">2</span>
+                        </div>
+                    </div>
+                    <div class="obstacle-row">
+                        <div class="HN" id="HN3">
+                        </div>
+                        <div class="obstacle-row-number-object">
+                            <span class="obstacle-row-number">3</span>
+                        </div>
+                    </div>
+                    <div class="obstacle-row">
+                        <div class="HN" id="HN4">
+                        </div>
+                        <div class="obstacle-row-number-object">
+                            <span class="obstacle-row-number">4</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div id="chuongts-list">
+
+        </div>
+        <div class="bar">
+            <div class="questions">
+                <p id="question">
+                </p>
+            </div>
+        </div>
+        <div class="inline ans-group">
+            <input class="chatbar" type="text" id="vcnvans" autofocus autocomplete="off" disabled>
+            <input class="vcnvans-preview" type="text" id="dapan" autocomplete="off" readonly disabled>
+            <button onclick="anchuong();" id="chuong">Trả lời CNV</button>
+        </div>
+        <div class="dapanthisinh" id="dapanthisinh">
+            <div class="PlayerAnswer" id="odapan1">
+                <!-- <div class="mask" id="wrong-mask1">
+                </div> -->
+                <div class="ts-info">
+                    <img class="tsimg" id="ts1vcnv" draggable="false">
+                    <p class="tsname" id="tents1"></p>
+                    <a class="tspoint" id="points1"></a>
+                </div>
+                <p class="dapan" id="dapan1"></p>
+            </div>
+
+            <div class="PlayerAnswer" id="odapan2">
+                <!-- <div class="mask" id="wrong-mask2">
+                </div> -->
+                <div class="ts-info">
+                    <img class="tsimg" id="ts2vcnv" draggable="false">
+                    <p class="tsname" id="tents2"></p>
+                    <a class="tspoint" id="points2"></a>
+                </div>
+                <p class="dapan" id="dapan2"></p>
+            </div>
+            <div class="PlayerAnswer" id="odapan3">
+                <!-- <div class="mask" id="wrong-mask3">
+
+                </div> -->
+                <div class="ts-info">
+                    <img class="tsimg" id="ts3vcnv" draggable="false">
+                    <p class="tsname" id="tents3"></p>
+                    <a class="tspoint" id="points3"></a>
+                </div>
+                <p class="dapan" id="dapan3"></p>
+            </div>
+            <div class="PlayerAnswer" id="odapan4">
+                <!-- <div class="mask" id="wrong-mask4">
+
+                </div> -->
+                <div class="ts-info">
+                    <img class="tsimg" id="ts4vcnv" draggable="false">
+                    <p class="tsname" id="tents4"></p>
+                    <a class="tspoint" id="points4"></a>
+                </div>
+                <p class="dapan" id="dapan4"></p>
+            </div>
+        </div>
+
+    </div>
+
+    <button onclick="anchuong();" id="chuong2">Trả lời CNV</button>
+
+
+    <div class="notification">
+        <p id="notification-text"></p>
+    </div>
+
+
+    <audio id="audio_8" src="audio/Obstacle/ObstacleStart.mp3"></audio>
+    <audio id="audio_9" src="audio/Obstacle/ObstacleRowShow.mp3"></audio>
+    <audio id="audio_10" src="audio/Obstacle/ObstacleRowChoose.mp3"></audio>
+    <audio id="audio_11" src="audio/Obstacle/ObstacleRowThinking.mp3"></audio>
+    <audio id="audio_12" src="audio/Obstacle/ObstacleAnswers.mp3"></audio>
+    <audio id="audio_13" src="audio/Obstacle/ObstacleRightAnswer.mp3"></audio>
+    <audio id="audio_14" src="audio/Obstacle/ObstacleRowWrongAnswer.mp3"></audio>
+    <audio id="audio_15" src="audio/Obstacle/ObstacleAnswer.mp3"></audio>
+    <audio id="audio_16" src="audio/Obstacle/ObstacleRight.mp3"></audio>
+    <audio id="HNAudio"></audio>
+    <audio id="audio_extra_1" src="audio/Obstacle/ObstacleImageShow.mp3"></audio>
+    <audio id="audio_extra_11" src="audio/Others/Space.mp3"></audio>
+    <audio id="audio_extra_12" src="audio/Others/TenseMoments.mp3"></audio>
+
+
+</body>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-functions.js"></script>
+<script src="js/keyboardshortcut.js"></script>
+<script src="js/authloggedin.js"></script>
+<script src="js/Obstacle.js"></script>
+<script src="js/PlayerList.js"></script>
+<script src="js/Match.js"></script>
+<script src="js/SwitchBackObstacle.js"></script>
+<script src="js/blockConsole.js"></script>
+<script src="js/Participant.js"></script>
+<script src="js/Theme.js"></script>
+
+</html>

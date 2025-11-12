@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="./output.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(to right, #ff0000, #0000ff);
+      transition: background 0.5s ease;
+    }
+
+    .container {
+      display: inline-block;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+
+    input[type="color"],
+    select {
+      margin-bottom: 20px;
+      padding: 5px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <!DOCTYPE html>
+  <html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradient Color Picker</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>Gradient Color Picker</h1>
+      <label for="color1">Color 1:</label>
+      <input type="color" id="color1" name="color1" value="#ff0000">
+      <label for="color2">Color 2:</label>
+      <input type="color" id="color2" name="color2" value="#0000ff">
+      <label for="direction">Direction:</label>
+      <select id="direction" name="direction">
+        <option value="to right">To Right</option>
+        <option value="to left">To Left</option>
+        <option value="to top">To Top</option>
+        <option value="to bottom">To Bottom</option>
+        <option value="to top right">To Top Right</option>
+        <option value="to top left">To Top Left</option>
+        <option value="to bottom right">To Bottom Right</option>
+        <option value="to bottom left">To Bottom Left</option>
+      </select>
+    </div>
+    <script src="script.js"></script>
+  </body>
+
+  </html>
+</body>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const color1Input = document.getElementById('color1');
+    const color2Input = document.getElementById('color2');
+    const directionInput = document.getElementById('direction');
+
+    function updateBackground() {
+      const color1 = color1Input.value;
+      const color2 = color2Input.value;
+      const direction = directionInput.value;
+      document.body.style.background = `linear-gradient(${direction}, ${color1}, ${color2})`;
+    }
+
+    color1Input.addEventListener('input', updateBackground);
+    color2Input.addEventListener('input', updateBackground);
+    directionInput.addEventListener('change', updateBackground);
+
+    // Initial call to set the gradient based on default values
+    updateBackground();
+  });
+</script>
+
+</html>

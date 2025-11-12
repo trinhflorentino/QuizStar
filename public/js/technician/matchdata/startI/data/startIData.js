@@ -1,1 +1,76 @@
-const a0_0x563cd8=a0_0x1517;function a0_0x1517(_0xa2ca6f,_0x1bc10f){const _0x23b522=a0_0x23b5();return a0_0x1517=function(_0x1517d3,_0x5e13c1){_0x1517d3=_0x1517d3-0x1e2;let _0x41e815=_0x23b522[_0x1517d3];return _0x41e815;},a0_0x1517(_0xa2ca6f,_0x1bc10f);}function a0_0x23b5(){const _0x4f1452=['uid','value','176533OHrPWc','StartICountdown','text-white','currentStartIAnswerRef','val','countdown','DB/dacau','ref','28IaqKqn','/KDO223sCountdown','bg-green-600','currentStartIQuestionRef','430423teQscL','onAuthStateChanged','collection','remove','off','1690116dziQSl','currentStartIQuestionNumberRef','player','classList','StartIPackage','DB/cau','42zDSFQg','/playerstatus/khoidong','/khoidong','22Jkjovq','currentUser','StartIQuestion','match','2jKbKRS','87546qRtQMi','6781923afbxUm','causo','getElementById','10RVctxl','StartIAnswer','2076216QjgKwO','1047110ixbnFP','textContent','exists','/StartQuestion/Q'];a0_0x23b5=function(){return _0x4f1452;};return a0_0x23b5();}(function(_0x4c9b43,_0x3ca9fa){const _0x19e543=a0_0x1517,_0x3239c3=_0x4c9b43();while(!![]){try{const _0x5831c1=-parseInt(_0x19e543(0x1e9))/0x1*(-parseInt(_0x19e543(0x1fb))/0x2)+parseInt(_0x19e543(0x1fc))/0x3*(-parseInt(_0x19e543(0x1e5))/0x4)+-parseInt(_0x19e543(0x203))/0x5+-parseInt(_0x19e543(0x1f4))/0x6*(-parseInt(_0x19e543(0x209))/0x7)+-parseInt(_0x19e543(0x202))/0x8+parseInt(_0x19e543(0x1fd))/0x9*(parseInt(_0x19e543(0x200))/0xa)+-parseInt(_0x19e543(0x1f7))/0xb*(parseInt(_0x19e543(0x1ee))/0xc);if(_0x5831c1===_0x3ca9fa)break;else _0x3239c3['push'](_0x3239c3['shift']());}catch(_0xe9fef){_0x3239c3['push'](_0x3239c3['shift']());}}}(a0_0x23b5,0x6305a),auth[a0_0x563cd8(0x1ea)](_0x1c04a3=>{const _0x199d7e=a0_0x563cd8;if(!_0x1c04a3)return;const _0x5c1f5c=firestoreDB[_0x199d7e(0x1eb)](_0x199d7e(0x1fa))['doc'](auth[_0x199d7e(0x1f8)][_0x199d7e(0x207)]);_0x5c1f5c['onSnapshot'](_0x3201e2=>{const _0x3c08af=_0x199d7e;if(!_0x3201e2[_0x3c08af(0x205)])return;const _0x59684f=_0x3201e2['data']()['match'];var _0x1a97cb,_0x2da1b3;const _0x501f30=0x5,_0x18a19f=realtimeDB[_0x3c08af(0x1e4)](_0x59684f+_0x3c08af(0x1f5));_0x18a19f['on'](_0x3c08af(0x208),_0x13f14f=>{const _0x59cfe9=_0x3c08af,_0x462888=_0x13f14f[_0x59cfe9(0x20d)]();if(_0x462888&&_0x462888[_0x59cfe9(0x1f0)]!==undefined){const _0x3555e2=_0x462888[_0x59cfe9(0x1f0)];for(let _0xeb312c=0x1;_0xeb312c<=0x4;_0xeb312c++){const _0x4f7adc=document[_0x59cfe9(0x1ff)](_0x59cfe9(0x1f2)+_0xeb312c);if(_0x3555e2===0x0)_0x4f7adc['classList'][_0x59cfe9(0x1ec)](_0x59cfe9(0x1e7),_0x59cfe9(0x20b));else _0xeb312c===_0x3555e2?_0x4f7adc['classList']['add']('bg-green-600',_0x59cfe9(0x20b)):_0x4f7adc[_0x59cfe9(0x1f1)]['remove'](_0x59cfe9(0x1e7),'text-white');}window['currentStartIQuestionNumberRef']&&window[_0x59cfe9(0x1ef)]['off']();window[_0x59cfe9(0x1e8)]&&window[_0x59cfe9(0x1e8)]['off']();window[_0x59cfe9(0x20c)]&&window[_0x59cfe9(0x20c)][_0x59cfe9(0x1ed)]();const _0x2b7eb1=realtimeDB['ref'](_0x59684f+_0x59cfe9(0x1f6));window[_0x59cfe9(0x1ef)]=_0x2b7eb1,_0x2b7eb1['on'](_0x59cfe9(0x208),_0x5d4f28=>{const _0xe8b75d=_0x59cfe9,_0x49d951=_0x5d4f28['val']()[_0xe8b75d(0x1fe)],_0x5a295a=realtimeDB['ref'](_0x59684f+_0xe8b75d(0x206)+_0x3555e2+_0xe8b75d(0x1f3)+_0x49d951),_0x2b7204=realtimeDB[_0xe8b75d(0x1e4)](_0x59684f+_0xe8b75d(0x206)+_0x3555e2+_0xe8b75d(0x1e3)+_0x49d951);window[_0xe8b75d(0x1e8)]=_0x5a295a,window[_0xe8b75d(0x20c)]=_0x2b7204,_0x2da1b3&&clearInterval(_0x2da1b3),document[_0xe8b75d(0x1ff)](_0xe8b75d(0x20a))[_0xe8b75d(0x204)]='',_0x5a295a['on'](_0xe8b75d(0x208),_0x42bad1=>{const _0x2ed9e7=_0xe8b75d,_0x3d69da=_0x42bad1[_0x2ed9e7(0x20d)]();document[_0x2ed9e7(0x1ff)](_0x2ed9e7(0x1f9))[_0x2ed9e7(0x204)]=_0x3d69da;}),_0x2b7204['on']('value',_0x3b7785=>{const _0x5504a3=_0xe8b75d,_0x54a94c=_0x3b7785['val']();document[_0x5504a3(0x1ff)](_0x5504a3(0x201))[_0x5504a3(0x204)]=_0x54a94c;});});}});const _0x13fc77=realtimeDB['ref'](_0x59684f+_0x3c08af(0x1e6));_0x13fc77['on'](_0x3c08af(0x208),_0x5a1f42=>{const _0xf2595f=_0x3c08af,_0x5e62ef=_0x5a1f42['val']()[_0xf2595f(0x1e2)];if(_0x5e62ef==0x1){var _0x42b6e8=_0x501f30;document[_0xf2595f(0x1ff)](_0xf2595f(0x20a))[_0xf2595f(0x204)]=_0x42b6e8,_0x2da1b3=setInterval(function(){const _0x308303=_0xf2595f;_0x42b6e8--,document[_0x308303(0x1ff)](_0x308303(0x20a))[_0x308303(0x204)]=_0x42b6e8,_0x42b6e8<=0x0&&(clearInterval(_0x2da1b3),document[_0x308303(0x1ff)](_0x308303(0x20a))['textContent']='');},0x3e8);}});});}));
+auth.onAuthStateChanged(_0x1b0326 => {
+    if (!_0x1b0326) {
+      return;
+    }
+    const _0x387bf3 = firestoreDB.collection("match").doc(auth.currentUser.uid);
+    _0x387bf3.onSnapshot(_0x17024f => {
+      if (!_0x17024f.exists) {
+        return;
+      }
+      const _0x53687b = _0x17024f.data().match;
+      var _0x3f8b61;
+      const _0x452c3f = realtimeDB.ref(_0x53687b + '/playerstatus/khoidong');
+      _0x452c3f.on("value", _0x659c55 => {
+        const _0x47a1b5 = _0x659c55.val();
+        if (_0x47a1b5 && _0x47a1b5.player !== undefined) {
+          const _0x4d56fa = _0x47a1b5.player;
+          for (let _0x291421 = 0x1; _0x291421 <= 0x4; _0x291421++) {
+            const _0x2b15fc = document.getElementById('StartIPackage' + _0x291421);
+            if (_0x4d56fa === 0x0) {
+              _0x2b15fc.classList.remove("bg-green-600", "text-white");
+            } else if (_0x291421 === _0x4d56fa) {
+              _0x2b15fc.classList.add("bg-green-600", "text-white");
+            } else {
+              _0x2b15fc.classList.remove("bg-green-600", 'text-white');
+            }
+          }
+          if (window.currentStartIQuestionNumberRef) {
+            window.currentStartIQuestionNumberRef.off();
+          }
+          if (window.currentStartIQuestionRef) {
+            window.currentStartIQuestionRef.off();
+          }
+          if (window.currentStartIAnswerRef) {
+            window.currentStartIAnswerRef.off();
+          }
+          const _0x5ba604 = realtimeDB.ref(_0x53687b + "/khoidong");
+          window.currentStartIQuestionNumberRef = _0x5ba604;
+          _0x5ba604.on("value", _0x1a4303 => {
+            const _0x2c6a76 = _0x1a4303.val().causo;
+            const _0x3d3e28 = realtimeDB.ref(_0x53687b + "/StartQuestion/Q" + _0x4d56fa + "DB/cau" + _0x2c6a76);
+            const _0xa55069 = realtimeDB.ref(_0x53687b + "/StartQuestion/Q" + _0x4d56fa + "DB/dacau" + _0x2c6a76);
+            window.currentStartIQuestionRef = _0x3d3e28;
+            window.currentStartIAnswerRef = _0xa55069;
+            if (_0x3f8b61) {
+              clearInterval(_0x3f8b61);
+            }
+            document.getElementById("StartICountdown").textContent = '';
+            _0x3d3e28.on('value', _0x1af395 => {
+              const _0x487741 = _0x1af395.val();
+              document.getElementById("StartIQuestion").textContent = _0x487741;
+            });
+            _0xa55069.on('value', _0x51d3bc => {
+              const _0x1f0196 = _0x51d3bc.val();
+              document.getElementById("StartIAnswer").textContent = _0x1f0196;
+            });
+          });
+        }
+      });
+      const _0x4662b6 = realtimeDB.ref(_0x53687b + "/StartCountdown");
+      _0x4662b6.on("value", _0x352410 => {
+        const _0x31baf4 = _0x352410.val().countdown;
+        if (_0x31baf4 == 0x1) {
+          var _0x466acc = 0x5;
+          document.getElementById("StartICountdown").textContent = _0x466acc;
+          _0x3f8b61 = setInterval(function () {
+            _0x466acc--;
+            document.getElementById('StartICountdown').textContent = _0x466acc;
+            if (_0x466acc <= 0x0) {
+              clearInterval(_0x3f8b61);
+              document.getElementById("StartICountdown").textContent = '';
+            }
+          }, 0x3e8);
+        }
+      });
+    });
+  });

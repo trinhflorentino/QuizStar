@@ -1,10 +1,12 @@
 {
   "hosting": {
     "public": ".",
+    "cleanUrls": true,
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
-    ]
+    ],
+    "site": "trinhdeptrai1st"
   }
 }

@@ -1,40 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { auth, storage } from '../services/firebaseConfig';
+import { storage, auth } from '../services/firebaseConfig';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { updateProfile } from 'firebase/auth';
+import { updateProfile, signOut } from 'firebase/auth';
 import { CgProfile } from "react-icons/cg";
 import { TbLogout } from 'react-icons/tb';
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { MdFileUpload } from "react-icons/md";
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 // const bg = require("../images/background.jpg");
 // import bg from "../images/background.jpg";
 
 const Profile = () => {
-    const [user, setUser] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const [newName, setNewName] = useState('');
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const fileInputRef = useRef(null);
+    const { currentUser } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-            if (currentUser) {
-                setUser(currentUser);
-                setNewName(currentUser.displayName || '');
-            }
-        });
-
-        return () => unsubscribe();
-    }, []);
+        if (currentUser) {
+            setNewName(currentUser.displayName || '');
+        }
+    }, [currentUser]);
 
     const handleDeleteAvatar = async () => {
-        if (!user.photoURL) return;
+        if (!currentUser?.photoURL) return;
 
         try {
-            if (user.photoURL.includes(`users/${user.uid}`)) {
-                const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
+            if (currentUser.photoURL.includes(`users/${currentUser.uid}`)) {
+                const storageRef = ref(storage, `users/${currentUser.uid}/profile.jpg`);
                 await deleteObject(storageRef);
             }
             
@@ -42,7 +40,6 @@ const Profile = () => {
                 photoURL: null
             });
             
-            setUser({ ...user, photoURL: null });
             alert('Xóa ảnh đại diện thành công');
         } catch (error) {
             console.error("Error deleting avatar:", error);
@@ -54,12 +51,11 @@ const Profile = () => {
         const file = e.target.files[0];
         if (!file) return;
 
-        const storageRef = ref(storage, `users/${user.uid}/profile.jpg`);
+        const storageRef = ref(storage, `users/${currentUser.uid}/profile.jpg`);
         try {
             await uploadBytes(storageRef, file);
             const photoURL = await getDownloadURL(storageRef);
             await updateProfile(auth.currentUser, { photoURL });
-            setUser({ ...user, photoURL });
             alert('Tải ảnh lên thành công');
         } catch (error) {
             console.error("Error uploading avatar:", error);
@@ -73,7 +69,6 @@ const Profile = () => {
             await updateProfile(auth.currentUser, {
                 displayName: newName
             });
-            setUser({ ...user, displayName: newName });
             setIsEditing(false);
         } catch (error) {
             console.error("Error updating name:", error);
@@ -89,6 +84,32 @@ const Profile = () => {
         // Add password change logic here
     };
 
+    const handleSignOut = async () => {
+        try {
+            await signOut(auth);
+            navigate('/');
+        } catch (error) {
+            console.error("Error signing out:", error);
+        }
+    };
+
+    if (!currentUser) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="text-center p-8">
+                    <p className="text-lg text-gray-600 mb-4">
+                        Vui lòng đăng nhập để xem thông tin cá nhân
+                    </p>
+                    <button 
+                        onClick={() => navigate('/Login')}
+                        className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                    >
+                        Đăng nhập
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -101,7 +122,7 @@ const Profile = () => {
                 }}>
                 {/* Profile Image */}
                 <img 
-                    src={user?.photoURL || require("../images/profile.jpg")} 
+                    src={currentUser?.photoURL || require("../images/profile.jpg")} 
                     alt="Profile" 
                     className="w-36 h-36 object-cover rounded-full absolute bottom-0 transform translate-y-1/2 border-4 border-white"
                 />
@@ -109,9 +130,9 @@ const Profile = () => {
 
             {/* User Info */}
             <div className="text-center mt-20">
-                <h1 className="font-bold text-3xl text-gray-900">{user?.displayName}</h1>
+                <h1 className="font-bold text-3xl text-gray-900">{currentUser?.displayName}</h1>
                 <p className="text-black text-sm">
-                    {`Tham gia QuizStar ngày ${new Date(user?.metadata?.creationTime).toLocaleDateString()}`}
+                    {`Tham gia QuizStar ngày ${new Date(currentUser?.metadata?.creationTime).toLocaleDateString()}`}
                 </p>
             </div>
 
@@ -125,7 +146,7 @@ const Profile = () => {
                     Chỉnh sửa thông tin
                 </button>
                 <button
-                    onClick={() => auth.signOut()}
+                    onClick={handleSignOut}
                     className="flex items-center bg-slate-50 rounded-md border border-slate-300 py-2 px-4 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-red-500"
                 >
                     <TbLogout className="mr-1.5"/>
@@ -234,7 +255,7 @@ const Profile = () => {
                                 type="submit"
                                 className="w-full bg-slate-800 text-white py-2 px-4 rounded-md hover:bg-slate-700"
                             >
-                                Confirm Password Change
+                                Đổi mật khẩu
                             </button>
                         </div>
                     </form>

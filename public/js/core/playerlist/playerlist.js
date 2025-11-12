@@ -1,1 +1,124 @@
-function a0_0x1a38(){const _0x46fad8=['1460997eyDzyK','data','6OxfmBc','obstaclePlayer','users/profile.jpg','dark:text-white','13398EBeOQh','player','8aXadyZ','Checkbox','createElement','41370RZzbWx','catch','push','flex\x20items-center\x20space-x-2','error','match','entries','div','type','collection','mr-2\x20w-4\x20h-4\x20rounded-md','923995IGiGZI','h-12\x20w-12\x20rounded-full\x20object-cover','chatPlayerContainer','onAuthStateChanged','obstacle','140xDyNAH','input','7833819zjMPJl','displayName','/profile.jpg','videosPlayerContainer','span','10qiYHRL','onSnapshot','getElementById','15072xgwBex','832908fDOkXV','value','innerHTML','/point/player','obstaclePlayerContainer','finishPlayerContainer','textContent','3926AYQfQH','Player','7293fCEcju','users/','font-semibold\x20dark:text-white','checkbox','src','Error\x20fetching\x20default\x20profile\x20image:','startiPlayerContainer','accelerationPlayer','val','className','flex\x20items-center\x20justify-between','introductionPlayerContainer','acceleration','uid','exists','values','appendChild','8Jlbsuq','ref','forEach','storage','/games','then','pointSummaryPlayerContainer','child'];a0_0x1a38=function(){return _0x46fad8;};return a0_0x1a38();}const a0_0x23a582=a0_0x12c5;(function(_0x598bf1,_0x4e39b8){const _0x5da15f=a0_0x12c5,_0x413a3e=_0x598bf1();while(!![]){try{const _0x51c3d3=parseInt(_0x5da15f(0x1ab))/0x1*(-parseInt(_0x5da15f(0x196))/0x2)+parseInt(_0x5da15f(0x1b6))/0x3*(parseInt(_0x5da15f(0x198))/0x4)+-parseInt(_0x5da15f(0x1a6))/0x5*(-parseInt(_0x5da15f(0x192))/0x6)+parseInt(_0x5da15f(0x1ad))/0x7*(-parseInt(_0x5da15f(0x1d0))/0x8)+parseInt(_0x5da15f(0x190))/0x9*(parseInt(_0x5da15f(0x1b2))/0xa)+-parseInt(_0x5da15f(0x1bf))/0xb*(-parseInt(_0x5da15f(0x1b5))/0xc)+-parseInt(_0x5da15f(0x1bd))/0xd*(-parseInt(_0x5da15f(0x19b))/0xe);if(_0x51c3d3===_0x4e39b8)break;else _0x413a3e['push'](_0x413a3e['shift']());}catch(_0x25380a){_0x413a3e['push'](_0x413a3e['shift']());}}}(a0_0x1a38,0x8b4c5),auth[a0_0x23a582(0x1a9)](_0x217b1e=>{const _0x2593ba=a0_0x23a582;if(!_0x217b1e)return;const _0x281a0f=firestoreDB[_0x2593ba(0x1a4)](_0x2593ba(0x1a0))['doc'](_0x217b1e['uid']);_0x281a0f[_0x2593ba(0x1b3)](_0xeed07b=>{const _0x20e69a=_0x2593ba;if(!_0xeed07b[_0x20e69a(0x1cd)])return;const _0x4ad96b=_0xeed07b[_0x20e69a(0x191)]()[_0x20e69a(0x1a0)],_0x516dfa=realtimeDB[_0x20e69a(0x1d1)](_0x4ad96b+_0x20e69a(0x1d4));_0x516dfa['on'](_0x20e69a(0x1b7),_0xef2d51=>{const _0x2ad289=_0x20e69a,_0x41ca0d=_0xef2d51[_0x2ad289(0x1c7)]()||{},_0x324a13={'chat':document['getElementById'](_0x2ad289(0x1a8)),'intro':document[_0x2ad289(0x1b4)](_0x2ad289(0x1ca)),'startI':document[_0x2ad289(0x1b4)](_0x2ad289(0x1c5)),'startII':document[_0x2ad289(0x1b4)]('startiiPlayerContainer'),'obstacle':document[_0x2ad289(0x1b4)](_0x2ad289(0x1ba)),'acceleration':document['getElementById']('accelerationPlayerContainer'),'finish':document[_0x2ad289(0x1b4)](_0x2ad289(0x1bb)),'additional':document[_0x2ad289(0x1b4)]('additionalPlayerContainer'),'pointSummary':document[_0x2ad289(0x1b4)](_0x2ad289(0x18e)),'video':document[_0x2ad289(0x1b4)](_0x2ad289(0x1b0))};Object[_0x2ad289(0x1ce)](_0x324a13)['forEach'](_0x3e2dce=>{const _0x1ea1cf=_0x2ad289;if(_0x3e2dce)_0x3e2dce[_0x1ea1cf(0x1b8)]='';});const _0x3fcfc1={};for(let _0x2097e2=0x1;_0x2097e2<=0x4;_0x2097e2++){const _0x2500b0=_0x41ca0d['player'+_0x2097e2];if(_0x2500b0){const _0x415747=_0x2500b0[_0x2ad289(0x1cc)],_0x320da5=_0x2500b0[_0x2ad289(0x1ae)];Object[_0x2ad289(0x1a1)](_0x324a13)[_0x2ad289(0x1d2)](([_0x5e9ff3,_0x9228e3])=>{const _0x1c69fe=_0x2ad289;if(_0x9228e3){const _0x26aee3=createPlayerItem(_0x415747,_0x320da5,_0x2097e2,_0x3fcfc1,_0x5e9ff3);_0x9228e3[_0x1c69fe(0x1cf)](_0x26aee3);}});const _0x3abc99=realtimeDB[_0x2ad289(0x1d1)](_0x4ad96b+_0x2ad289(0x1b9)+_0x2097e2);_0x3abc99['on'](_0x2ad289(0x1b7),_0x5604e7=>{const _0x28ccba=_0x2ad289,_0x1a04db=_0x5604e7[_0x28ccba(0x1c7)]()?.['point']||0x0,_0x4d981b=_0x3fcfc1[_0x28ccba(0x197)+_0x2097e2]||[];_0x4d981b[_0x28ccba(0x1d2)](_0xe6b311=>{const _0x5542ce=_0x28ccba;_0xe6b311[_0x5542ce(0x1bc)]=_0x1a04db;});});}}});});}));function a0_0x12c5(_0x41066a,_0x1882e4){const _0x1a38d3=a0_0x1a38();return a0_0x12c5=function(_0x12c51a,_0x2dd69c){_0x12c51a=_0x12c51a-0x18d;let _0x1255f0=_0x1a38d3[_0x12c51a];return _0x1255f0;},a0_0x12c5(_0x41066a,_0x1882e4);}function createPlayerItem(_0x4b903b,_0x4a7da3,_0x32ecdb,_0x49a5be,_0x11ce2a){const _0x563786=a0_0x23a582,_0x32f61f=document[_0x563786(0x19a)](_0x563786(0x1a2));_0x32f61f[_0x563786(0x1c8)]=_0x563786(0x1c9),_0x32f61f['id']=_0x11ce2a+'Player'+_0x32ecdb;const _0x2335f4=document[_0x563786(0x19a)](_0x563786(0x1a2));_0x2335f4[_0x563786(0x1c8)]=_0x563786(0x19e),_0x32f61f[_0x563786(0x1cf)](_0x2335f4);if(_0x11ce2a===_0x563786(0x1aa)){const _0x2a6dd7=document[_0x563786(0x19a)]('input');_0x2a6dd7[_0x563786(0x1a3)]=_0x563786(0x1c2),_0x2a6dd7['className']=_0x563786(0x1a5),_0x2a6dd7['id']=_0x563786(0x193)+_0x32ecdb+'Checkbox',_0x2335f4[_0x563786(0x1cf)](_0x2a6dd7);}if(_0x11ce2a===_0x563786(0x1cb)){const _0x804a09=document['createElement'](_0x563786(0x1ac));_0x804a09[_0x563786(0x1a3)]=_0x563786(0x1c2),_0x804a09['className']=_0x563786(0x1a5),_0x804a09['id']=_0x563786(0x1c6)+_0x32ecdb+_0x563786(0x199),_0x2335f4[_0x563786(0x1cf)](_0x804a09);}const _0x1bedf9=document[_0x563786(0x19a)]('img');_0x1bedf9['className']=_0x563786(0x1a7),firebase['storage']()[_0x563786(0x1d1)]()['child'](_0x563786(0x1c0)+_0x4b903b+_0x563786(0x1af))['getDownloadURL']()['then'](_0x4306c2=>_0x1bedf9[_0x563786(0x1c3)]=_0x4306c2)[_0x563786(0x19c)](()=>{const _0x3ff2f9=_0x563786;firebase[_0x3ff2f9(0x1d3)]()[_0x3ff2f9(0x1d1)]()[_0x3ff2f9(0x18f)](_0x3ff2f9(0x194))['getDownloadURL']()[_0x3ff2f9(0x18d)](_0x57d3ec=>_0x1bedf9[_0x3ff2f9(0x1c3)]=_0x57d3ec)['catch'](_0x280d12=>console[_0x3ff2f9(0x19f)](_0x3ff2f9(0x1c4),_0x280d12));}),_0x2335f4[_0x563786(0x1cf)](_0x1bedf9);const _0x544bba=document[_0x563786(0x19a)]('div');_0x544bba[_0x563786(0x1c8)]='flex\x20flex-col';const _0x492c79=document['createElement'](_0x563786(0x1b1));_0x492c79['className']=_0x563786(0x195),_0x492c79[_0x563786(0x1bc)]=_0x4a7da3,_0x492c79['id']=_0x11ce2a+_0x563786(0x1be)+_0x32ecdb+'Name',_0x544bba['appendChild'](_0x492c79),_0x2335f4[_0x563786(0x1cf)](_0x544bba);const _0x170b1c=document[_0x563786(0x19a)](_0x563786(0x1b1));return _0x170b1c[_0x563786(0x1c8)]=_0x563786(0x1c1),_0x170b1c[_0x563786(0x1bc)]=0x0,_0x32f61f['appendChild'](_0x170b1c),!_0x49a5be[_0x563786(0x197)+_0x32ecdb]&&(_0x49a5be[_0x563786(0x197)+_0x32ecdb]=[]),_0x49a5be[_0x563786(0x197)+_0x32ecdb][_0x563786(0x19d)](_0x170b1c),_0x32f61f;}
+auth.onAuthStateChanged(_0x3c1850 => {
+    if (!_0x3c1850) {
+      return;
+    }
+    const _0x281997 = firestoreDB.collection("match").doc(_0x3c1850.uid);
+    const _0xb3b120 = new Map();
+    _0x281997.onSnapshot(_0x55dc58 => {
+      if (!_0x55dc58.exists) {
+        return;
+      }
+      const _0x575014 = _0x55dc58.data().match;
+      const _0x375cc7 = realtimeDB.ref(_0x575014 + "/games");
+      _0x375cc7.on('value', async _0x18bb4e => {
+        const _0x518b57 = _0x18bb4e.val() || {};
+        const _0x3c6bd1 = {
+          'chat': document.getElementById("chatPlayerContainer"),
+          'intro': document.getElementById("introductionPlayerContainer"),
+          'startI': document.getElementById("startiPlayerContainer"),
+          'startII': document.getElementById("startiiPlayerContainer"),
+          'obstacle': document.getElementById("obstaclePlayerContainer"),
+          'acceleration': document.getElementById("accelerationPlayerContainer"),
+          'finish': document.getElementById("finishPlayerContainer"),
+          'additional': document.getElementById("additionalPlayerContainer"),
+          'pointSummary': document.getElementById("pointSummaryPlayerContainer"),
+          'video': document.getElementById("videosPlayerContainer")
+        };
+        Object.values(_0x3c6bd1).forEach(_0x2510a8 => {
+          if (_0x2510a8) {
+            _0x2510a8.innerHTML = '';
+          }
+        });
+        const _0x5826c2 = {};
+        const _0x45b68f = {};
+        for (let _0x1d4ddb = 0x1; _0x1d4ddb <= 0x4; _0x1d4ddb++) {
+          const _0x4364e9 = _0x518b57['player' + _0x1d4ddb];
+          if (_0x4364e9) {
+            const _0x2c662b = _0x4364e9.uid;
+            const _0x487de6 = _0x4364e9.displayName;
+            Object.entries(_0x3c6bd1).forEach(([_0x2939a2, _0x214e4d]) => {
+              if (_0x214e4d) {
+                const _0x8e2149 = createPlayerItem(_0x2c662b, _0x487de6, _0x1d4ddb, _0x5826c2, _0x45b68f, _0x2939a2);
+                _0x214e4d.appendChild(_0x8e2149);
+              }
+            });
+            const _0x220541 = realtimeDB.ref(_0x575014 + '/point/player' + _0x1d4ddb);
+            _0x220541.on("value", _0x14b1e3 => {
+              const _0x4e52ad = _0x14b1e3.val()?.["point"] || 0x0;
+              const _0x5163e7 = _0x5826c2["player" + _0x1d4ddb] || [];
+              _0x5163e7.forEach(_0x598ade => {
+                _0x598ade.textContent = _0x4e52ad;
+              });
+            });
+            const _0x4c7554 = realtimeDB.ref(_0x575014 + "/playerConnection/player" + _0x1d4ddb + "/connections");
+            _0x4c7554.on("value", _0x54cad2 => {
+              const _0x4d4aea = _0x54cad2.exists();
+              const _0x194071 = _0xb3b120.get("player" + _0x1d4ddb);
+              if (_0x194071 === true && !_0x4d4aea && _0x487de6 !== 'N/A') {
+                document.getElementById("audio_Disconnected").play();
+                failToast("Có thí sinh bị mất kết nối đến hệ thống.", 0x3a98, "top", "right", true, "radial-gradient(circle at 74.2% 50.9%, rgb(14, 72, 222) 5.2%, rgb(3, 22, 65) 75.3%)", '');
+              }
+              _0xb3b120.set("player" + _0x1d4ddb, _0x4d4aea);
+              const _0x1471a8 = _0x45b68f["player" + _0x1d4ddb] || [];
+              _0x1471a8.forEach(_0x5a378a => {
+                _0x5a378a.classList.remove("bg-red-500", "bg-green-500");
+                _0x5a378a.classList.add(_0x4d4aea ? "bg-green-500" : "bg-red-500");
+              });
+            });
+          }
+        }
+      });
+    });
+  });
+  function createPlayerItem(_0x4535ee, _0x232cc6, _0x31e5e1, _0x288938, _0x38fd0d, _0x2301a2) {
+    const _0x5c9b9e = document.createElement("div");
+    _0x5c9b9e.className = "flex items-center justify-between";
+    _0x5c9b9e.id = _0x2301a2 + "Player" + _0x31e5e1;
+    const _0x13cd4f = document.createElement("div");
+    _0x13cd4f.className = "flex items-center space-x-2";
+    _0x5c9b9e.appendChild(_0x13cd4f);
+    if (_0x2301a2 === "obstacle" || _0x2301a2 === "acceleration" || _0x2301a2 === "additional") {
+      const _0x5280b7 = document.createElement("input");
+      _0x5280b7.type = 'checkbox';
+      _0x5280b7.className = "mr-2 w-4 h-4 rounded-md";
+      _0x5280b7.id = _0x2301a2 + "Player" + _0x31e5e1 + 'Checkbox';
+      _0x13cd4f.appendChild(_0x5280b7);
+    }
+    const _0x3a1013 = document.createElement("div");
+    _0x3a1013.className = "\n        chat-avatar w-12 h-12 rounded-full flex-shrink-0\n        " + (_0x232cc6 === "host" ? "bg-blue-700 dark:bg-blue-800" : "bg-gray-400 dark:bg-gray-500") + "\n    ";
+    const _0x5cf6e4 = _0x232cc6.split(" ").pop();
+    _0x3a1013.textContent = _0x5cf6e4[0x0].toUpperCase();
+    _0x3a1013.style.color = "white";
+    _0x3a1013.style.display = "flex";
+    _0x3a1013.style.justifyContent = "center";
+    _0x3a1013.style.alignItems = "center";
+    _0x3a1013.style.fontWeight = "bold";
+    _0x13cd4f.appendChild(_0x3a1013);
+    const _0x23f157 = document.createElement("div");
+    _0x23f157.className = "flex flex-col";
+    const _0x3b7446 = document.createElement('span');
+    _0x3b7446.className = "dark:text-white";
+    _0x3b7446.textContent = _0x232cc6;
+    _0x3b7446.id = _0x2301a2 + 'Player' + _0x31e5e1 + 'Name';
+    _0x23f157.appendChild(_0x3b7446);
+    _0x13cd4f.appendChild(_0x23f157);
+    const _0x450e6d = document.createElement("div");
+    _0x450e6d.className = "flex items-center space-x-2";
+    _0x5c9b9e.appendChild(_0x450e6d);
+    const _0x4473e8 = document.createElement("span");
+    _0x4473e8.className = "font-semibold dark:text-white";
+    _0x4473e8.textContent = 0x0;
+    _0x450e6d.appendChild(_0x4473e8);
+    const _0x397a20 = document.createElement("div");
+    _0x397a20.className = "h-3 w-3 rounded-full bg-red-500 ml-2";
+    _0x450e6d.appendChild(_0x397a20);
+    if (!_0x288938['player' + _0x31e5e1]) {
+      _0x288938["player" + _0x31e5e1] = [];
+    }
+    _0x288938["player" + _0x31e5e1].push(_0x4473e8);
+    if (!_0x38fd0d["player" + _0x31e5e1]) {
+      _0x38fd0d["player" + _0x31e5e1] = [];
+    }
+    _0x38fd0d["player" + _0x31e5e1].push(_0x397a20);
+    return _0x5c9b9e;
+  }
