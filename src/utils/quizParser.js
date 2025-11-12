@@ -149,13 +149,12 @@ function parseQuestions(contentText, answerKeyData) {
   let match;
   let matchCount = 0;
   let sequentialQuestionNum = 1; // Sequential question number (1, 2, 3, 4...)
-  let answerKeyIndex = 0; // Index into sequentialAnswers array (only increment for actual questions, not text blocks)
   
   while ((match = questionPattern.exec(contentText)) !== null) {
     matchCount++;
     const originalQuestionNum = parseInt(match[1]);
     
-    console.log(`🔍 [DEBUG] Found question match ${matchCount}: original number=${originalQuestionNum}, sequential number=${sequentialQuestionNum}, answerKeyIndex=${answerKeyIndex}`);
+    console.log(`🔍 [DEBUG] Found question match ${matchCount}: original number=${originalQuestionNum}, sequential number=${sequentialQuestionNum}`);
     
     // Check if there's text before this question
     const textBefore = contentText.substring(lastIndex, match.index).trim();
@@ -180,13 +179,13 @@ function parseQuestions(contentText, answerKeyData) {
     console.log(`🔍 [DEBUG] Determined question type:`, questionType);
     
     // Extract question text and options
-    // Use sequential question number for answer key lookup (by index in sequentialAnswers)
+    // Use original question number to find answer in answer key
     const { questionText, options, correctAnswer } = extractQuestionData(
       questionContent, 
       questionType, 
       sequentialQuestionNum, // Use sequential number
       answerKeyData,
-      answerKeyIndex // Use index into sequentialAnswers array
+      originalQuestionNum // Use original number to find answer in answer key
     );
     console.log(`🔍 [DEBUG] Extracted - questionText length:`, questionText ? questionText.length : 0, 'options count:', options ? options.length : 0);
     console.log(`🔍 [DEBUG] Extracted options:`, options);
@@ -209,7 +208,6 @@ function parseQuestions(contentText, answerKeyData) {
     });
     
     sequentialQuestionNum++; // Increment for next question
-    answerKeyIndex++; // Increment answer key index only for actual questions
     lastIndex = match.index + match[0].length;
   }
   
@@ -250,7 +248,8 @@ function determineQuestionType(content) {
   // Can have optional * before the letter (for correct answer marker)
   // Options can be on the same line: *A. text B. text C. text D. text
   // Pattern should match: *A. (anywhere) or A. (after space/newline/start)
-  const mcqPattern = /\*([A-Z])\.\s*|(?:^|\s)([A-Z])\.\s*/g;
+  // Also accept A) markers and invisible/zero-width separators
+  const mcqPattern = /\*([A-Z])[)\.][\s\u00A0\u200B\u200C\uFEFF]*|(?:^|[\s\u00A0\u200B\u200C\uFEFF])([A-Z])[)\.][\s\u00A0\u200B\u200C\uFEFF]*/g;
   const mcqMatches = [];
   let mcqMatch;
   while ((mcqMatch = mcqPattern.exec(content)) !== null) {
@@ -262,10 +261,17 @@ function determineQuestionType(content) {
     // Check character before the match
     const beforeChar = matchIndex > 0 ? content[matchIndex - 1] : ' ';
     
-    // Check character after the period
-    const periodIndex = content.indexOf('.', matchIndex);
-    const afterPeriodIndex = periodIndex !== -1 ? periodIndex + 1 : matchIndex + fullMatch.length;
-    const afterChar = afterPeriodIndex < content.length ? content[afterPeriodIndex] : '';
+    // Check character after the marker (either '.' or ')')
+    const dotIndex = content.indexOf('.', matchIndex);
+    const parenIndex = content.indexOf(')', matchIndex);
+    let markerCharIndex = -1;
+    if (dotIndex !== -1 && parenIndex !== -1) {
+      markerCharIndex = Math.min(dotIndex, parenIndex);
+    } else {
+      markerCharIndex = dotIndex !== -1 ? dotIndex : parenIndex;
+    }
+    const afterMarkerIndex = markerCharIndex !== -1 ? markerCharIndex + 1 : matchIndex + fullMatch.length;
+    const afterChar = afterMarkerIndex < content.length ? content[afterMarkerIndex] : '';
     
     // Valid if:
     // - Letter is A-Z
@@ -273,15 +279,17 @@ function determineQuestionType(content) {
     // - For unstarred: before must be space/newline/tab/start
     // - After period must be space/newline/tab/letter/end
     let validBefore;
-    if (isStarred) {
-      // Starred marker: *A. can appear after any non-letter character or at start
-      validBefore = matchIndex === 0 || !/[A-Za-z]/.test(beforeChar);
-    } else {
-      // Unstarred marker: must be after space/newline/tab/start
-      validBefore = beforeChar === ' ' || beforeChar === '\n' || beforeChar === '\t' || matchIndex === 0;
-    }
+  if (isStarred) {
+    // Starred marker: *A. can appear after any non-letter character or at start
+    validBefore = matchIndex === 0 || !/[A-Za-z]/.test(beforeChar);
+  } else {
+    // Unstarred marker: allow common punctuation or any whitespace before, or start
+    const isWs = beforeChar === ' ' || beforeChar === '\n' || beforeChar === '\t' || beforeChar === '\r' || /\u00A0|\u200B|\u200C|\uFEFF/.test(beforeChar);
+    const isPunct = /[.,;:!?()\[\]{}"“”'’»-]/.test(beforeChar);
+    validBefore = isWs || isPunct || matchIndex === 0;
+  }
     
-    const validAfter = afterChar === ' ' || afterChar === '\n' || afterChar === '\t' || afterChar === '' || /[A-Za-z]/.test(afterChar);
+    const validAfter = afterChar === ' ' || afterChar === '\n' || afterChar === '\r' || afterChar === '\t' || afterChar === '' || /\u00A0|\u200B|\u200C|\uFEFF/.test(afterChar) || /[A-Za-z]/.test(afterChar);
     
     if (letter >= 'A' && letter <= 'Z' && validBefore && validAfter) {
       // Calculate the actual index of the letter
@@ -331,7 +339,7 @@ function determineQuestionType(content) {
     // - Before is space/newline/tab/* or start of string
     // - After is space/newline/tab/[ or end of string or period
     const validBefore = beforeChar === ' ' || beforeChar === '\n' || beforeChar === '\t' || beforeChar === '*' || matchIndex === 0;
-    const validAfter = afterChar === ' ' || afterChar === '\n' || afterChar === '\t' || afterChar === '[' || afterChar === '' || afterChar === '.';
+    const validAfter = afterChar === ' ' || afterChar === '\n' || afterChar === '\r' || afterChar === '\t' || afterChar === '[' || afterChar === '' || afterChar === '.';
     
     if (validBefore && validAfter) {
       tfMatches.push(tfMatch);
@@ -390,23 +398,25 @@ function determineQuestionType(content) {
 /**
  * Extracts question text, options, and correct answer from question content
  */
-function extractQuestionData(content, type, questionNum, answerKeyData, answerKeyIndex = -1) {
-  console.log(`🔍 [DEBUG] extractQuestionData - questionNum:`, questionNum, 'type:', type, 'answerKeyIndex:', answerKeyIndex);
+function extractQuestionData(content, type, questionNum, answerKeyData, originalQuestionNum = -1) {
+  console.log(`🔍 [DEBUG] extractQuestionData - questionNum:`, questionNum, 'type:', type, 'originalQuestionNum:', originalQuestionNum);
   console.log(`🔍 [DEBUG] extractQuestionData - content (first 200 chars):`, content.substring(0, 200));
   
-  // Get answer key for this question by index in sequentialAnswers array
+  // Get answer key for this question by original number (not by index)
   let answerKeyMap = {};
-  if (answerKeyData && answerKeyData.sequentialAnswers && answerKeyIndex >= 0 && answerKeyIndex < answerKeyData.sequentialAnswers.length) {
-    const answerData = answerKeyData.sequentialAnswers[answerKeyIndex];
-    // Only use if type matches
-    if (answerData.type === type) {
+  if (answerKeyData && answerKeyData.sequentialAnswers && originalQuestionNum >= 0) {
+    // Find answer by matching originalNumber
+    const answerData = answerKeyData.sequentialAnswers.find(
+      ans => ans.originalNumber === originalQuestionNum && ans.type === type
+    );
+    if (answerData) {
       answerKeyMap[questionNum] = answerData;
-      console.log(`🔍 [DEBUG] Found answer key for question ${questionNum} at index ${answerKeyIndex}:`, answerData);
+      console.log(`🔍 [DEBUG] Found answer key for question ${questionNum} (original: ${originalQuestionNum}):`, answerData);
     } else {
-      console.log(`🔍 [DEBUG] Answer key type mismatch: expected ${type}, got ${answerData.type}`);
+      console.log(`🔍 [DEBUG] No answer key found for question ${questionNum} (original: ${originalQuestionNum}, type: ${type})`);
     }
   } else {
-    console.log(`🔍 [DEBUG] No answer key found for question ${questionNum} at index ${answerKeyIndex}`);
+    console.log(`🔍 [DEBUG] No answer key data or invalid originalQuestionNum for question ${questionNum}`);
   }
   
   let questionText = '';
@@ -420,7 +430,7 @@ function extractQuestionData(content, type, questionNum, answerKeyData, answerKe
     const allMatches = [];
     
     // Find all *A. patterns
-    const starredPatternGlobal = /\*([A-Z])\.\s*/g;
+    const starredPatternGlobal = /\*([A-Z])[)\.][\s\u00A0\u200B\u200C\uFEFF]*/g;
     let starredMatchGlobal;
     while ((starredMatchGlobal = starredPatternGlobal.exec(content)) !== null) {
       allMatches.push({
@@ -435,7 +445,7 @@ function extractQuestionData(content, type, questionNum, answerKeyData, answerKe
     // Options can be on the same line: *A. text B. text C. text D. text
     // Pattern should match: space + A. + optional space
     // Note: index will be at the space (if present) or at the letter
-    const unstarredPattern = /(?:^|\s)([A-Z])\.\s*/g;
+    const unstarredPattern = /(?:^|[\s\u00A0\u200B\u200C\uFEFF])([A-Z])[)\.][\s\u00A0\u200B\u200C\uFEFF]*/g;
     let unstarredMatch;
     while ((unstarredMatch = unstarredPattern.exec(content)) !== null) {
       let matchIndex = unstarredMatch.index;
@@ -444,8 +454,8 @@ function extractQuestionData(content, type, questionNum, answerKeyData, answerKe
       // fullMatch could be " A. " or "A. " or " A." or "A."
       // We want index to point to the letter position
       let letterIndex = matchIndex;
-      if (fullMatch.startsWith(' ')) {
-        letterIndex = matchIndex + 1; // Point to the letter after space
+      if (/^\s/.test(fullMatch)) {
+        letterIndex = matchIndex + fullMatch.match(/^\s*/)[0].length; // Point to the letter after any whitespace
       }
       
       // Check if this is already captured as a starred match
@@ -548,11 +558,18 @@ function extractQuestionData(content, type, questionNum, answerKeyData, answerKe
         // Unstarred: index points to the letter
         // We need to find where the period and spaces end
         const letterIndex = currentMarker.index;
-        // Find the period after the letter
-        const periodIndex = content.indexOf('.', letterIndex);
-        if (periodIndex !== -1) {
-          // Skip the period and any spaces after it
-          let pos = periodIndex + 1;
+        // Find the marker char ('.' or ')') after the letter
+        const dotIndex = content.indexOf('.', letterIndex);
+        const parenIndex = content.indexOf(')', letterIndex);
+        let markerIdx = -1;
+        if (dotIndex !== -1 && parenIndex !== -1) {
+          markerIdx = Math.min(dotIndex, parenIndex);
+        } else {
+          markerIdx = dotIndex !== -1 ? dotIndex : parenIndex;
+        }
+        if (markerIdx !== -1) {
+          // Skip the marker and any spaces after it
+          let pos = markerIdx + 1;
           while (pos < content.length && (content[pos] === ' ' || content[pos] === '\t')) {
             pos++;
           }
@@ -650,15 +667,14 @@ function extractQuestionData(content, type, questionNum, answerKeyData, answerKe
       });
     }
     
-    // Get correct answer from answer key map or marked option
-    if (answerKeyMap[questionNum] && answerKeyMap[questionNum].type === 'mcq') {
+    // Get correct answer - prioritize marked option (*) over answer key
+    const markedOption = options.findIndex(opt => opt.isMarked);
+    if (markedOption !== -1) {
+      // Marked option in question takes priority
+      correctAnswer = markedOption;
+    } else if (answerKeyMap[questionNum] && answerKeyMap[questionNum].type === 'mcq') {
+      // Fallback to answer key if no marked option
       correctAnswer = answerKeyMap[questionNum].answer;
-    } else {
-      // Fallback to marked option
-      const markedOption = options.findIndex(opt => opt.isMarked);
-      if (markedOption !== -1) {
-        correctAnswer = markedOption;
-      }
     }
     
   } else if (type === 'truefalse') {
@@ -863,12 +879,17 @@ function extractQuestionData(content, type, questionNum, answerKeyData, answerKe
       }
     }
     
-    // Get correct answers from answer key map or marked statements
-    if (answerKeyMap[questionNum] && answerKeyMap[questionNum].type === 'truefalse') {
+    // Get correct answers - prioritize marked statements (*) over answer key
+    const markedAnswers = options.map(opt => opt.isMarked);
+    const hasMarked = markedAnswers.some(m => m);
+    if (hasMarked) {
+      // Marked statements in question take priority
+      correctAnswer = markedAnswers;
+    } else if (answerKeyMap[questionNum] && answerKeyMap[questionNum].type === 'truefalse') {
+      // Fallback to answer key if no marked statements
       correctAnswer = answerKeyMap[questionNum].answer;
     } else {
-      // Fallback to marked statements
-      correctAnswer = options.map(opt => opt.isMarked);
+      correctAnswer = markedAnswers;
     }
     
   } else {
@@ -914,7 +935,7 @@ function convertToStateFormat(items) {
         type: item.type,
         answer: item.answer !== null && item.answer !== undefined 
           ? (item.type === 'shortanswer' && !Array.isArray(item.answer) ? [item.answer] : item.answer)
-          : (item.type === 'shortanswer' ? [] : (item.type === 'truefalse' ? [] : 0)),
+          : (item.type === 'shortanswer' ? [] : (item.type === 'truefalse' ? [] : null)),
         score: item.type === 'truefalse' ? 1.0 : item.type === 'shortanswer' ? 0.5 : 0.25
       };
       

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useFormMaker } from './hooks/useFormMaker';
 import { useQuizSubmission } from './hooks/useQuizSubmission';
 import { useAIServices } from './hooks/useAIServices';
-import { useNotification } from '../../contexts/NotificationContext';
 import TextInputPanel from './components/TextInputPanel';
 import EquationModal from './components/EquationModal';
 import ConfigurationModal from './components/ConfigurationModal';
@@ -11,7 +10,6 @@ import QuizPreview from './QuizPreview';
 import FileUploadModal from './FileUploadModal';
 import MatrixUploadModal from './MatrixUploadModal';
 import QuestionGeneratorModal from './QuestionGeneratorModal';
-import ConfirmDialog from './components/ConfirmDialog';
 
 function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubmit }) {
   // Use custom hooks
@@ -43,7 +41,6 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
 
   const { isSubmitting, submitQuiz } = useQuizSubmission();
   const { isLoading, extractQuestions, matrixQuestion, createQuestions: generateQuestions } = useAIServices();
-  const { success, warning } = useNotification();
 
   // Modal states
   const [showExerciseModal, setShowExerciseModal] = useState(false);
@@ -51,14 +48,13 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
   const [showModal, setShowModal] = useState(false);
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [showEquationModal, setShowEquationModal] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // Handle file upload
   const handleExtractQuestions = async () => {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput?.files[0];
     if (!file) {
-      warning("Vui lòng chọn file trước.", 4000);
+      alert("Vui lòng chọn file trước.");
       return;
     }
     await extractQuestions(file, setRawText, setQuizTitle, quizTitle);
@@ -70,7 +66,7 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
     const fileInput = document.getElementById('matrixInput');
     const file = fileInput?.files[0];
     if (!file) {
-      warning("Vui lòng chọn file trước.", 4000);
+      alert("Vui lòng chọn file trước.");
       return;
     }
     await matrixQuestion(file, setRawText);
@@ -98,15 +94,12 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
 
   // Handle clear
   const handleClear = () => {
-    setShowConfirmDialog(true);
-  };
-
-  const handleConfirmClear = () => {
-    setRawText('');
-    setQuizTitle('');
-    setList([]);
-    setOptionList([]);
-    success("Đã xóa toàn bộ dữ liệu.", 3000);
+    if (window.confirm("Bạn có chắc muốn xóa toàn bộ dữ liệu đã nhập?")) {
+      setRawText('');
+      setQuizTitle('');
+      setList([]);
+      setOptionList([]);
+    }
   };
 
   // Keyboard shortcuts
@@ -220,15 +213,6 @@ function FormMaker({ isEditing = false, initialData = null, onSubmit: customSubm
         mcqRef={mcqRef}
         trueFalseRef={trueFalseRef}
         shortAnswerRef={shortAnswerRef}
-      />
-
-      {/* Confirm Dialog */}
-      <ConfirmDialog
-        isOpen={showConfirmDialog}
-        onClose={() => setShowConfirmDialog(false)}
-        onConfirm={handleConfirmClear}
-        title="Xác nhận xóa"
-        message="Bạn có chắc muốn xóa toàn bộ dữ liệu đã nhập? Hành động này không thể hoàn tác."
       />
     </div>
   );

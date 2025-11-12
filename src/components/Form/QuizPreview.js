@@ -1,7 +1,7 @@
 import React from 'react';
 import { MathJax } from 'better-react-mathjax';
 
-function QuizPreview({ quizTitle, questions, options }) {
+function QuizPreview({ quizTitle, questions, options, onAnswerChange }) {
   if (!questions || questions.length === 0) {
     return (
       <div className="p-6 bg-white rounded-lg shadow-md h-full overflow-y-auto flex items-center justify-center">
@@ -73,9 +73,12 @@ function QuizPreview({ quizTitle, questions, options }) {
                   options[index].map((opt, optIndex) => (
                     <div
                       key={opt.id || optIndex}
-                      className={`flex items-start p-2 rounded ${
-                        question.answer === optIndex ? 'bg-green-100 border border-green-300' : 'bg-white'
-                      }`}
+                      onClick={() => onAnswerChange && onAnswerChange(index, optIndex)}
+                      className={`flex items-start p-2 rounded transition-colors ${
+                        question.answer === optIndex 
+                          ? 'bg-green-100 border border-green-300' 
+                          : 'bg-white border border-gray-200 hover:bg-gray-50'
+                      } ${onAnswerChange ? 'cursor-pointer' : ''}`}
                     >
                       <span className="font-medium mr-2">{String.fromCharCode(65 + optIndex)}.</span>
                       <div className="prose-sm max-w-none flex-1">
@@ -103,10 +106,11 @@ function QuizPreview({ quizTitle, questions, options }) {
                 {options[index] && options[index].length > 0 ? (
                   options[index].map((opt, optIndex) => (
                     <div 
-                      key={opt.id || optIndex} 
-                      className={`p-2 rounded flex items-start ${
+                      key={opt.id || optIndex}
+                      onClick={() => onAnswerChange && onAnswerChange(index, optIndex)}
+                      className={`p-2 rounded flex items-start transition-colors ${
                         opt.answer ? 'bg-green-100 border border-green-300' : 'bg-red-100 border border-red-300'
-                      }`}
+                      } ${onAnswerChange ? 'cursor-pointer hover:opacity-80' : ''}`}
                     >
                       <span className="font-medium mr-2">{String.fromCharCode(97 + optIndex)}.</span>
                       <div className="flex-1 prose-sm max-w-none">

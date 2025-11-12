@@ -17,6 +17,7 @@ const Form = lazy(() => import("./components/Form/Form"));
 const FormMaker = lazy(() => import("./components/Form/FormMaker"));
 const PinVerify = lazy(() => import("./components/Form/PinVerify"));
 const ResultFetch = lazy(() => import("./components/Form/ResultFetch"));
+const ResultSummary = lazy(() => import("./components/Form/ResultSummary"));
 const DisplayPin = lazy(() => import("./components/Form/DisplayPin"));
 const ExamsCreated = lazy(() => import("./components/Form/ExamsCreated"));
 const ExamsAttempted = lazy(() => import("./components/Form/ExamsAttempted"));
@@ -126,6 +127,7 @@ function App() {
                           <Route path="/pinverify" element={<PinVerify />} />
                           {/* <Route path="/ExamAccess" element={<PinVerify />} /> */}
                           <Route path="/pinverify/Form/:pin" element={<Form />} />
+                          <Route path="/pinverify/Form/:pin/ResultSummary/:studentEmail/:attemptId" element={<ResultSummary />} />
                           
                           {/* Protected Routes */}
                           <Route path="/FormMaker" element={<ProtectedRoute><FormMaker /></ProtectedRoute>} />
