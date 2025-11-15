@@ -10,6 +10,7 @@ import { FiUpload } from "react-icons/fi";
 import { matrixQuestionsJSONFromSnapshot } from "../components/AI/AIService";
 import { cleanMatrixResult, mergeTemplateWithExisting } from "../utils/questionBankUtils";
 import { PROMPT_VERSION as QUESTION_BANK_PROMPT_VERSION, MATRIX_ANALYSIS_PROMPT } from "./QuestionBank";
+import { useNotification } from "../contexts/NotificationContext";
 
 function QuestionBankDetail() {
   const { bankId } = useParams();
@@ -47,9 +48,23 @@ function QuestionBankDetail() {
   const [isReanalyzing, setIsReanalyzing] = useState(false);
   const [reanalyzeError, setReanalyzeError] = useState(null);
   const [reanalyzePreview, setReanalyzePreview] = useState(null);
+  
+  // Question view states
+  const [selectedRequirement, setSelectedRequirement] = useState(null);
+  const [requirementQuestions, setRequirementQuestions] = useState([]);
+  
+  // Question edit/delete states
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [editQuestionText, setEditQuestionText] = useState("");
+  const [editQuestionOptions, setEditQuestionOptions] = useState([]);
+  const [isDeleteQuestionModalOpen, setIsDeleteQuestionModalOpen] = useState(false);
+  const [deletingQuestion, setDeletingQuestion] = useState(null);
+  const [selectedQuestions, setSelectedQuestions] = useState(new Set());
+  const [isDeleteSelectedModalOpen, setIsDeleteSelectedModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const auth = getAuth();
+  const { success, error, warning, info } = useNotification();
 
   const getTimestampValue = (value) => {
     if (!value) return 0;
@@ -156,9 +171,10 @@ function QuestionBankDetail() {
       }));
 
       closeDeleteModal();
-    } catch (error) {
-      console.error("Error deleting item:", error);
-      alert("Có lỗi xảy ra khi xóa mục");
+      success("Đã xóa mục thành công!");
+    } catch (err) {
+      console.error("Error deleting item:", err);
+      error("Có lỗi xảy ra khi xóa mục");
     }
   };
   
@@ -230,9 +246,10 @@ function QuestionBankDetail() {
       }));
       
       closeEditModal();
-    } catch (error) {
-      console.error("Error editing item:", error);
-      alert("Có lỗi xảy ra khi chỉnh sửa mục");
+      success("Đã cập nhật mục thành công!");
+    } catch (err) {
+      console.error("Error editing item:", err);
+      error("Có lỗi xảy ra khi chỉnh sửa mục");
     }
   };
   
@@ -260,7 +277,7 @@ function QuestionBankDetail() {
 
   const handleReanalyze = async () => {
     if (!questionBank?.matrixSource?.snapshot) {
-      alert("Ngân hàng này chưa lưu dữ liệu nguồn để phân tích lại.");
+      warning("Ngân hàng này chưa lưu dữ liệu nguồn để phân tích lại.");
       return;
     }
 
@@ -329,9 +346,10 @@ function QuestionBankDetail() {
       }));
 
       setReanalyzePreview(null);
-    } catch (error) {
-      console.error("Không thể áp dụng kết quả phân tích lại:", error);
-      alert("Có lỗi xảy ra khi cập nhật ngân hàng: " + error.message);
+      success("Đã cập nhật ngân hàng thành công!");
+    } catch (err) {
+      console.error("Không thể áp dụng kết quả phân tích lại:", err);
+      error("Có lỗi xảy ra khi cập nhật ngân hàng: " + err.message);
     }
   };
 
@@ -402,9 +420,10 @@ function QuestionBankDetail() {
       }));
       
       closeAddModal();
-    } catch (error) {
-      console.error("Error adding item:", error);
-      alert("Có lỗi xảy ra khi thêm mục");
+      success("Đã thêm mục thành công!");
+    } catch (err) {
+      console.error("Error adding item:", err);
+      error("Có lỗi xảy ra khi thêm mục");
     }
   };
   
@@ -432,8 +451,412 @@ function QuestionBankDetail() {
   }
   
   // Helper function to render requirement items by difficulty level
+  const openRequirementQuestions = (item, levelName, level, chapterIndex, subContentIndex, itemIndex) => {
+    // Get all questions for this requirement item
+    // Questions are stored after the template item in the requirements array
+    const requirements = questionBank.chapters[chapterIndex]?.subContents[subContentIndex]?.requirements[level] || [];
+    
+    // Find questions that belong to this requirement item
+    // Questions are typically stored after the template item
+    let questions = [];
+    let startIdx = itemIndex + 1;
+    
+    // Find the next template item or end of array
+    let endIdx = requirements.length;
+    for (let i = startIdx; i < requirements.length; i++) {
+      if (requirements[i] && requirements[i]._template) {
+        endIdx = i;
+        break;
+      }
+    }
+    
+    // Collect questions in this range
+    for (let i = startIdx; i < endIdx; i++) {
+      const req = requirements[i];
+      if (req && !req._template && req.questionId) {
+        questions.push(req);
+      }
+    }
+    
+    setSelectedRequirement({
+      item,
+      levelName,
+      level,
+      chapterIndex,
+      subContentIndex,
+      itemIndex,
+      chapterName: questionBank.chapters[chapterIndex]?.name,
+      subContentName: questionBank.chapters[chapterIndex]?.subContents[subContentIndex]?.name
+    });
+    setRequirementQuestions(questions);
+  };
+
+  const closeRequirementQuestions = () => {
+    setSelectedRequirement(null);
+    setRequirementQuestions([]);
+    setSelectedQuestions(new Set());
+  };
+
+  const toggleQuestionSelection = (questionId) => {
+    setSelectedQuestions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(questionId)) {
+        newSet.delete(questionId);
+      } else {
+        newSet.add(questionId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedQuestions.size === requirementQuestions.length) {
+      setSelectedQuestions(new Set());
+    } else {
+      setSelectedQuestions(new Set(requirementQuestions.map(q => q.questionId).filter(id => id)));
+    }
+  };
+
+  const openEditQuestion = (question, questionIndex) => {
+    setEditingQuestion({ question, questionIndex });
+    setEditQuestionText(question.description || question.question || question.question_text || "");
+    
+    // Extract options if MCQ
+    if (question.formattedQuestion?.options) {
+      setEditQuestionOptions(question.formattedQuestion.options.map(opt => ({
+        text: opt.option || opt.text || "",
+        is_correct: opt.is_correct || false
+      })));
+    } else {
+      setEditQuestionOptions([]);
+    }
+  };
+
+  const closeEditQuestion = () => {
+    setEditingQuestion(null);
+    setEditQuestionText("");
+    setEditQuestionOptions([]);
+  };
+
+  const handleEditQuestionSubmit = async () => {
+    if (!editingQuestion || !selectedRequirement || !auth.currentUser) return;
+
+    try {
+      const bankDocRef = doc(db, "users", auth.currentUser.uid, "questionBanks", bankId);
+      const updatedChapters = JSON.parse(JSON.stringify(questionBank.chapters));
+      
+      const { chapterIndex, subContentIndex, level, itemIndex } = selectedRequirement;
+      const requirements = updatedChapters[chapterIndex].subContents[subContentIndex].requirements[level];
+      
+      // Find the range of questions for this requirement item
+      let startIdx = itemIndex + 1;
+      let endIdx = requirements.length;
+      
+      // Find the next template item to determine the end boundary
+      for (let i = startIdx; i < requirements.length; i++) {
+        if (requirements[i] && requirements[i]._template) {
+          endIdx = i;
+          break;
+        }
+      }
+      
+      // Find the question by matching questionId within the valid range
+      let foundIndex = -1;
+      
+      for (let i = startIdx; i < endIdx; i++) {
+        if (requirements[i] && !requirements[i]._template && 
+            requirements[i].questionId === editingQuestion.question.questionId) {
+          foundIndex = i;
+          break;
+        }
+      }
+      
+      if (foundIndex === -1) {
+        error("Không tìm thấy câu hỏi để sửa");
+        return;
+      }
+      
+      // Update question
+      const updatedQuestion = {
+        ...requirements[foundIndex],
+        description: editQuestionText
+      };
+      
+      // Update options if MCQ
+      if (editQuestionOptions.length > 0) {
+        updatedQuestion.formattedQuestion = {
+          ...updatedQuestion.formattedQuestion,
+          options: editQuestionOptions.map(opt => ({
+            option: opt.text,
+            is_correct: opt.is_correct
+          }))
+        };
+        
+        // Update correctAnswer
+        const correctIndex = editQuestionOptions.findIndex(opt => opt.is_correct);
+        if (correctIndex !== -1) {
+          updatedQuestion.correctAnswer = correctIndex;
+        }
+      }
+      
+      requirements[foundIndex] = updatedQuestion;
+      
+      // Update Firestore
+      await updateDoc(bankDocRef, { chapters: updatedChapters });
+      
+      // Update local state
+      setQuestionBank(prev => ({
+        ...prev,
+        chapters: updatedChapters
+      }));
+      
+      // Refresh questions list using updated data
+      const updatedRequirements = updatedChapters[chapterIndex].subContents[subContentIndex].requirements[level];
+      let questions = [];
+      let newStartIdx = itemIndex + 1;
+      let newEndIdx = updatedRequirements.length;
+      
+      // Find the next template item
+      for (let i = newStartIdx; i < updatedRequirements.length; i++) {
+        if (updatedRequirements[i] && updatedRequirements[i]._template) {
+          newEndIdx = i;
+          break;
+        }
+      }
+      
+      // Collect questions in this range
+      for (let i = newStartIdx; i < newEndIdx; i++) {
+        const req = updatedRequirements[i];
+        if (req && !req._template && req.questionId) {
+          questions.push(req);
+        }
+      }
+      
+      // Update the questions list
+      setRequirementQuestions(questions);
+      
+      closeEditQuestion();
+      success("Đã cập nhật câu hỏi thành công!");
+    } catch (err) {
+      console.error("Error updating question:", err);
+      error("Có lỗi xảy ra khi cập nhật câu hỏi: " + err.message);
+    }
+  };
+
+  const openDeleteQuestionModal = (question) => {
+    setDeletingQuestion(question);
+    setIsDeleteQuestionModalOpen(true);
+  };
+
+  const closeDeleteQuestionModal = () => {
+    setDeletingQuestion(null);
+    setIsDeleteQuestionModalOpen(false);
+  };
+
+  const handleDeleteQuestion = async () => {
+    if (!deletingQuestion || !selectedRequirement || !auth.currentUser) return;
+
+    try {
+      const bankDocRef = doc(db, "users", auth.currentUser.uid, "questionBanks", bankId);
+      const updatedChapters = JSON.parse(JSON.stringify(questionBank.chapters));
+      
+      const { chapterIndex, subContentIndex, level, itemIndex } = selectedRequirement;
+      const requirements = updatedChapters[chapterIndex].subContents[subContentIndex].requirements[level];
+      
+      // Find the range of questions for this requirement item
+      let startIdx = itemIndex + 1;
+      let endIdx = requirements.length;
+      
+      // Find the next template item to determine the end boundary
+      for (let i = startIdx; i < requirements.length; i++) {
+        if (requirements[i] && requirements[i]._template) {
+          endIdx = i;
+          break;
+        }
+      }
+      
+      // Find and remove the question within the valid range
+      let foundIndex = -1;
+      
+      for (let i = startIdx; i < endIdx; i++) {
+        if (requirements[i] && !requirements[i]._template && 
+            requirements[i].questionId === deletingQuestion.questionId) {
+          foundIndex = i;
+          break;
+        }
+      }
+      
+      if (foundIndex === -1) {
+        error("Không tìm thấy câu hỏi để xóa");
+        return;
+      }
+      
+      // Remove the question
+      requirements.splice(foundIndex, 1);
+      
+      // Update Firestore
+      await updateDoc(bankDocRef, { chapters: updatedChapters });
+      
+      // Update local state
+      setQuestionBank(prev => ({
+        ...prev,
+        chapters: updatedChapters
+      }));
+      
+      // Refresh questions list using updated data
+      const updatedRequirements = updatedChapters[chapterIndex].subContents[subContentIndex].requirements[level];
+      let questions = [];
+      let newStartIdx = itemIndex + 1;
+      let newEndIdx = updatedRequirements.length;
+      
+      // Find the next template item
+      for (let i = newStartIdx; i < updatedRequirements.length; i++) {
+        if (updatedRequirements[i] && updatedRequirements[i]._template) {
+          newEndIdx = i;
+          break;
+        }
+      }
+      
+      // Collect remaining questions in this range
+      for (let i = newStartIdx; i < newEndIdx; i++) {
+        const req = updatedRequirements[i];
+        if (req && !req._template && req.questionId) {
+          questions.push(req);
+        }
+      }
+      
+      // Update the questions list
+      setRequirementQuestions(questions);
+      
+      closeDeleteQuestionModal();
+      success("Đã xóa câu hỏi thành công!");
+    } catch (err) {
+      console.error("Error deleting question:", err);
+      error("Có lỗi xảy ra khi xóa câu hỏi: " + err.message);
+    }
+  };
+
+  const openDeleteSelectedModal = () => {
+    if (selectedQuestions.size === 0) {
+      warning("Vui lòng chọn ít nhất một câu hỏi để xóa");
+      return;
+    }
+    setIsDeleteSelectedModalOpen(true);
+  };
+
+  const closeDeleteSelectedModal = () => {
+    setIsDeleteSelectedModalOpen(false);
+  };
+
+  const handleDeleteSelectedQuestions = async () => {
+    if (selectedQuestions.size === 0 || !selectedRequirement || !auth.currentUser) {
+      error("Không có câu hỏi nào được chọn để xóa");
+      return;
+    }
+
+    try {
+      const bankDocRef = doc(db, "users", auth.currentUser.uid, "questionBanks", bankId);
+      const updatedChapters = JSON.parse(JSON.stringify(questionBank.chapters));
+      
+      const { chapterIndex, subContentIndex, level, itemIndex } = selectedRequirement;
+      const requirements = updatedChapters[chapterIndex].subContents[subContentIndex].requirements[level];
+      
+      // Find the range of questions for this requirement item
+      // Questions are stored after the template item (at itemIndex) until the next template
+      let startIdx = itemIndex + 1;
+      let endIdx = requirements.length;
+      
+      // Find the next template item to determine the end boundary
+      for (let i = startIdx; i < requirements.length; i++) {
+        if (requirements[i] && requirements[i]._template) {
+          endIdx = i;
+          break;
+        }
+      }
+      
+      // Find all selected questions and collect their indices (in reverse order to avoid index shifting)
+      const indicesToRemove = [];
+      
+      // Only look within the valid range for this requirement
+      for (let i = startIdx; i < endIdx; i++) {
+        if (requirements[i] && !requirements[i]._template && 
+            requirements[i].questionId && selectedQuestions.has(requirements[i].questionId)) {
+          indicesToRemove.push(i);
+        }
+      }
+      
+      // Validate: Only delete questions that are actually selected (double-check)
+      const validIndicesToRemove = indicesToRemove.filter(index => {
+        const question = requirements[index];
+        return question && 
+               !question._template && 
+               question.questionId && 
+               selectedQuestions.has(question.questionId);
+      });
+      
+      if (validIndicesToRemove.length === 0) {
+        error("Không tìm thấy câu hỏi đã chọn để xóa");
+        return;
+      }
+      
+      // Only remove questions that are actually in the selectedQuestions set
+      // Remove questions in reverse order to avoid index shifting issues
+      validIndicesToRemove.sort((a, b) => b - a).forEach(index => {
+        requirements.splice(index, 1);
+      });
+      
+      // Update Firestore
+      await updateDoc(bankDocRef, { chapters: updatedChapters });
+      
+      // Update local state
+      setQuestionBank(prev => ({
+        ...prev,
+        chapters: updatedChapters
+      }));
+      
+      // Clear selection
+      setSelectedQuestions(new Set());
+      
+      // Refresh questions list using updated data
+      // Recalculate questions from updated chapters
+      const updatedRequirements = updatedChapters[chapterIndex].subContents[subContentIndex].requirements[level];
+      let questions = [];
+      let newStartIdx = itemIndex + 1;
+      let newEndIdx = updatedRequirements.length;
+      
+      // Find the next template item
+      for (let i = newStartIdx; i < updatedRequirements.length; i++) {
+        if (updatedRequirements[i] && updatedRequirements[i]._template) {
+          newEndIdx = i;
+          break;
+        }
+      }
+      
+      // Collect remaining questions in this range
+      for (let i = newStartIdx; i < newEndIdx; i++) {
+        const req = updatedRequirements[i];
+        if (req && !req._template && req.questionId) {
+          questions.push(req);
+        }
+      }
+      
+      // Update the questions list
+      setRequirementQuestions(questions);
+      
+      closeDeleteSelectedModal();
+      success(`Đã xóa ${validIndicesToRemove.length} câu hỏi thành công!`);
+    } catch (err) {
+      console.error("Error deleting questions:", err);
+      error("Có lỗi xảy ra khi xóa câu hỏi: " + err.message);
+      closeDeleteSelectedModal();
+    }
+  };
+
   const renderRequirements = (items, levelName, level, subContent, chapterIndex, subContentIndex) => {
     if (!items) items = [];
+    
+    // Count questions for each requirement item
+    const requirements = subContent.requirements?.[level] || [];
     
     return (
       <div className="mb-4">
@@ -451,29 +874,65 @@ function QuestionBankDetail() {
         
         <div className="space-y-2 ml-4">
           {items.length > 0 ? (
-            items.map((item, index) => (
-              <div key={index} className="p-2 bg-gray-50 rounded-md flex justify-between items-center">
-                <p className="text-sm">
-                  {item.description}
-                </p>
-                <div className="flex items-center">
-                  <button 
-                    className="text-blue-500 hover:text-blue-700 p-1 mr-1"
-                    onClick={() => openEditModal('requirement', item, { chapterIndex, subContentIndex }, index, level)}
-                    title="Chỉnh sửa"
-                  >
-                    <MdEdit size={16} />
-                  </button>
-                  <button 
-                    className="text-red-500 hover:text-red-700 p-1"
-                    onClick={() => openDeleteModal('requirement', item, { chapterIndex, subContentIndex }, index, level)}
-                    title="Xóa"
-                  >
-                    <MdDelete size={16} />
-                  </button>
+            items.map((item, index) => {
+              // Count questions for this requirement item
+              let questionCount = 0;
+              let startIdx = index + 1;
+              let endIdx = requirements.length;
+              
+              // Find the next template item
+              for (let i = startIdx; i < requirements.length; i++) {
+                if (requirements[i] && requirements[i]._template) {
+                  endIdx = i;
+                  break;
+                }
+              }
+              
+              // Count questions in this range
+              for (let i = startIdx; i < endIdx; i++) {
+                if (requirements[i] && !requirements[i]._template && requirements[i].questionId) {
+                  questionCount++;
+                }
+              }
+              
+              return (
+                <div 
+                  key={index} 
+                  className={`p-2 rounded-md flex justify-between items-center ${
+                    questionCount > 0 ? 'bg-blue-50 hover:bg-blue-100 cursor-pointer' : 'bg-gray-50'
+                  }`}
+                  onClick={questionCount > 0 ? () => openRequirementQuestions(item, levelName, level, chapterIndex, subContentIndex, index) : undefined}
+                  title={questionCount > 0 ? `Click để xem ${questionCount} câu hỏi` : 'Chưa có câu hỏi'}
+                >
+                  <div className="flex items-center gap-2 flex-1">
+                    <p className="text-sm">
+                      {item.description}
+                    </p>
+                    {questionCount > 0 && (
+                      <span className="text-xs bg-blue-200 text-blue-700 px-2 py-0.5 rounded-full">
+                        {questionCount} câu
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center" onClick={(e) => e.stopPropagation()}>
+                    <button 
+                      className="text-blue-500 hover:text-blue-700 p-1 mr-1"
+                      onClick={() => openEditModal('requirement', item, { chapterIndex, subContentIndex }, index, level)}
+                      title="Chỉnh sửa"
+                    >
+                      <MdEdit size={16} />
+                    </button>
+                    <button 
+                      className="text-red-500 hover:text-red-700 p-1"
+                      onClick={() => openDeleteModal('requirement', item, { chapterIndex, subContentIndex }, index, level)}
+                      title="Xóa"
+                    >
+                      <MdDelete size={16} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <p className="text-gray-500 italic text-sm">Chưa có yêu cầu nào.</p>
           )}
@@ -915,6 +1374,333 @@ function QuestionBankDetail() {
                 }
               >
                 Thêm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for viewing requirement questions */}
+      {selectedRequirement && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-4">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold">Câu hỏi đã import</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  <span className="font-medium">{selectedRequirement.chapterName}</span> - 
+                  <span className="font-medium"> {selectedRequirement.subContentName}</span>
+                </p>
+                <p className="text-sm text-gray-600 mt-1">
+                  <span className="font-medium">{selectedRequirement.levelName}:</span> {selectedRequirement.item.description}
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                {selectedQuestions.size > 0 && (
+                  <button
+                    onClick={openDeleteSelectedModal}
+                    className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm flex items-center gap-2"
+                  >
+                    <MdDelete size={16} />
+                    Xóa đã chọn ({selectedQuestions.size})
+                  </button>
+                )}
+                <button 
+                  onClick={closeRequirementQuestions} 
+                  className="text-gray-500 hover:text-gray-700 text-2xl"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Select all checkbox */}
+            {requirementQuestions.length > 0 && (
+              <div className="mb-4 flex items-center gap-2 pb-3 border-b">
+                <input
+                  type="checkbox"
+                  checked={selectedQuestions.size === requirementQuestions.length && requirementQuestions.length > 0}
+                  onChange={toggleSelectAll}
+                  className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                />
+                <label className="text-sm text-gray-700 cursor-pointer">
+                  Chọn tất cả ({requirementQuestions.length} câu)
+                </label>
+              </div>
+            )}
+
+            {requirementQuestions.length > 0 ? (
+              <div className="space-y-4">
+                {requirementQuestions.map((question, index) => (
+                  <div 
+                    key={question.questionId || index} 
+                    className={`border rounded-lg p-4 ${
+                      selectedQuestions.has(question.questionId) 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3 mb-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedQuestions.has(question.questionId)}
+                        onChange={() => toggleQuestionSelection(question.questionId)}
+                        className="mt-1 w-4 h-4 text-blue-600 rounded focus:ring-blue-500 flex-shrink-0"
+                      />
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700">Câu {index + 1}</span>
+                          <div className="flex items-center gap-2">
+                            {question.importedFrom && (
+                              <span className="text-xs text-gray-500">
+                                Import từ: {question.importedFrom.examTitle}
+                              </span>
+                            )}
+                            <button
+                              onClick={() => openEditQuestion(question, index)}
+                              className="text-blue-500 hover:text-blue-700 p-1"
+                              title="Sửa câu hỏi"
+                            >
+                              <MdEdit size={16} />
+                            </button>
+                            <button
+                              onClick={() => openDeleteQuestionModal(question)}
+                              className="text-red-500 hover:text-red-700 p-1"
+                              title="Xóa câu hỏi"
+                            >
+                              <MdDelete size={16} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Question text */}
+                    <div className="mb-3">
+                      <MathJax>
+                        <div 
+                          className="text-sm text-gray-900"
+                          dangerouslySetInnerHTML={{ __html: question.description || question.question || question.question_text || "Không có nội dung" }}
+                        />
+                      </MathJax>
+                    </div>
+
+                    {/* Question options if MCQ */}
+                    {question.formattedQuestion?.options && (
+                      <div className="ml-4 space-y-1 mb-2">
+                        {question.formattedQuestion.options.map((option, optIndex) => (
+                          <div key={optIndex} className="text-sm text-gray-700">
+                            {String.fromCharCode(65 + optIndex)}. {option.option || option.text}
+                            {option.is_correct && (
+                              <span className="ml-2 text-green-600 font-medium">✓ Đúng</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Classification metadata */}
+                    {question.classificationMeta && (
+                      <div className="mt-2 pt-2 border-t border-gray-100">
+                        <div className="text-xs text-gray-500 space-y-1">
+                          {question.classificationMeta.suggestedByAI && (
+                            <div>Được gợi ý bởi AI</div>
+                          )}
+                          {question.classificationMeta.manualOverride && (
+                            <div>Được phân loại thủ công</div>
+                          )}
+                          {question.classificationMeta.suggestionReason && (
+                            <div>Lý do: {question.classificationMeta.suggestionReason}</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center p-8 text-gray-500 italic">
+                Chưa có câu hỏi nào được import cho yêu cầu này.
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={closeRequirementQuestions}
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for editing question */}
+      {editingQuestion && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-2xl font-bold">Sửa câu hỏi</h2>
+              <button 
+                onClick={closeEditQuestion} 
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 text-sm font-bold mb-2">
+                  Nội dung câu hỏi
+                </label>
+                <textarea
+                  value={editQuestionText}
+                  onChange={(e) => setEditQuestionText(e.target.value)}
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  rows={4}
+                />
+              </div>
+
+              {/* Options for MCQ */}
+              {editQuestionOptions.length > 0 && (
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2">
+                    Các lựa chọn
+                  </label>
+                  <div className="space-y-2">
+                    {editQuestionOptions.map((option, optIndex) => (
+                      <div key={optIndex} className="flex items-center gap-2">
+                        <span className="text-sm font-medium w-6">{String.fromCharCode(65 + optIndex)}.</span>
+                        <input
+                          type="text"
+                          value={option.text}
+                          onChange={(e) => {
+                            const newOptions = [...editQuestionOptions];
+                            newOptions[optIndex].text = e.target.value;
+                            setEditQuestionOptions(newOptions);
+                          }}
+                          className="flex-1 shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          placeholder="Nhập lựa chọn"
+                        />
+                        <label className="flex items-center gap-1 text-sm">
+                          <input
+                            type="radio"
+                            name="correctAnswer"
+                            checked={option.is_correct}
+                            onChange={() => {
+                              const newOptions = editQuestionOptions.map((opt, idx) => ({
+                                ...opt,
+                                is_correct: idx === optIndex
+                              }));
+                              setEditQuestionOptions(newOptions);
+                            }}
+                          />
+                          <span>Đúng</span>
+                        </label>
+                        {editQuestionOptions.length > 2 && (
+                          <button
+                            onClick={() => {
+                              const newOptions = editQuestionOptions.filter((_, idx) => idx !== optIndex);
+                              setEditQuestionOptions(newOptions);
+                            }}
+                            className="text-red-500 hover:text-red-700 p-1"
+                            title="Xóa lựa chọn"
+                          >
+                            <MdDelete size={16} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    {editQuestionOptions.length < 6 && (
+                      <button
+                        onClick={() => setEditQuestionOptions([...editQuestionOptions, { text: "", is_correct: false }])}
+                        className="text-blue-500 hover:text-blue-700 text-sm flex items-center gap-1"
+                      >
+                        <IoAddCircleOutline size={16} />
+                        Thêm lựa chọn
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={closeEditQuestion}
+                  className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-100"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleEditQuestionSubmit}
+                  disabled={!editQuestionText.trim()}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Lưu thay đổi
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for confirming question deletion */}
+      {isDeleteQuestionModalOpen && deletingQuestion && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Xác nhận xóa câu hỏi</h2>
+            <p className="mb-4 text-gray-700">
+              Bạn có chắc chắn muốn xóa câu hỏi này? Hành động này không thể hoàn tác.
+            </p>
+            <div className="mb-4 p-3 bg-gray-50 rounded text-sm">
+              <MathJax>
+                <div 
+                  dangerouslySetInnerHTML={{ 
+                    __html: deletingQuestion.description || deletingQuestion.question || deletingQuestion.question_text || "Không có nội dung" 
+                  }} 
+                />
+              </MathJax>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={closeDeleteQuestionModal}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-100"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleDeleteQuestion}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for confirming multiple questions deletion */}
+      {isDeleteSelectedModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Xác nhận xóa câu hỏi</h2>
+            <p className="mb-4 text-gray-700">
+              Bạn có chắc chắn muốn xóa <span className="font-medium">{selectedQuestions.size}</span> câu hỏi đã chọn? Hành động này không thể hoàn tác.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={closeDeleteSelectedModal}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-100"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleDeleteSelectedQuestions}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Xóa
               </button>
             </div>
           </div>

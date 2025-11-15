@@ -2,7 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import mammoth from 'mammoth';
 import { summarizeQuestionBankForPrompt } from "../../utils/questionBankUtils";
 
-const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "AIzaSyAeMN1c914F4WzgwKKbr4C29KbYx76h5a4";
+const apiKey = "AIzaSyAALD14Mjabz9zKhV7y7ToaleIEieoEtmA";
 const ai = new GoogleGenAI({ apiKey });
 
 const responseSchema = {
@@ -98,7 +98,15 @@ const model20flash = {
   }
 };
 
-
+const model25flashlite = {
+  model: "gemini-flash-lite-latest",
+  config: {
+    temperature: 0.3,
+    thinkingConfig: {
+      thinkingBudget: 0,
+    }
+  }
+} 
 const model15pro = {
   model: "gemini-2.5-pro",
   config: {
@@ -245,6 +253,91 @@ export async function suggestQuestionPlacement(question, bankStructure, options 
   };
 }
 
+export async function suggestQuestionPlacementBatch(questions, bankStructure, options = {}) {
+  if (!questions || !Array.isArray(questions) || questions.length === 0) {
+    throw new Error("Thiếu dữ liệu câu hỏi để gợi ý");
+  }
+
+  // Create normalized questions with index for fallback mapping
+  const normalizedQuestions = questions.map((q, index) => {
+    const normalized = extractQuestionForPrompt(q);
+    // Ensure id is present and add index for fallback
+    if (!normalized.id) {
+      normalized.id = q.id || q.questionId || `question_${index}`;
+    }
+    normalized._index = index; // Internal index for fallback mapping
+    return normalized;
+  });
+  
+  const bankSummary = summarizeQuestionBankForPrompt(bankStructure);
+  const promptVersion = options.promptVersion || "v1-batch";
+
+  const prompt = `Bạn là trợ lý phân loại câu hỏi ở phiên bản ${promptVersion}.\n\n` +
+    `Cấu trúc ngân hàng câu hỏi (theo chỉ số mảng):\n${bankSummary}\n\n` +
+    `Danh sách ${questions.length} câu hỏi cần phân loại:\n${JSON.stringify(normalizedQuestions.map(({_index, ...q}) => q), null, 2)}\n\n` +
+    `QUAN TRỌNG: Trước khi phân loại, hãy xác định lĩnh vực/môn học của ngân hàng câu hỏi dựa trên tên chương và nội dung.\n` +
+    `- Nếu câu hỏi KHÔNG thuộc lĩnh vực/môn học của ngân hàng câu hỏi (ví dụ: câu hỏi Hóa học trong ngân hàng Toán học), hãy trả về:\n` +
+    `  {"questionId": "id của câu hỏi (phải khớp chính xác với id trong danh sách trên)", "chapterIndex": null, "subContentIndex": null, "requirement": null, "confidence": 0, "reason": "Câu hỏi không liên quan đến lĩnh vực của ngân hàng câu hỏi này"}\n` +
+    `- Chỉ phân loại câu hỏi khi nó THỰC SỰ liên quan đến nội dung trong ngân hàng câu hỏi.\n` +
+    `- Không cố gắng ép buộc câu hỏi vào bất kỳ vị trí nào nếu nó không phù hợp.\n\n` +
+    `Hãy xác định vị trí phù hợp nhất cho từng câu hỏi.\n` +
+    `Luôn trả về JSON array với cấu trúc:\n` +
+    `[{"questionId": "id của câu hỏi (PHẢI khớp chính xác với trường 'id' trong danh sách câu hỏi trên)", "chapterIndex": number | null, "subContentIndex": number | null, "requirement": "nhanBiet|thongHieu|vanDung|vanDungCao|null", "confidence": number từ 0 đến 1, "reason": "Giải thích ngắn gọn"}]\n` +
+    `LƯU Ý: Trường "questionId" PHẢI khớp chính xác với trường "id" trong danh sách câu hỏi ở trên. Nếu câu hỏi không liên quan hoặc không đủ dữ liệu, hãy để các trường index là null, requirement là null, confidence = 0 và giải thích rõ lý do trong trường "reason".`;
+
+  const response = await ai.models.generateContent({
+    model: model25flashlite.model,
+    contents: [{ text: prompt }],
+    config: model25flashlite.config
+  });
+
+  const text = response?.text || "";
+  const parsed = parseJsonArrayFromText(text);
+
+  // Map results back to questions by ID, with index fallback
+  const resultsMap = new Map();
+  if (Array.isArray(parsed)) {
+    parsed.forEach((item, index) => {
+      if (item.questionId) {
+        resultsMap.set(item.questionId, {
+          chapterIndex: typeof item.chapterIndex === "number" ? item.chapterIndex : null,
+          subContentIndex: typeof item.subContentIndex === "number" ? item.subContentIndex : null,
+          requirement: item.requirement || null,
+          confidence: typeof item.confidence === "number" ? item.confidence : 0,
+          reason: item.reason || ""
+        });
+      }
+    });
+  }
+
+  // Return results in the same order as input questions
+  // Try to match by ID first, then by index as fallback
+  return questions.map((q, index) => {
+    const id = q.id || q.questionId || normalizedQuestions[index]?.id;
+    const result = resultsMap.get(id);
+    
+    // Fallback: if ID doesn't match, try to match by array index
+    if (!result && Array.isArray(parsed) && parsed[index]) {
+      const item = parsed[index];
+      return {
+        chapterIndex: typeof item.chapterIndex === "number" ? item.chapterIndex : null,
+        subContentIndex: typeof item.subContentIndex === "number" ? item.subContentIndex : null,
+        requirement: item.requirement || null,
+        confidence: typeof item.confidence === "number" ? item.confidence : 0,
+        reason: item.reason || ""
+      };
+    }
+    
+    return result || {
+      chapterIndex: null,
+      subContentIndex: null,
+      requirement: null,
+      confidence: 0,
+      reason: "Không có gợi ý từ AI"
+    };
+  });
+}
+
 // Helper functions
 function readFileAsArrayBuffer(file) {
   return new Promise((resolve, reject) => {
@@ -386,10 +479,15 @@ function buildPlacementPrompt(question, bankStructure, promptVersion) {
   return `Bạn là trợ lý phân loại câu hỏi ở phiên bản ${promptVersion}.\n\n` +
     `Cấu trúc ngân hàng câu hỏi (theo chỉ số mảng):\n${bankSummary}\n\n` +
     `Câu hỏi cần phân loại:\n${JSON.stringify(normalizedQuestion, null, 2)}\n\n` +
+    `QUAN TRỌNG: Trước khi phân loại, hãy xác định lĩnh vực/môn học của ngân hàng câu hỏi dựa trên tên chương và nội dung.\n` +
+    `- Nếu câu hỏi KHÔNG thuộc lĩnh vực/môn học của ngân hàng câu hỏi (ví dụ: câu hỏi Hóa học trong ngân hàng Toán học), hãy trả về:\n` +
+    `  {"chapterIndex": null, "subContentIndex": null, "requirement": null, "confidence": 0, "reason": "Câu hỏi không liên quan đến lĩnh vực của ngân hàng câu hỏi này"}\n` +
+    `- Chỉ phân loại câu hỏi khi nó THỰC SỰ liên quan đến nội dung trong ngân hàng câu hỏi.\n` +
+    `- Không cố gắng ép buộc câu hỏi vào bất kỳ vị trí nào nếu nó không phù hợp.\n\n` +
     `Hãy xác định vị trí phù hợp nhất cho câu hỏi này.\n` +
     `Luôn trả về JSON với cấu trúc:\n` +
     `{"chapterIndex": number | null, "subContentIndex": number | null, "requirement": "nhanBiet|thongHieu|vanDung|vanDungCao|null", "confidence": number từ 0 đến 1, "reason": "Giải thích ngắn gọn"}.\n` +
-    `Nếu không đủ dữ liệu hãy để các trường index là null, requirement là null và confidence = 0.`;
+    `Nếu câu hỏi không liên quan hoặc không đủ dữ liệu, hãy để các trường index là null, requirement là null, confidence = 0 và giải thích rõ lý do trong trường "reason".`;
 }
 
 function extractQuestionForPrompt(question) {
@@ -436,5 +534,23 @@ function parseJsonFromText(text) {
   } catch (err) {
     console.warn("Không thể parse JSON từ phản hồi AI:", text);
     return {};
+  }
+}
+
+function parseJsonArrayFromText(text) {
+  if (!text) return [];
+  const trimmed = text.trim();
+
+  // Try to find JSON array in the text
+  const arrayMatch = trimmed.match(/\[[\s\S]*\]/);
+  if (!arrayMatch) {
+    return [];
+  }
+
+  try {
+    return JSON.parse(arrayMatch[0]);
+  } catch (err) {
+    console.warn("Không thể parse JSON array từ phản hồi AI:", text);
+    return [];
   }
 }

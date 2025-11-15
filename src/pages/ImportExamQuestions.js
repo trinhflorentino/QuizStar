@@ -6,7 +6,7 @@ import { default as db } from "../services/firebaseConfig";
 import { IoChevronBack } from "react-icons/io5";
 import { FaFolder, FaFileAlt, FaArrowLeft, FaArrowRight, FaHome, FaChevronRight } from "react-icons/fa";
 import { MathJax, MathJaxContext } from "better-react-mathjax";
-import { suggestQuestionPlacement } from "../components/AI/AIService";
+import { suggestQuestionPlacementBatch } from "../components/AI/AIService";
 import { calculateRequirementCoverage } from "../utils/questionBankUtils";
 
 function ImportExamQuestions() {
@@ -27,6 +27,8 @@ function ImportExamQuestions() {
 
   // For requirement selection UI
   const [expandedRequirements, setExpandedRequirements] = useState({});
+  const [expandedSubContents, setExpandedSubContents] = useState({}); // Track expanded subContents
+  const [expandedRequirementLevels, setExpandedRequirementLevels] = useState({}); // Track expanded requirement levels
   const [suggestionsLoading, setSuggestionsLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -159,27 +161,48 @@ function ImportExamQuestions() {
     setSuggestionsLoading(true);
 
     try {
-      const updated = [];
-      for (const mapping of mappings) {
-        try {
-          const suggestion = await suggestQuestionPlacement(mapping.question, structureForAI);
-          let nextMapping = { ...mapping, aiSuggestion: suggestion };
-          if (isValidSuggestion(suggestion)) {
-            nextMapping = {
-              ...nextMapping,
-              chapterIndex: suggestion.chapterIndex,
-              subContentIndex: suggestion.subContentIndex,
-              requirement: suggestion.requirement,
-              manualOverride: false
-            };
-          }
-          updated.push(nextMapping);
-        } catch (error) {
-          console.error("Error generating suggestion for question:", error);
-          updated.push({ ...mapping, aiSuggestion: null });
-        }
-      }
+      // Extract all questions from mappings
+      const questions = mappings.map(m => m.question);
 
+      // Make a single batch request for all questions
+      const suggestions = await suggestQuestionPlacementBatch(questions, structureForAI);
+
+      // Map suggestions back to mappings
+      const updated = mappings.map((mapping, index) => {
+        const suggestion = suggestions[index];
+        let nextMapping = { ...mapping, aiSuggestion: suggestion };
+
+        if (isValidSuggestion(suggestion)) {
+          // Question is related - apply the suggestion
+          nextMapping = {
+            ...nextMapping,
+            chapterIndex: suggestion.chapterIndex,
+            subContentIndex: suggestion.subContentIndex,
+            requirement: suggestion.requirement,
+            selected: true, // Automatically select when AI classifies
+            manualOverride: false
+          };
+        } else {
+          // Question is not related - clear the mapping so user must manually select
+          // Don't keep the default first requirement assignment
+          nextMapping = {
+            ...nextMapping,
+            chapterIndex: null,
+            subContentIndex: null,
+            requirement: null,
+            selected: false, // Don't select if not classified
+            manualOverride: false
+          };
+        }
+
+        return nextMapping;
+      });
+
+      setQuestionsToImport(updated);
+    } catch (error) {
+      console.error("Error generating suggestions for questions:", error);
+      // On error, keep the mappings but without AI suggestions
+      const updated = mappings.map(mapping => ({ ...mapping, aiSuggestion: null }));
       setQuestionsToImport(updated);
     } finally {
       setSuggestionsLoading(false);
@@ -210,7 +233,7 @@ function ImportExamQuestions() {
       // Fetch exam questions from collection
       const settersCollectionRef = collection(db, "Paper_Setters", exam.id, "Question_Papers_MCQ");
       const docos = await getDocs(settersCollectionRef);
-      
+
       if (docos.docs.length === 0) {
         setExamQuestions([]);
         setQuestionsToImport([]);
@@ -218,16 +241,16 @@ function ImportExamQuestions() {
         setLoading(false);
         return;
       }
-      
+
       // Get question data
       const docosData = docos.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
-      
+
       let questionsData = [];
       let answersData = [];
-      
+
       // Check if the exam follows the question_question format (Form.js format)
       if (docosData.length > 0 && docosData[0].question_question) {
         questionsData = docosData[0].question_question.map((q, index) => ({
@@ -241,7 +264,7 @@ function ImportExamQuestions() {
           originalFormat: true,
           originalIndex: index
         }));
-        
+
         // Get answers if available in the original format
         if (docos.docs.length > 1 && docosData[1].answer_answer) {
           answersData = docosData[1].answer_answer;
@@ -254,7 +277,7 @@ function ImportExamQuestions() {
             }
           }
         }
-        
+
         // Mark correct answers if we have answer data
         if (answersData && answersData.length > 0) {
           questionsData.forEach((question, qIndex) => {
@@ -270,12 +293,12 @@ function ImportExamQuestions() {
         // Use the existing format from the current implementation
         questionsData = docosData.filter(doc => !doc.id.includes('_answerSheet') && !doc.answer_answer);
       }
-      
+
       // Sort questions by their order if available
       questionsData.sort((a, b) => (a.order || 0) - (b.order || 0));
-      
+
       setExamQuestions(questionsData);
-      
+
       // Initialize questionsToImport with default mappings
       if (questionBank && questionBank.chapters && questionBank.chapters.length > 0) {
         const defaultChapter = questionBank.chapters[0];
@@ -285,36 +308,46 @@ function ImportExamQuestions() {
 
         const initialMappings = questionsData.map(q => ({
           question: q,
-          selected: true,
-          chapterIndex: 0,
-          subContentIndex: defaultSubContent ? 0 : null,
-          requirement: "nhanBiet", // Default requirement level
+          selected: false, // Start with false, only select when classified
+          chapterIndex: null,
+          subContentIndex: null,
+          requirement: null,
           aiSuggestion: null,
           manualOverride: false
         }));
 
         setQuestionsToImport(initialMappings);
-        await generateSuggestionsForMappings(initialMappings);
-      }
 
-      // Move to step 2
-      setStep(2);
+        // Move to step 2 immediately (don't wait for AI)
+        setStep(2);
+        setLoading(false);
+
+        // Generate AI suggestions in the background
+        generateSuggestionsForMappings(initialMappings);
+      } else {
+        setStep(2);
+        setLoading(false);
+      }
     } catch (error) {
       console.error("Error fetching exam questions:", error);
       alert("Không thể tải câu hỏi từ đề thi này");
-    } finally {
       setLoading(false);
     }
   };
   
-  // Toggle question selection checkbox
+  // Toggle question selection checkbox (only allow if classified)
   const toggleQuestionSelection = (questionId) => {
     setQuestionsToImport(prev => 
-      prev.map(q => 
-        q.question.id === questionId 
-          ? { ...q, selected: !q.selected } 
-          : q
-      )
+      prev.map(q => {
+        if (q.question.id !== questionId) return q;
+        
+        // Only allow toggling if question is classified
+        if (!q.requirement || q.chapterIndex === null || q.subContentIndex === null) {
+          return q; // Don't allow selection if not classified
+        }
+        
+        return { ...q, selected: !q.selected };
+      })
     );
   };
   
@@ -340,13 +373,37 @@ function ImportExamQuestions() {
         return;
       }
       
+      // Filter out questions that don't have a valid requirement mapping
+      const validQuestions = selectedQuestions.filter(mapping => {
+        return mapping.chapterIndex !== null && 
+               mapping.subContentIndex !== null && 
+               mapping.requirement !== null &&
+               typeof mapping.chapterIndex === 'number' &&
+               typeof mapping.subContentIndex === 'number' &&
+               REQUIREMENT_KEYS.includes(mapping.requirement);
+      });
+      
+      if (validQuestions.length === 0) {
+        alert("Vui lòng phân loại ít nhất một câu hỏi trước khi import. Các câu hỏi chưa được phân loại sẽ không được import.");
+        setImporting(false);
+        return;
+      }
+      
+      if (validQuestions.length < selectedQuestions.length) {
+        const unclassifiedCount = selectedQuestions.length - validQuestions.length;
+        if (!window.confirm(`${unclassifiedCount} câu hỏi chưa được phân loại sẽ không được import. Bạn có muốn tiếp tục import ${validQuestions.length} câu hỏi đã được phân loại không?`)) {
+          setImporting(false);
+          return;
+        }
+      }
+      
       // Create a deep copy of the question bank chapters
       const updatedChapters = JSON.parse(JSON.stringify(questionBank.chapters));
       
       // Group questions by chapter and subcontent for batch processing
       const questionsByChapterAndSubcontent = {};
       
-      selectedQuestions.forEach(mapping => {
+      validQuestions.forEach(mapping => {
         const key = `${mapping.chapterIndex}-${mapping.subContentIndex}-${mapping.requirement}`;
         if (!questionsByChapterAndSubcontent[key]) {
           questionsByChapterAndSubcontent[key] = [];
@@ -381,83 +438,215 @@ function ImportExamQuestions() {
           updatedChapters[chapterIndex].subContents[subContentIndex].requirements[requirement] = [];
         }
         
-        // Add questions to the requirement
+        // Get the requirements array for this level
+        const requirementsArray = updatedChapters[chapterIndex].subContents[subContentIndex].requirements[requirement];
+        
+        // Group questions by itemIndex to insert them in the correct position
+        const questionsByItemIndex = {};
+        
         mappings.forEach(mapping => {
-          const question = mapping.question;
-
-          // Prepare question data for storage
-          let questionData = {
-            description: question.question_text || "Không có mô tả",
-            questionId: question.id,
-            importedFrom: {
-              examId: selectedExam.id,
-              examTitle: selectedExam.quiz_title,
-              importDate: new Date().toISOString()
+          const itemIndex = mapping.itemIndex;
+          if (itemIndex !== null && itemIndex !== undefined) {
+            if (!questionsByItemIndex[itemIndex]) {
+              questionsByItemIndex[itemIndex] = [];
             }
-          };
-
-          questionData.classificationMeta = {
-            requirement: mapping.requirement,
-            chapterIndex: Number(chapterIndex),
-            subContentIndex: Number(subContentIndex),
-            suggestionConfidence: mapping.aiSuggestion?.confidence ?? null,
-            suggestionReason: mapping.aiSuggestion?.reason || null,
-            suggestedByAI: Boolean(mapping.aiSuggestion),
-            manualOverride: Boolean(mapping.manualOverride),
-            assignedAt: new Date().toISOString()
-          };
-
-          // Store original format if available
-          if (question.originalFormat) {
-            // For Form.js format questions
-            questionData.questionType = question.type;
-            
-            // Store formatted question for MCQ
-            if (question.type === 'mcq') {
-              questionData.formattedQuestion = {
-                question: question.question_text,
-                options: question.options.map(opt => ({
-                  option: opt.text || opt.option,
-                  is_correct: opt.is_correct
-                })),
-                type: question.type
-              };
-              
-              // Find correct answer index
-              const correctOptionIndex = question.options.findIndex(opt => opt.is_correct);
-              if (correctOptionIndex !== -1) {
-                questionData.correctAnswer = correctOptionIndex;
-              }
-            } 
-            // Store true/false question data
-            else if (question.type === 'truefalse') {
-              questionData.formattedQuestion = {
-                question: question.question_text,
-                options: question.options.map(opt => ({
-                  option: opt.text || opt.option,
-                  is_correct: opt.is_correct
-                })),
-                type: question.type
-              };
-              
-              // Store correct answers as array of true/false values
-              questionData.correctAnswers = question.options.map(opt => opt.is_correct);
-            }
-            // Store short answer question
-            else if (question.type === 'shortanswer') {
-              questionData.formattedQuestion = {
-                question: question.question_text,
-                type: question.type
-              };
-            }
+            questionsByItemIndex[itemIndex].push(mapping);
           } else {
-            // For the standard format, just store the question data
-            questionData.questionData = question;
+            // If no itemIndex, add to a special group for questions without specific requirement
+            if (!questionsByItemIndex['_no_index']) {
+              questionsByItemIndex['_no_index'] = [];
+            }
+            questionsByItemIndex['_no_index'].push(mapping);
+          }
+        });
+        
+        // Process questions by itemIndex (in reverse order to maintain correct insertion positions)
+        const sortedItemIndices = Object.keys(questionsByItemIndex)
+          .filter(key => key !== '_no_index')
+          .map(key => parseInt(key))
+          .sort((a, b) => b - a); // Sort in reverse order
+        
+        // Insert questions after their respective template items
+        sortedItemIndices.forEach(itemIndex => {
+          const mappingsForItem = questionsByItemIndex[itemIndex];
+          
+          // Verify that itemIndex points to a template item
+          if (!requirementsArray[itemIndex] || !requirementsArray[itemIndex]._template) {
+            console.warn(`Invalid itemIndex ${itemIndex}: not a template item. Adding questions to _no_index group.`);
+            // Fallback: move to _no_index group
+            if (!questionsByItemIndex['_no_index']) {
+              questionsByItemIndex['_no_index'] = [];
+            }
+            questionsByItemIndex['_no_index'].push(...mappingsForItem);
+            return;
           }
           
-          // Add question to requirements
-          updatedChapters[chapterIndex].subContents[subContentIndex].requirements[requirement].push(questionData);
+          // Find the insertion position (after the template item at itemIndex)
+          // Find where existing questions for this template end (before next template)
+          let insertPosition = itemIndex + 1;
+          
+          // Find the next template item to determine the boundary
+          for (let i = itemIndex + 1; i < requirementsArray.length; i++) {
+            if (requirementsArray[i] && requirementsArray[i]._template) {
+              // Found next template, insert before it
+              insertPosition = i;
+              break;
+            }
+          }
+          // If no next template found, insertPosition stays at the end
+          
+          // Prepare and insert questions (in reverse order to maintain positions)
+          const questionsToInsert = [];
+          mappingsForItem.forEach(mapping => {
+            const question = mapping.question;
+
+            // Prepare question data for storage
+            let questionData = {
+              description: question.question_text || "Không có mô tả",
+              questionId: question.id,
+              importedFrom: {
+                examId: selectedExam.id,
+                examTitle: selectedExam.quiz_title,
+                importDate: new Date().toISOString()
+              }
+            };
+
+            questionData.classificationMeta = {
+              requirement: mapping.requirement,
+              chapterIndex: Number(chapterIndex),
+              subContentIndex: Number(subContentIndex),
+              itemIndex: itemIndex,
+              suggestionConfidence: mapping.aiSuggestion?.confidence ?? null,
+              suggestionReason: mapping.aiSuggestion?.reason || null,
+              suggestedByAI: Boolean(mapping.aiSuggestion),
+              manualOverride: Boolean(mapping.manualOverride),
+              assignedAt: new Date().toISOString()
+            };
+
+            // Store original format if available
+            if (question.originalFormat) {
+              // For Form.js format questions
+              questionData.questionType = question.type;
+              
+              // Store formatted question for MCQ
+              if (question.type === 'mcq') {
+                questionData.formattedQuestion = {
+                  question: question.question_text,
+                  options: question.options.map(opt => ({
+                    option: opt.text || opt.option,
+                    is_correct: opt.is_correct
+                  })),
+                  type: question.type
+                };
+                
+                // Find correct answer index
+                const correctOptionIndex = question.options.findIndex(opt => opt.is_correct);
+                if (correctOptionIndex !== -1) {
+                  questionData.correctAnswer = correctOptionIndex;
+                }
+              } 
+              // Store true/false question data
+              else if (question.type === 'truefalse') {
+                questionData.formattedQuestion = {
+                  question: question.question_text,
+                  options: question.options.map(opt => ({
+                    option: opt.text || opt.option,
+                    is_correct: opt.is_correct
+                  })),
+                  type: question.type
+                };
+                
+                // Store correct answers as array of true/false values
+                questionData.correctAnswers = question.options.map(opt => opt.is_correct);
+              }
+              // Store short answer question
+              else if (question.type === 'shortanswer') {
+                questionData.formattedQuestion = {
+                  question: question.question_text,
+                  type: question.type
+                };
+              }
+            } else {
+              // For the standard format, just store the question data
+              questionData.questionData = question;
+            }
+            
+            questionsToInsert.push(questionData);
+          });
+          
+          // Insert all questions at once at the correct position
+          requirementsArray.splice(insertPosition, 0, ...questionsToInsert);
         });
+        
+        // Handle questions without itemIndex (from old AI suggestions) - add them at the end
+        if (questionsByItemIndex['_no_index']) {
+          questionsByItemIndex['_no_index'].forEach(mapping => {
+            const question = mapping.question;
+
+            // Prepare question data for storage
+            let questionData = {
+              description: question.question_text || "Không có mô tả",
+              questionId: question.id,
+              importedFrom: {
+                examId: selectedExam.id,
+                examTitle: selectedExam.quiz_title,
+                importDate: new Date().toISOString()
+              }
+            };
+
+            questionData.classificationMeta = {
+              requirement: mapping.requirement,
+              chapterIndex: Number(chapterIndex),
+              subContentIndex: Number(subContentIndex),
+              suggestionConfidence: mapping.aiSuggestion?.confidence ?? null,
+              suggestionReason: mapping.aiSuggestion?.reason || null,
+              suggestedByAI: Boolean(mapping.aiSuggestion),
+              manualOverride: Boolean(mapping.manualOverride),
+              assignedAt: new Date().toISOString()
+            };
+
+            // Store original format if available
+            if (question.originalFormat) {
+              questionData.questionType = question.type;
+              
+              if (question.type === 'mcq') {
+                questionData.formattedQuestion = {
+                  question: question.question_text,
+                  options: question.options.map(opt => ({
+                    option: opt.text || opt.option,
+                    is_correct: opt.is_correct
+                  })),
+                  type: question.type
+                };
+                
+                const correctOptionIndex = question.options.findIndex(opt => opt.is_correct);
+                if (correctOptionIndex !== -1) {
+                  questionData.correctAnswer = correctOptionIndex;
+                }
+              } else if (question.type === 'truefalse') {
+                questionData.formattedQuestion = {
+                  question: question.question_text,
+                  options: question.options.map(opt => ({
+                    option: opt.text || opt.option,
+                    is_correct: opt.is_correct
+                  })),
+                  type: question.type
+                };
+                questionData.correctAnswers = question.options.map(opt => opt.is_correct);
+              } else if (question.type === 'shortanswer') {
+                questionData.formattedQuestion = {
+                  question: question.question_text,
+                  type: question.type
+                };
+              }
+            } else {
+              questionData.questionData = question;
+            }
+            
+            // Add to end of array
+            requirementsArray.push(questionData);
+          });
+        }
       });
       
       // Update the question bank in Firestore
@@ -465,7 +654,7 @@ function ImportExamQuestions() {
       await updateDoc(bankDocRef, { chapters: updatedChapters });
       
       // Success message and navigation
-      alert("Đã import thành công " + selectedQuestions.length + " câu hỏi vào ngân hàng câu hỏi!");
+      alert("Đã import thành công " + validQuestions.length + " câu hỏi vào ngân hàng câu hỏi!");
       navigate(`/QuestionBank/${bankId}`);
       
     } catch (error) {
@@ -483,8 +672,26 @@ function ImportExamQuestions() {
     }));
   };
   
-  // Select a specific requirement for a question
-  const selectRequirement = (questionId, chapterIndex, subContentIndex, requirement) => {
+  // Toggle subContent expansion
+  const toggleSubContent = (chapterIndex, subContentIndex) => {
+    const key = `${chapterIndex}-${subContentIndex}`;
+    setExpandedSubContents(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  // Toggle requirement level expansion
+  const toggleRequirementLevel = (chapterIndex, subContentIndex, requirement) => {
+    const key = `${chapterIndex}-${subContentIndex}-${requirement}`;
+    setExpandedRequirementLevels(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  // Select a specific requirement item for a question
+  const selectRequirement = (questionId, chapterIndex, subContentIndex, requirement, itemIndex) => {
     setQuestionsToImport(prev =>
       prev.map(q =>
         q.question.id === questionId
@@ -493,6 +700,8 @@ function ImportExamQuestions() {
               chapterIndex,
               subContentIndex,
               requirement,
+              itemIndex: itemIndex !== undefined ? itemIndex : null, // Store the template item index
+              selected: true, // Automatically select when classified
               manualOverride: true
             }
           : q
@@ -504,104 +713,140 @@ function ImportExamQuestions() {
   
   // Render the requirements selection UI for a question
   const renderRequirementSelector = (questionId, mapping) => {
-    const isExpanded = expandedRequirements[questionId];
-    
-    if (!isExpanded) {
-      return (
-        <button
-          onClick={() => toggleRequirementSelection(questionId)}
-          className="mt-3 text-blue-600 hover:text-blue-800 flex items-center text-sm"
-        >
-          <span>Chọn yêu cầu</span>
-          <FaChevronRight className="ml-1" />
-        </button>
-      );
-    }
-    
     return (
-      <div className="mt-3 border border-gray-200 rounded-lg p-3 bg-gray-50">
-        <div className="flex justify-between items-center mb-2">
-          <h4 className="text-sm font-medium">Chọn yêu cầu</h4>
+      <div className="mt-3 border-t border-gray-200 pt-3">
+        <div className="flex justify-between items-center mb-3">
+          <h4 className="text-sm font-semibold text-gray-700">Chọn vị trí phân loại</h4>
           <button
             onClick={() => toggleRequirementSelection(questionId)}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 text-sm"
           >
-            <IoChevronBack className="ml-1" />
+            Đóng
           </button>
         </div>
-        
-        <div className="space-y-3">
+
+        <div className="space-y-4 max-h-96 overflow-y-auto">
           {questionBank.chapters.map((chapter, chapterIndex) => (
             <div key={chapterIndex} className="border border-gray-200 rounded-lg">
-              <div className="p-2 bg-gray-100 font-medium text-sm">
-                {chapter.name}
+              <div className="px-4 py-2 bg-gray-100 font-semibold text-sm">
+                Chương {chapterIndex + 1}: {chapter.name}
               </div>
-              
+
               {chapter.subContents && chapter.subContents.length > 0 ? (
-                <div className="p-2">
-                  {chapter.subContents.map((subContent, subContentIndex) => (
-                    <div key={subContentIndex} className="mb-2 border-b pb-2 last:border-b-0 last:pb-0">
-                      <div className="font-medium text-sm mb-1">{subContent.name}</div>
-                      
-                      <div className="grid grid-cols-2 gap-1">
+                <div className="p-4 space-y-2 text-sm">
+                  {chapter.subContents.map((subContent, subContentIndex) => {
+                    const subContentKey = `${chapterIndex}-${subContentIndex}`;
+                    const isSubContentExpanded = expandedSubContents[subContentKey];
+                    const isSubContentSelected = mapping.chapterIndex === chapterIndex &&
+                      mapping.subContentIndex === subContentIndex;
+
+                    return (
+                      <div key={subContentIndex} className="border border-gray-200 rounded-lg overflow-hidden">
+                        {/* SubContent header - clickable to expand */}
                         <button
-                          className={`text-xs p-1 rounded ${
-                            mapping.chapterIndex === chapterIndex && 
-                            mapping.subContentIndex === subContentIndex && 
-                            mapping.requirement === 'nhanBiet' 
-                              ? 'bg-blue-100 text-blue-700' 
-                              : 'hover:bg-gray-100'
+                          className={`w-full text-left p-3 transition-colors flex items-center justify-between ${
+                            isSubContentSelected
+                              ? 'bg-blue-50 border-blue-200'
+                              : 'bg-gray-50 hover:bg-gray-100'
                           }`}
-                          onClick={() => selectRequirement(questionId, chapterIndex, subContentIndex, 'nhanBiet')}
+                          onClick={() => toggleSubContent(chapterIndex, subContentIndex)}
                         >
-                          Nhận biết
+                          <div className="font-medium text-gray-800 text-sm">
+                            {chapterIndex + 1}.{subContentIndex + 1} {subContent.name}
+                          </div>
+                          <div className="text-gray-500 text-xs">
+                            {isSubContentExpanded ? '▼' : '▶'}
+                          </div>
                         </button>
-                        
-                        <button
-                          className={`text-xs p-1 rounded ${
-                            mapping.chapterIndex === chapterIndex && 
-                            mapping.subContentIndex === subContentIndex && 
-                            mapping.requirement === 'thongHieu' 
-                              ? 'bg-blue-100 text-blue-700' 
-                              : 'hover:bg-gray-100'
-                          }`}
-                          onClick={() => selectRequirement(questionId, chapterIndex, subContentIndex, 'thongHieu')}
-                        >
-                          Thông hiểu
-                        </button>
-                        
-                        <button
-                          className={`text-xs p-1 rounded ${
-                            mapping.chapterIndex === chapterIndex && 
-                            mapping.subContentIndex === subContentIndex && 
-                            mapping.requirement === 'vanDung' 
-                              ? 'bg-blue-100 text-blue-700' 
-                              : 'hover:bg-gray-100'
-                          }`}
-                          onClick={() => selectRequirement(questionId, chapterIndex, subContentIndex, 'vanDung')}
-                        >
-                          Vận dụng
-                        </button>
-                        
-                        <button
-                          className={`text-xs p-1 rounded ${
-                            mapping.chapterIndex === chapterIndex && 
-                            mapping.subContentIndex === subContentIndex && 
-                            mapping.requirement === 'vanDungCao' 
-                              ? 'bg-blue-100 text-blue-700' 
-                              : 'hover:bg-gray-100'
-                          }`}
-                          onClick={() => selectRequirement(questionId, chapterIndex, subContentIndex, 'vanDungCao')}
-                        >
-                          Vận dụng cao
-                        </button>
+
+                        {/* Expanded requirement levels */}
+                        {isSubContentExpanded && (
+                          <div className="border-t border-gray-200 bg-white">
+                            <div className="p-2 space-y-1">
+                              {REQUIREMENT_KEYS.map(reqKey => {
+                                const levelKey = `${chapterIndex}-${subContentIndex}-${reqKey}`;
+                                const isLevelExpanded = expandedRequirementLevels[levelKey];
+                                const requirements = subContent.requirements?.[reqKey] || [];
+                                const requirementCount = requirements.length;
+                                const isLevelSelected = mapping.chapterIndex === chapterIndex &&
+                                  mapping.subContentIndex === subContentIndex &&
+                                  mapping.requirement === reqKey;
+
+                                if (requirementCount === 0) {
+                                  return null; // Skip empty requirement levels
+                                }
+
+                                return (
+                                  <div key={reqKey} className="border border-gray-200 rounded overflow-hidden">
+                                    {/* Requirement level header - clickable to expand */}
+                                    <button
+                                      className={`w-full text-left p-2 transition-colors flex items-center justify-between ${
+                                        isLevelSelected
+                                          ? 'bg-blue-100 border-blue-300 text-blue-700'
+                                          : 'bg-gray-50 hover:bg-gray-100'
+                                      }`}
+                                      onClick={() => toggleRequirementLevel(chapterIndex, subContentIndex, reqKey)}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <span className="uppercase tracking-wide text-[11px] text-gray-500">
+                                          {requirementLabels[reqKey]}
+                                        </span>
+                                        <span className="text-gray-600 text-xs">
+                                          ({requirementCount} yêu cầu)
+                                        </span>
+                                      </div>
+                                      <div className="text-gray-500 text-xs">
+                                        {isLevelExpanded ? '▼' : '▶'}
+                                      </div>
+                                    </button>
+
+                                    {/* Expanded requirement items */}
+                                    {isLevelExpanded && requirements.length > 0 && (
+                                      <div className="border-t border-gray-200 bg-white">
+                                        <div className="p-2 space-y-1 max-h-48 overflow-y-auto">
+                                          {requirements.map((req, reqIndex) => {
+                                            // Only show template items (requirements with _template flag)
+                                            if (!req._template) return null;
+                                            
+                                            const reqDescription = req.description || req.question || req.question_text || `Yêu cầu ${reqIndex + 1}`;
+                                            // Check if this specific item is selected
+                                            const isItemSelected = mapping.chapterIndex === chapterIndex &&
+                                              mapping.subContentIndex === subContentIndex &&
+                                              mapping.requirement === reqKey &&
+                                              mapping.itemIndex === reqIndex;
+
+                                            return (
+                                              <button
+                                                key={reqIndex}
+                                                className={`w-full text-left p-2 rounded text-xs transition-colors ${
+                                                  isItemSelected
+                                                    ? 'bg-blue-50 border border-blue-200 text-blue-700'
+                                                    : 'bg-gray-50 hover:bg-gray-100 border border-transparent'
+                                                }`}
+                                                onClick={() => selectRequirement(questionId, chapterIndex, subContentIndex, reqKey, reqIndex)}
+                                              >
+                                                <div className="text-gray-700">
+                                                  • {reqDescription}
+                                                </div>
+                                              </button>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
-                <div className="p-2 text-gray-500 italic text-sm">
-                  Không có nội dung con
+                <div className="p-4 text-gray-500 italic text-sm text-center">
+                  Không có nội dung
                 </div>
               )}
             </div>
@@ -613,219 +858,306 @@ function ImportExamQuestions() {
   
   // Render question cards for step 2
   const renderQuestionCards = () => {
+    const selectedCount = questionsToImport.filter(q => q.selected).length;
+    const totalCount = examQuestions.length;
+    const selectedPercentage = totalCount > 0 ? Math.round((selectedCount / totalCount) * 100) : 0;
+
     return (
       <div>
-        <h2 className="text-xl font-semibold mb-4">
-          Chọn câu hỏi từ đề thi: {selectedExam?.quiz_title}
-        </h2>
-        
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
-          <p className="text-blue-800">
-            Đã tìm thấy {examQuestions.length} câu hỏi từ đề thi này. Vui lòng chọn câu hỏi và yêu cầu tương ứng.
-          </p>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">
+            {selectedExam?.quiz_title}
+          </h2>
+          <div className="text-sm text-gray-600">
+            <span className="font-medium text-blue-600">{selectedCount}</span> / {totalCount} câu hỏi
+            <span className="ml-2 text-blue-600 font-medium">({selectedPercentage}%)</span>
+          </div>
         </div>
 
         {suggestionsLoading && (
-          <div className="mb-4 text-sm text-blue-600">
-            Đang gợi ý vị trí câu hỏi vào ngân hàng bằng AI...
+          <div className="mb-3 p-2 bg-blue-50 border border-blue-100 rounded text-xs text-blue-700 flex items-center">
+            <div className="animate-spin h-3 w-3 border-2 border-blue-600 border-t-transparent rounded-full mr-2"></div>
+            Đang phân loại bằng AI...
           </div>
         )}
 
-        {coverage.summary && coverage.summary.length > 0 && (
-          <div className="mb-6 border border-gray-200 rounded-lg bg-gray-50 p-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Độ phủ yêu cầu sau khi import</h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-xs text-left text-gray-600">
-                <thead>
-                  <tr className="text-gray-500 uppercase tracking-wide border-b">
-                    <th className="py-2 pr-4">Chương / Nội dung</th>
-                    <th className="py-2 pr-4">Yêu cầu</th>
-                    <th className="py-2 pr-4">Hiện có</th>
-                    <th className="py-2 pr-4">Sẽ thêm</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {coverage.summary
-                    .filter(item => item.existing > 0 || item.incoming > 0)
-                    .map((item, index) => (
-                      <tr key={`${item.chapterIndex}-${item.subContentIndex}-${item.requirement}-${index}`} className="border-b last:border-b-0">
-                        <td className="py-2 pr-4">
-                          <div className="font-medium text-gray-800">{item.chapterName}</div>
-                          <div className="text-gray-500">{item.subContentName}</div>
-                        </td>
-                        <td className="py-2 pr-4">{requirementLabels[item.requirement] || item.requirement}</td>
-                        <td className="py-2 pr-4">{item.existing}</td>
-                        <td className="py-2 pr-4">{item.incoming}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        <div className="mb-4 flex justify-between">
+        <div className="mb-3 flex justify-between items-center">
           <button
             onClick={() => setStep(1)}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 flex items-center"
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded-md hover:bg-gray-100 flex items-center"
           >
-            <FaArrowLeft className="mr-2" />
-            Quay lại chọn đề thi
+            <FaArrowLeft className="mr-1.5 text-xs" />
+            Chọn đề khác
           </button>
-          
+
           <button
             onClick={() => handleImport()}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={importing || questionsToImport.filter(q => q.selected).length === 0}
+            className="px-4 py-1.5 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={importing || selectedCount === 0}
           >
             {importing ? (
               <>
-                <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></div>
+                <div className="animate-spin h-3 w-3 border-2 border-white border-t-transparent rounded-full mr-2"></div>
                 Đang import...
               </>
             ) : (
               <>
-                <FaArrowRight className="mr-2" />
-                Import {questionsToImport.filter(q => q.selected).length} câu hỏi
+                <FaArrowRight className="mr-1.5 text-xs" />
+                Import {selectedCount} câu
               </>
             )}
           </button>
         </div>
-        
-        {/* Question cards with requirements selection */}
-        <div className="space-y-6">
-          {questionsToImport.map((mapping, index) => (
+
+        {/* Two column layout: Questions on left, Matrix on right */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Left column: Questions list */}
+          <div className="lg:col-span-2 space-y-3 max-h-[calc(100vh-300px)] overflow-y-auto pr-2">
+            {questionsToImport.map((mapping, index) => (
             <div 
               key={mapping.question.id} 
               className={`border rounded-lg ${mapping.selected ? "border-blue-200" : "border-gray-200"}`}
             >
-              <div className="p-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={mapping.selected}
-                    onChange={() => toggleQuestionSelection(mapping.question.id)}
-                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mr-3"
-                  />
-                  <h3 className="font-medium">Câu hỏi {index + 1}</h3>
-                </div>
-                
-                <div className="text-sm text-gray-500">
-                  {mapping.selected ? (
-                    <>
-                      <span className="font-medium text-blue-600">
-                        {questionBank.chapters[mapping.chapterIndex]?.name || "Không xác định"} /
-                        {questionBank.chapters[mapping.chapterIndex]?.subContents?.[mapping.subContentIndex]?.name || "Không xác định"}
-                      </span>
-                      <span className="ml-2 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs">
-                        {mapping.requirement === 'nhanBiet' && 'Nhận biết'}
-                        {mapping.requirement === 'thongHieu' && 'Thông hiểu'}
-                        {mapping.requirement === 'vanDung' && 'Vận dụng'}
-                        {mapping.requirement === 'vanDungCao' && 'Vận dụng cao'}
-                      </span>
-                      {mapping.aiSuggestion && (
-                        <div className="mt-1 text-xs text-gray-500">
-                          {isValidSuggestion(mapping.aiSuggestion) ? (
-                            <>
-                              Gợi ý AI: {questionBank.chapters[mapping.aiSuggestion.chapterIndex]?.name || 'Chương ?'} /
-                              {questionBank.chapters[mapping.aiSuggestion.chapterIndex]?.subContents?.[mapping.aiSuggestion.subContentIndex]?.name || 'Nội dung ?'}
-                              {' '}– {requirementLabels[mapping.aiSuggestion.requirement] || mapping.aiSuggestion.requirement}
-                              {' '}({Math.round((mapping.aiSuggestion.confidence || 0) * 100)}%)
-                              {mapping.manualOverride && !(
-                                mapping.chapterIndex === mapping.aiSuggestion.chapterIndex &&
-                                mapping.subContentIndex === mapping.aiSuggestion.subContentIndex &&
-                                mapping.requirement === mapping.aiSuggestion.requirement
-                              ) && (
-                                <button
-                                  className="ml-2 text-blue-600 hover:text-blue-800"
-                                  onClick={() => applySuggestionToQuestion(mapping.question.id)}
-                                >
-                                  Áp dụng gợi ý
-                                </button>
-                              )}
-                            </>
-                          ) : (
-                            <>Gợi ý AI: Không đủ dữ liệu để phân loại</>
-                          )}
-                          {mapping.aiSuggestion?.reason && (
-                            <div className="text-[11px] text-gray-400 mt-1">Lý do: {mapping.aiSuggestion.reason}</div>
-                          )}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <span className="italic">Không được chọn</span>
-                  )}
-                </div>
-              </div>
-              
-              <div className="p-4">
-                {/* Question content */}
-                <div className={`${mapping.selected ? "text-gray-900" : "text-gray-500"}`}>
-                  {mapping.question.originalFormat ? (
-                    <MathJax>
-                      <div dangerouslySetInnerHTML={{ __html: mapping.question.question_text }} />
-                    </MathJax>
-                  ) : (
-                    <div dangerouslySetInnerHTML={{ __html: mapping.question.question_text || "Không có nội dung" }} />
-                  )}
-                  
-                  {/* Display answer options for MCQ */}
-                  {mapping.question.type === "mcq" && mapping.question.options && (
-                    <div className="mt-2 pl-4 text-sm">
-                      {mapping.question.options.map((option, optionIndex) => (
-                        <div key={optionIndex} className={`${option.is_correct ? "font-semibold text-green-600" : ""}`}>
-                          {String.fromCharCode(65 + optionIndex)}. {mapping.question.originalFormat ? (
-                            <MathJax>
-                              <span dangerouslySetInnerHTML={{ __html: option.text || option.option }} />
-                            </MathJax>
-                          ) : (
-                            <span>{option.text}</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {/* Display true/false options */}
-                  {mapping.question.type === "truefalse" && mapping.question.options && (
-                    <div className="mt-2 pl-4 text-sm">
-                      {mapping.question.options.map((option, optionIndex) => (
-                        <div key={optionIndex}>
-                          {String.fromCharCode(97 + optionIndex)}. {option.text || option.option}: 
-                          <span className={option.is_correct ? "ml-2 font-semibold text-green-600" : "ml-2"}>
-                            {option.is_correct ? "Đúng" : "Sai"}
+              <div className="p-2.5 flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  checked={mapping.selected}
+                  onChange={() => toggleQuestionSelection(mapping.question.id)}
+                  disabled={!mapping.requirement || mapping.chapterIndex === null || mapping.subContentIndex === null}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 mt-1 flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={!mapping.requirement ? "Vui lòng phân loại câu hỏi trước khi chọn" : ""}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <span className="text-sm font-medium text-gray-700">Câu {index + 1}</span>
+                    <button
+                      onClick={() => toggleRequirementSelection(mapping.question.id)}
+                      className="text-xs text-blue-600 hover:text-blue-800 flex-shrink-0"
+                    >
+                      {mapping.requirement ? "Đổi vị trí" : "Chọn vị trí"}
+                    </button>
+                  </div>
+
+                  {/* Question text - compact */}
+                  <div className={`text-sm ${mapping.selected ? "text-gray-900" : "text-gray-500"} line-clamp-2`}>
+                    {mapping.question.originalFormat ? (
+                      <MathJax>
+                        <div dangerouslySetInnerHTML={{ __html: mapping.question.question_text }} />
+                      </MathJax>
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: mapping.question.question_text || "Không có nội dung" }} />
+                    )}
+                  </div>
+
+                  {/* Classification info - compact */}
+                  <div className="mt-1.5 space-y-1">
+                    <div className="flex flex-wrap items-center gap-1.5 text-xs">
+                      {mapping.requirement && mapping.chapterIndex !== null && mapping.subContentIndex !== null ? (
+                        <>
+                          <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">
+                            {requirementLabels[mapping.requirement]}
                           </span>
-                        </div>
-                      ))}
+                          {questionBank.chapters[mapping.chapterIndex]?.subContents?.[mapping.subContentIndex]?.name && (
+                            <span className="text-gray-600 truncate max-w-[200px]">
+                              {questionBank.chapters[mapping.chapterIndex].subContents[mapping.subContentIndex].name}
+                            </span>
+                          )}
+                          {(() => {
+                            // Try to get requirement item description
+                            if (mapping.itemIndex !== null && mapping.itemIndex !== undefined) {
+                              const requirements = questionBank.chapters[mapping.chapterIndex]?.subContents?.[mapping.subContentIndex]?.requirements?.[mapping.requirement] || [];
+                              const selectedRequirement = requirements[mapping.itemIndex];
+                              if (selectedRequirement && selectedRequirement._template) {
+                                const reqDescription = selectedRequirement.description || selectedRequirement.question || selectedRequirement.question_text;
+                                if (reqDescription) {
+                                  return (
+                                    <span className="text-gray-700 font-medium truncate max-w-[300px]" title={reqDescription}>
+                                      • {reqDescription}
+                                    </span>
+                                  );
+                                }
+                              }
+                            }
+                            return null;
+                          })()}
+                          {mapping.aiSuggestion && isValidSuggestion(mapping.aiSuggestion) && mapping.manualOverride && (
+                            <button
+                              className="text-blue-600 hover:text-blue-800 underline text-xs"
+                              onClick={() => applySuggestionToQuestion(mapping.question.id)}
+                            >
+                              Dùng gợi ý AI
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <span className="bg-yellow-50 text-yellow-700 px-2 py-0.5 rounded border border-yellow-200">
+                          ⚠️ Chưa phân loại - Vui lòng chọn vị trí
+                        </span>
+                      )}
                     </div>
-                  )}
-                  
-                  {/* Display short answer */}
-                  {mapping.question.type === "shortanswer" && (
-                    <div className="mt-2 pl-4 text-sm italic">
-                      Câu hỏi tự luận
-                    </div>
-                  )}
+                    {/* AI reason display */}
+                    {mapping.aiSuggestion?.reason && (
+                      <div className="text-[11px] text-gray-500 italic bg-gray-50 px-2 py-1 rounded border-l-2 border-gray-300">
+                        <span className="font-medium text-gray-600">Lý do: </span>
+                        {mapping.aiSuggestion.reason}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Requirements selection modal - expanded when clicked */}
+                  {expandedRequirements[mapping.question.id] && renderRequirementSelector(mapping.question.id, mapping)}
                 </div>
-                
-                {/* Requirements selection UI */}
-                {mapping.selected && renderRequirementSelector(mapping.question.id, mapping)}
               </div>
             </div>
           ))}
           
-          {questionsToImport.length === 0 && (
-            <div className="text-center p-8 text-gray-500 italic">
-              Không tìm thấy câu hỏi nào trong đề thi này.
+            {questionsToImport.length === 0 && (
+              <div className="text-center p-8 text-gray-500 italic">
+                Không tìm thấy câu hỏi nào trong đề thi này.
+              </div>
+            )}
+          </div>
+
+          {/* Right column: Matrix/Specification Summary */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4 border border-gray-200 rounded-lg bg-white shadow-sm">
+              <div className="p-3 bg-gray-50 border-b border-gray-200">
+                <h3 className="text-sm font-semibold text-gray-700">Độ phủ ma trận</h3>
+              </div>
+
+              <div className="max-h-[calc(100vh-300px)] overflow-y-auto">
+                {coverage.summary && coverage.summary.length > 0 ? (
+                  <div className="divide-y divide-gray-100">
+                    {coverage.summary
+                      .filter(item => item.incoming > 0)
+                      .map((item, index) => {
+                        // Get requirement items for this level
+                        const chapter = questionBank?.chapters?.[item.chapterIndex];
+                        const subContent = chapter?.subContents?.[item.subContentIndex];
+                        const requirements = subContent?.requirements?.[item.requirement] || [];
+                        
+                        // Get selected questions for this requirement level
+                        const selectedQuestionsForThisLevel = questionsToImport.filter(q => 
+                          q.selected && 
+                          q.chapterIndex === item.chapterIndex &&
+                          q.subContentIndex === item.subContentIndex &&
+                          q.requirement === item.requirement
+                        );
+
+                        // Get all items in order (templates and questions mixed)
+                        // Template items have _template: true
+                        // Question items have questionId and !_template
+                        
+                        // Build a map of template index to question count
+                        const templateIndices = [];
+                        requirements.forEach((req, index) => {
+                          if (req && req._template && req.description) {
+                            templateIndices.push({ index, description: req.description });
+                          }
+                        });
+                        
+                        // Count questions between templates
+                        const requirementsWithCounts = templateIndices.map((template, templateIdx) => {
+                          const startIdx = template.index + 1;
+                          const endIdx = templateIdx < templateIndices.length - 1 
+                            ? templateIndices[templateIdx + 1].index 
+                            : requirements.length;
+                          
+                          // Count questions in this range
+                          let questionCount = 0;
+                          for (let i = startIdx; i < endIdx; i++) {
+                            const item = requirements[i];
+                            if (item && !item._template && item.questionId) {
+                              questionCount++;
+                            }
+                          }
+                          
+                          return {
+                            name: template.description,
+                            existingCount: questionCount
+                          };
+                        }).filter(req => req.existingCount > 0); // Only show requirements with questions
+
+                        return (
+                          <div key={`${item.chapterIndex}-${item.subContentIndex}-${item.requirement}-${index}`} className="p-2.5 hover:bg-gray-50">
+                            <div className="text-xs font-medium text-gray-700 mb-1 truncate" title={item.subContentName}>
+                              {item.subContentName}
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-gray-500 font-medium">
+                                  {requirementLabels[item.requirement]}
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="text-gray-600">{item.existing}</span>
+                                  <span className="text-green-600 font-medium">+{item.incoming}</span>
+                                </div>
+                              </div>
+                              {requirementsWithCounts.length > 0 && (
+                                <div className="text-[10px] text-gray-400 space-y-0.5 pl-2">
+                                  {requirementsWithCounts.length <= 5 ? (
+                                    // Show all if 5 or fewer
+                                    requirementsWithCounts.map((req, idx) => (
+                                      <div key={idx} className="flex items-center justify-between truncate">
+                                        <span className="truncate flex-1">• {req.name}</span>
+                                        <span className="text-gray-500 ml-2 flex-shrink-0">
+                                          ({req.existingCount} câu)
+                                        </span>
+                                      </div>
+                                    ))
+                                  ) : (
+                                    // Show first 3 if more than 5
+                                    <>
+                                      {requirementsWithCounts.slice(0, 3).map((req, idx) => (
+                                        <div key={idx} className="flex items-center justify-between truncate">
+                                          <span className="truncate flex-1">• {req.name}</span>
+                                          <span className="text-gray-500 ml-2 flex-shrink-0">
+                                            ({req.existingCount} câu)
+                                          </span>
+                                        </div>
+                                      ))}
+                                      <div className="text-gray-500 italic px-1">
+                                        ... và {requirementsWithCounts.length - 3} yêu cầu khác
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-xs text-gray-500">
+                    Chưa có câu hỏi được chọn
+                  </div>
+                )}
+              </div>
+
+              {/* Summary stats */}
+              {selectedCount > 0 && (
+                <div className="p-3 bg-blue-50 border-t border-blue-100">
+                  <div className="text-xs text-blue-800">
+                    <div className="flex justify-between mb-1">
+                      <span>Tổng câu hỏi:</span>
+                      <span className="font-semibold">{selectedCount}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>% đề thi:</span>
+                      <span className="font-semibold">{selectedPercentage}%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     );
   };
   
-  // Render folder structure similar to FolderStructure.js
+  // Render folder structure similar to FolderStructure.js (table/list style)
   const renderFolderStructure = () => {
     return (
       <div>
@@ -865,34 +1197,49 @@ function ImportExamQuestions() {
           </button>
         )}
         
-        {/* Display folders and exams in grid style */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+        {/* Display folders and exams in table/list style like FolderStructure */}
+        <div className="grid grid-cols-12 py-2 px-3 border-b border-gray-200 bg-gray-50 font-medium text-gray-700 rounded-t-md">
+          <div className="col-span-8">Tên</div>
+          <div className="col-span-4 text-right">Thao tác</div>
+        </div>
+        
+        <div className="divide-y divide-gray-200 rounded-b-md border-l border-r border-b border-gray-200">
           {displayItems.map(item => (
             <div 
               key={item.id}
-              className="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+              className="grid grid-cols-12 p-3 hover:bg-gray-50 cursor-pointer"
               onClick={() => item.type === 'folder' ? openFolder(item) : selectExam(item)}
             >
-              <div className="flex items-center">
+              <div className="col-span-8 flex items-center">
                 {item.type === 'folder' ? (
-                  <FaFolder className="text-yellow-500 mr-3 text-xl" />
+                  <FaFolder className="text-yellow-500 mr-3 flex-shrink-0" />
                 ) : (
-                  <FaFileAlt className="text-blue-500 mr-3 text-xl" />
+                  <FaFileAlt className="text-gray-500 mr-3 flex-shrink-0" />
                 )}
-                <div className="flex-1 overflow-hidden">
-                  <h3 className="font-medium truncate">
-                    {item.type === 'folder' ? item.name : item.quiz_title}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {item.type === 'folder' ? 'Thư mục' : 'Đề thi'}
-                  </p>
-                </div>
+                <span className="truncate font-medium">
+                  {item.type === 'folder' ? item.name : item.quiz_title}
+                </span>
+              </div>
+              <div className="col-span-4 flex items-center justify-end">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (item.type === 'folder') {
+                      openFolder(item);
+                    } else {
+                      selectExam(item);
+                    }
+                  }}
+                  className="px-3 py-1 text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-md"
+                >
+                  {item.type === 'folder' ? 'Mở' : 'Chọn'}
+                </button>
               </div>
             </div>
           ))}
           
           {displayItems.length === 0 && (
-            <div className="col-span-full text-center p-8 text-gray-500 italic">
+            <div className="p-8 text-center text-gray-500 italic">
               Không có đề thi hoặc thư mục nào trong thư mục này.
             </div>
           )}

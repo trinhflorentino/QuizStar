@@ -158,7 +158,7 @@ export function calculateRequirementCoverage(questionBank, questionsToImport = [
         if (!coverage[path]) {
           coverage[path] = {
             chapterIndex,
-            subContentIndex,
+            subContentIndex: subIndex,
             requirement: key,
             chapterName: chapter?.name || `Chương ${chapterIndex + 1}`,
             subContentName: sub?.name || `Nội dung ${subIndex + 1}`,
