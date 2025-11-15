@@ -291,7 +291,7 @@ Chúng tôi hoan nghênh mọi đóng góp! Vui lòng:
 
 ## 👥 Tác Giả
 
-**Tác giả:** Nguyễn Tiến Trình
+**Tác giả phần mềm:** Nguyễn Tiến Trình
 
 **Trường THPT Quảng Trị**
 
@@ -313,7 +313,7 @@ Dự án này là sản phẩm nghiên cứu khoa học, không được sử d�
 ## 📞 Liên Hệ
 
 Nếu có câu hỏi hoặc góp ý, vui lòng liên hệ qua:
-- Email: [your-email@example.com]
+- Email: tientrinhpanda@gmail.com
 - Website: [https://quizstar-txqt.web.app](https://quizstar-txqt.web.app)
 
 ## 🙏 Lời Cảm Ơn
