@@ -1,5 +1,5 @@
 (function () {
-  var redirectTarget = 'index.html';
+  var redirectTarget = '/';
 
   function resolveRedirect() {
     // Resolve the login page URL and avoid falling back to about:blank/popups
@@ -22,7 +22,7 @@
     }
 
     // Manual fallback: stick to same origin + root to prevent about:blank
-    return (origin || '') + '/' + redirectTarget.replace(/^\\//, '');
+    return (origin || '') + '/' + redirectTarget.replace(/^\//, '');
   }
 
   function redirectToLogin() {

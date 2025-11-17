@@ -24,7 +24,7 @@ auth.onAuthStateChanged(_0xd13e4d => {
     document.getElementById('userDisplayName').innerHTML = _0xd13e4d.displayName;
     document.getElementById('userNameInput').value = _0xd13e4d.displayName;
     if (_0xd13e4d.metadata.creationTime) {
-      document.getElementById("joinDate").innerHTML = "Bạn đã tham gia The Olympus Online từ ngày " + convertToDDMMYYYY(_0xd13e4d.metadata.creationTime);
+      document.getElementById("joinDate").innerHTML = "Bạn đã tham gia QuizStar từ ngày " + convertToDDMMYYYY(_0xd13e4d.metadata.creationTime);
     }
   });
   function convertToDDMMYYYY(_0x3220a5) {

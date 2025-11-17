@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-  <title>Trang chính | The Olympus Online</title>
+  <title>Trang chính | QuizStar</title>
   <link href="./dist/output.css" rel="stylesheet">
   <!-- Material Icons Link -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -28,17 +28,30 @@
     class="fixed top-0 left-0 z-40 w-32 h-screen transition-transform -translate-x-full sm:translate-x-0 border-r-2 border-neutral-100 dark:border-gray-500 flex flex-col justify-between items-center">
     <!-- App Logo -->
     <div class="mt-6">
-      <button data-tab-target="#home" class="tab-button" data-ripple-light="true" data-tooltip-target="homeToolTip">
-        <img id="appLogoImage" src="img/appLogo.png" class="rounded-full w-16 h-16" alt="appLogo">
+      <button onclick="window.location.href = '/'" class="tab-button" data-ripple-light="true" data-tooltip-target="appLogoToolTip">
+        <img id="appLogoImage" src="img/logo.jpg" class="rounded-full w-16 h-16" alt="appLogo">
       </button>
-      <div data-tooltip="homeToolTip" data-tooltip-placement="right-end"
+      <div data-tooltip="appLogoToolTip" data-tooltip-placement="right-end"
         class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
-        Trang chủ
+        Về trang đăng nhập
       </div>
     </div>
 
     <!-- Icon List (Center) -->
     <div class="flex flex-col items-center">
+      <div class="my-4">
+        <button data-tab-target="#home"
+          class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
+          data-ripple-light="true" data-tooltip-target="homeToolTip" id="homeButton">
+          <span id="homeIcon" class="material-symbols-outlined">
+            home
+          </span>
+        </button>
+        <div data-tooltip="homeToolTip" data-tooltip-placement="right-end"
+          class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
+          Trang chủ
+        </div>
+      </div>
       <div class="my-4">
         <button data-tab-target="#matches"
           class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
@@ -84,7 +97,7 @@
     <div class="mb-4">
       <button data-tab-target="#profile" class="tab-button" data-ripple-light="true"
         data-tooltip-target="profileToolTip">
-        <img id="userAvatar" src="img/appLogo.png" alt="avatar"
+        <img id="userAvatar" src="img/Logo.jpg" alt="avatar"
           class="relative inline-block h-14 w-14 rounded-full object-cover object-center">
       </button>
       <div data-tooltip="profileToolTip" data-tooltip-placement="right-end"
@@ -138,7 +151,7 @@
         <div class="p-8">
           <h5 class="block mb-2 text-xl antialiased font-semibold leading-snug tracking-normal"
             id="joinAnotherMatchTitle">
-            Chào mừng bạn đến với The Olympus Online
+            Chào mừng bạn đến với QuizStar
           </h5>
           <p class="block text-base antialiased font-light leading-relaxed text-inherit">
             Tham gia trận đấu bằng cách nhập mã trận và mật khẩu
@@ -718,7 +731,7 @@
       <div
         class="m-6 h-48 rounded-md bg-gradient-to-r from-blue-800 to-indigo-900 flex flex-col justify-end items-center relative">
         <!-- Profile Image -->
-        <img src="img/appLogo.png" alt="Profile Image" id="userProfileImage"
+        <img src="img/logo.jpg" alt="Profile Image" id="userProfileImage"
           class="w-36 h-36 object-cover rounded-full absolute bottom-0 transform translate-y-1/2 border-4 border-white" />
       </div>
 
@@ -910,7 +923,7 @@
       data-dialog="choose-positon-dialog">
       <div class="flex items-center justify-between p-4">
         <div class="flex items-center gap-3">
-          <img alt="tania andrew" src="img/appLogo.png"
+          <img alt="tania andrew" src="img/logo.jpg"
             class="relative inline-block h-9 w-9 rounded-full object-cover object-center" />
           <div class="-mt-px flex flex-col">
             <p class="text-sm text-slate-800 font-semibold dark:text-white" id="matchNameChoosePosition">
@@ -934,7 +947,7 @@
           <div class="flex items-center space-x-2">
             <img src="https://docs.material-tailwind.com/img/face-2.jpg" alt="avatar"
               class="relative inline-block h-10 w-10 !rounded-full  object-cover object-center" />
-            <p class="dark:text-white font-semibold">Trương Anh Khoa</p>
+            <p class="dark:text-white font-semibold">Trình</p>
           </div>
           <p class="font-semibold dark:text-white">Thí sinh 1</p>
         </div> -->
