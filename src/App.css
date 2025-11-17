@@ -19,15 +19,136 @@
   /* font-size: 14px; */
 }
 
+/* Exclude MathJax elements from Montserrat font inheritance */
+/* Let MathJax use its default optimized fonts */
+.MathJax,
+.mjx-container,
+mjx-container,
+[class*="mjx-"] {
+  font-family: "STIX Two Math", "Latin Modern Math", "Computer Modern", "TeX", "STIX", "STIXGeneral", "Asana Math", "Gyre Pagella", "Gyre Termes", "Latin Modern Roman", "DejaVu Serif", "DejaVu Sans", serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 html {
   background: linear-gradient(to left top, #2641c2, #adf7f2) no-repeat center
     fixed;
   min-height: 100vh;
 }
 
-.MathJax {
-  /* font-family: "Montserrat"; */
-  font-weight: 800!important;
+/* MathJax font weight fix - ensure all MathJax elements use normal weight */
+/* Target all possible MathJax selectors with maximum specificity */
+.MathJax,
+.mjx-container,
+.mjx-math,
+.mjx-chtml,
+.mjx-mathml,
+.mjx-annotation,
+.mjx-annotation-xml,
+.mjx-char,
+.mjx-char-boxed,
+.mjx-char-label,
+.mjx-char-italic,
+.mjx-char-roman,
+.mjx-char-stacked,
+.mjx-char-stretched,
+.mjx-char-symbol,
+.mjx-char-text,
+.mjx-char-variant,
+.mjx-char-vert,
+.mjx-char-horiz,
+.mjx-char-italic,
+.mjx-char-roman,
+.mjx-char-stacked,
+.mjx-char-stretched,
+.mjx-char-symbol,
+.mjx-char-text,
+.mjx-char-variant,
+.mjx-char-vert,
+.mjx-char-horiz,
+[class*="mjx-"],
+mjx-container,
+mjx-math,
+mjx-annotation,
+mjx-annotation-xml,
+mjx-char,
+mjx-char-boxed,
+mjx-char-label,
+mjx-char-italic,
+mjx-char-roman,
+mjx-char-stacked,
+mjx-char-stretched,
+mjx-char-symbol,
+mjx-char-text,
+mjx-char-variant,
+mjx-char-vert,
+mjx-char-horiz {
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
+/* Target all child elements */
+.MathJax *,
+.mjx-container *,
+.mjx-math *,
+.mjx-chtml *,
+.mjx-mathml *,
+.mjx-annotation *,
+.mjx-annotation-xml *,
+.mjx-char *,
+.mjx-char-boxed *,
+.mjx-char-label *,
+.mjx-char-italic *,
+.mjx-char-roman *,
+.mjx-char-stacked *,
+.mjx-char-stretched *,
+.mjx-char-symbol *,
+.mjx-char-text *,
+.mjx-char-variant *,
+.mjx-char-vert *,
+.mjx-char-horiz *,
+[class*="mjx-"] *,
+mjx-container *,
+mjx-math *,
+mjx-annotation *,
+mjx-annotation-xml *,
+mjx-char *,
+mjx-char-boxed *,
+mjx-char-label *,
+mjx-char-italic *,
+mjx-char-roman *,
+mjx-char-stacked *,
+mjx-char-stretched *,
+mjx-char-symbol *,
+mjx-char-text *,
+mjx-char-variant *,
+mjx-char-vert *,
+mjx-char-horiz * {
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
+/* Override any inherited font-family that might have bold weight - already set above but keep for specificity */
+.MathJax,
+.mjx-container,
+mjx-container,
+.MathJax *,
+.mjx-container *,
+mjx-container *,
+[class*="mjx-"],
+[class*="mjx-"] * {
+  font-family: "STIX Two Math", "Latin Modern Math", "Computer Modern", "TeX", "STIX", "STIXGeneral", "Asana Math", "Gyre Pagella", "Gyre Termes", "Latin Modern Roman", "DejaVu Serif", "DejaVu Sans", serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Additional fix for inline styles - use attribute selector */
+[class*="mjx-"][style*="font-weight"],
+mjx-container[style*="font-weight"],
+mjx-math[style*="font-weight"] {
+  font-weight: 400 !important;
 }
 
 a {

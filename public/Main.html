@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/x-icon" href="img/favicon.ico">
-  <title>Trang chính | QuizStar</title>
+  <title>Trang chính | The Olympus Online</title>
   <link href="./dist/output.css" rel="stylesheet">
   <!-- Material Icons Link -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -21,16 +21,6 @@
     integrity="sha512-UtLOu9C7NuThQhuXXrGwx9Jb/z9zPQJctuAgNUBK3Z6kkSYT9wJ+2+dh6klS+TDBCV9kNPBbAxbVD+vCcfGPaA=="
     crossorigin="anonymous" referrerpolicy="no-referrer" />
   <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-
-    gtag('config', 'G-9BZ1P9KSJR');
-  </script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7312982440694951"
-    crossorigin="anonymous"></script>
 </head>
 
 <body class="dark:bg-neutral-900">
@@ -49,19 +39,6 @@
 
     <!-- Icon List (Center) -->
     <div class="flex flex-col items-center">
-          <div class="my-4">
-        <a href="/"
-          class="text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
-          data-tooltip-target="homeNavigationToolTip">
-          <span class="material-symbols-outlined">
-            home
-          </span>
-        </a>
-        <div data-tooltip="homeNavigationToolTip" data-tooltip-placement="right-end"
-          class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
-          Quay lại trang chủ
-        </div>
-      </div>
       <div class="my-4">
         <button data-tab-target="#matches"
           class="tab-button text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-4 text-center inline-flex items-center me-2 dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
@@ -72,7 +49,7 @@
         </button>
         <div data-tooltip="matchListToolTip" data-tooltip-placement="right-end"
           class="absolute z-50 w-full whitespace-normal break-words rounded-lg bg-black py-1.5 px-3 text-sm font-normal text-white focus:outline-none">
-          Danh sách phòng trò chơi
+          Danh sách trận đấu
         </div>
       </div>
       <div class="my-4">
@@ -132,8 +109,8 @@
     <!-- Home Page -->
     <div id="home" class="tab-content block">
       <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
-        <p class="font-semibold text-3xl dark:text-white">Tham gia phòng trò chơi</p>
-        <p class="font-medium text-gray-500 text-lg">Nhập mã trận và mật khẩu để tham gia phòng trò chơi</p>
+        <p class="font-semibold text-3xl dark:text-white">Tham gia trận đấu</p>
+        <p class="font-medium text-gray-500 text-lg">Nhập mã trận và mật khẩu để tham gia trận đấu</p>
       </div>
 
       <div id="promotion-container">
@@ -161,10 +138,10 @@
         <div class="p-8">
           <h5 class="block mb-2 text-xl antialiased font-semibold leading-snug tracking-normal"
             id="joinAnotherMatchTitle">
-            Chào mừng bạn đến với QuizStar
+            Chào mừng bạn đến với The Olympus Online
           </h5>
           <p class="block text-base antialiased font-light leading-relaxed text-inherit">
-            Tham gia phòng trò chơi bằng cách nhập mã trận và mật khẩu
+            Tham gia trận đấu bằng cách nhập mã trận và mật khẩu
           </p>
         </div>
       </div>
@@ -173,14 +150,14 @@
     <!-- Matches Page -->
     <div id="matches" class="tab-content hidden">
       <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
-        <p class="font-semibold text-3xl dark:text-white">Danh sách phòng trò chơi</p>
-        <p class="text-gray-400 text-lg font-medium">Danh sách phòng trò chơi của bạn</p>
+        <p class="font-semibold text-3xl dark:text-white">Danh sách trận đấu</p>
+        <p class="text-gray-400 text-lg font-medium">Danh sách trận đấu của bạn</p>
       </div>
       <div class="w-full flex justify-between items-center mb-3 mt-1 pl-3 p-6">
         <div class="ml-3">
           <button
             class="bg-neutral-800 dark:bg-neutral-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-neutral-900 dark:hover:bg-neutral-700 transition duration-300"
-            data-dialog-target="match-creation-modal">Tạo phòng trò chơi mới
+            data-dialog-target="match-creation-modal">Tạo trận đấu mới
           </button>
         </div>
         <div class="ml-3">
@@ -213,7 +190,7 @@
               </th>
               <th class="p-4 border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-neutral-700">
                 <p class="text-sm font-normal leading-none text-slate-500 dark:text-slate-300">
-                  Tên phòng trò chơi
+                  Tên trận đấu
                 </p>
               </th>
               <th class="p-4 border-b border-slate-200 bg-slate-100 dark:border-slate-600 dark:bg-neutral-700">
@@ -257,6 +234,10 @@
             </button>
             <button
               class="px-3 py-1 min-w-9 min-h-9 text-sm font-normal text-slate-500 bg-white dark:bg-neutral-800 dark:text-slate-300 border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-400 transition duration-200 ease">
+              3
+            </button>
+            <button
+              class="px-3 py-1 min-w-9 min-h-9 text-sm font-normal text-slate-500 bg-white dark:bg-neutral-800 dark:text-slate-300 border border-slate-200 rounded hover:bg-slate-50 hover:border-slate-400 transition duration-200 ease">
               Next
             </button>
           </div>
@@ -269,16 +250,52 @@
     <div id="theme" class="tab-content hidden">
       <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
         <p class="font-semibold text-3xl dark:text-white">Chỉnh sửa giao diện</p>
-        <p class="font-medium text-gray-400 text-lg">Cá nhân hoá giao diện phòng trò chơi của bạn</p>
+        <p class="font-medium text-gray-400 text-lg">Cá nhân hoá giao diện trận đấu của bạn</p>
       </div>
 
-      <div class="flex flex-col items-center justify-center text-center p-6">
-        <img src="img/appLogo.png" alt="Designing" class="mb-4 w-24 h-24 rounded-full">
-        <p class="text-lg font-semibold dark:text-white">
-          <!-- Tính năng này đang được thiết kế cho giao diện mới. Để chỉnh sửa giao diện, truy cập tại <a
-            href="./ThemeCustomization.html" target="_blank" class="text-blue-800">đây</a> bạn nhé. -->
-            Chức năng chỉnh sửa giao diện tạm thời không khả dụng.
-        </p>
+      <div class="flex flex-col items-center justify-center p-6">
+        <!-- <div class="w-full">
+          <div class="relative">
+            <input type="text"
+              class="w-full pl-3 pr-3 py-2 bg-transparent placeholder:text-slate-400 text-slate-600 text-sm border border-slate-200 rounded-md transition duration-300 ease focus:outline-none focus:border-slate-400 hover:border-slate-300 shadow-sm focus:shadow dark:bg-neutral-800 dark:text-white dark:border-neutral-600 dark:placeholder:text-slate-300 dark:focus:border-slate-600 dark:hover:border-slate-500 dark:focus:shadow-md"
+              placeholder="Nền giao diện máy chiếu" id="projectorConfig_Background"/>
+            <p class="flex items-start mt-2 text-xs text-slate-400 dark:text-slate-300">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 mr-1.5">
+                <path fill-rule="evenodd"
+                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
+                  clip-rule="evenodd" />
+              </svg>
+
+              Sử dụng đường dẫn hình ảnh, mã màu gradient hoặc mã màu hex để chọn màu nền cho thuộc tính
+            </p>
+          </div>
+        </div> -->
+        <div class="flex gap-4 items-center w-full p-4">
+          <button id="saveAllConfig"
+            class="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-white border border-slate-300 dark:border-neutral-600 rounded-lg shadow-sm hover:bg-slate-800 hover:text-white hover:border-slate-800 dark:hover:bg-neutral-700 focus:ring-4 focus:outline-none focus:ring-gray-500 transition duration-300">
+            <span class="material-icons">save</span>
+            Lưu tất cả
+          </button>
+          <button id="downloadConfig"
+            class="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-white border border-slate-300 dark:border-neutral-600 rounded-lg shadow-sm hover:bg-slate-800 hover:text-white hover:border-slate-800 dark:hover:bg-neutral-700 focus:ring-4 focus:outline-none focus:ring-gray-500 transition duration-300">
+            <span class="material-icons">file_download</span>
+            Tải về cấu hình giao diện
+          </button>
+          <button id="restoreConfig"
+            class="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-white border border-slate-300 dark:border-neutral-600 rounded-lg shadow-sm hover:bg-slate-800 hover:text-white hover:border-slate-800 dark:hover:bg-neutral-700 focus:ring-4 focus:outline-none focus:ring-gray-500 transition duration-300">
+            <span class="material-icons">restore</span>
+            Khôi phục cấu hình giao diện
+          </button>
+          <button id="deleteConfig"
+            class="flex items-center gap-2 px-4 py-2 text-slate-600 dark:text-white border border-red-300 dark:border-red-600 rounded-lg shadow-sm hover:bg-red-600 hover:text-white hover:border-red-600 dark:hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-500 transition duration-300">
+            <span class="material-icons">delete</span>
+            Xóa cấu hình giao diện
+          </button>
+          <input type="file" id="configFileInput" style="display: none;" onchange="handleConfigFile(event)" />
+        </div>
+        <div id="projectorConfigContainer">
+
+        </div>
       </div>
     </div>
 
@@ -297,13 +314,13 @@
       <div class="p-6 border-b-2 border-neutral-100 dark:border-gray-500">
         <p class="font-semibold text-3xl dark:text-white">Thiết lập Video giới thiệu</p>
         <p class="font-medium text-gray-400 text-lg">Các Video mở đầu áp dụng trong các phần thi (chỉ áp dụng trong các
-          phòng trò chơi của bạn)</p>
+          trận đấu của bạn)</p>
       </div>
       <div class="flex flex-col sm:flex-row gap-6 p-4 hidden" id="introSelection">
         <div
           class="relative flex flex-col my-6 bg-white shadow-sm border border-slate-200 rounded-lg dark:bg-neutral-700">
-          <div class="relative w-full h-56 m-2.5 overflow-hidden text-white rounded-md">
-            <img src="img/Olympia_24.webp" alt="card-image" class="w-full h-full object-cover" />
+          <div class="relative w-full h-56 overflow-hidden text-white rounded-md">
+            <img src="img/Olympia_24.webp" alt="card-image" class="w-full h-full object-cover object-center" />
           </div>
           <div class="p-4">
             <h6 class="mb-2 text-slate-800 text-xl font-semibold dark:text-white">
@@ -323,7 +340,7 @@
         </div>
         <div
           class="relative flex flex-col my-6 bg-white shadow-sm border border-slate-200 rounded-lg dark:bg-neutral-700">
-          <div class="relative w-full h-56 m-2.5 overflow-hidden text-white rounded-md">
+          <div class="relative w-full h-56 overflow-hidden text-white rounded-md">
             <img src="img/NewBackground.png" class="w-full h-full object-cover" />
           </div>
           <div class="p-4">
@@ -344,54 +361,104 @@
         </div>
       </div>
       <div class="w-full h-full p-4" id="introSettings">
-        <div class="flex justify-between items-center p-6 border-b-2 border-neutral-100 dark:border-gray-500 w-full">
-          <div>
-            <p class="font-semibold text-2xl dark:text-white">Phát Video từ nguồn ngoài</p>
-            <p class="font-light text-sm dark:text-white">Nhập URL hoặc nhúng Video từ các nền tảng khác (như Youtube,
-              ...)</p>
-
-            <div
-              class="relative flex flex-col w-full h-full text-gray-700 bg-white shadow-md bg-clip-border rounded-xl mt-4 dark:text-neutral-300 dark:bg-neutral-800">
-              <div class="p-4">
-                <!-- Input fields for name and URL -->
-                <input id="videoName" type="text" placeholder="Tên"
-                  class="border rounded p-2 mr-2 bg-white text-gray-700 dark:bg-neutral-700 dark:text-neutral-300 dark:border-neutral-600" />
-                <input id="videoURL" type="text" placeholder="Đường dẫn"
-                  class="border rounded p-2 mr-2 bg-white text-gray-700 dark:bg-neutral-700 dark:text-neutral-300 dark:border-neutral-600" />
-                <button id="addVideoBtn"
-                  class="bg-neutral-800 dark:bg-neutral-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-neutral-900 dark:hover:bg-neutral-700 transition duration-300">Thêm
-                  Video</button>
-                <button onclick="window.open('https://youtu.be/3MhCCaNAvcg?si=4ekGsC9QH_DQYEVz', '_blank')"
-                  class="bg-neutral-800 dark:bg-neutral-600 text-white px-4 py-2 rounded-lg shadow-sm hover:bg-neutral-900 dark:hover:bg-neutral-700 transition duration-300">
-                  Hướng dẫn lấy đường dẫn từ Youtube
-                </button>
-              </div>
-              <table class="w-full text-left table-auto min-w-max">
-                <thead>
-                  <tr>
-                    <th
-                      class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
-                      Thứ tự</th>
-                    <th
-                      class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
-                      Tên</th>
-                    <th
-                      class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
-                      Đường dẫn</th>
-                    <th
-                      class="p-4 border-b border-blue-gray-100 bg-blue-gray-50 dark:bg-neutral-700 dark:border-neutral-600">
-                      Hành động</th>
-                  </tr>
-                </thead>
-                <tbody id="videoTableBody">
-                  <tr>
-                    <td colspan="4" class="p-4 text-center text-gray-700 dark:text-neutral-300">Không có video nào được
-                      thêm</td>
-                  </tr>
-                </tbody>
-              </table>
+        <div
+          class="flex justify-between items-start p-4 sm:p-6 border-b-2 border-neutral-100 dark:border-gray-500 w-full">
+          <div class="w-full">
+            <div class="mb-6">
+              <p class="font-semibold text-xl sm:text-2xl dark:text-white mb-2">Phát Video từ nguồn ngoài</p>
+              <p
+                class="font-light text-sm sm:text-base dark:text-white text-gray-600 dark:text-gray-300 leading-relaxed">
+                Nhập URL hoặc nhúng Video từ các nền tảng khác (như YouTube, Vimeo, ...). Bạn có thể tải video riêng lên
+                YouTube ở chế độ Không công khai hoặc Công khai, sau đó thêm đường dẫn vào đây.
+              </p>
             </div>
 
+            <div
+              class="relative flex flex-col w-full text-gray-700 bg-white shadow-lg bg-clip-border rounded-xl dark:text-neutral-300 dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700">
+              <div class="p-4 sm:p-6">
+                <!-- Input Section -->
+                <div class="mb-6">
+                  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                    <div class="space-y-2">
+                      <label for="videoName" class="block text-sm font-medium text-gray-700 dark:text-neutral-300">
+                        Tên video *
+                      </label>
+                      <input id="videoName" type="text" placeholder="Ví dụ: Video giới thiệu trận đấu"
+                        class="w-full border rounded-lg p-3 text-sm bg-white text-gray-700 dark:bg-neutral-700 dark:text-neutral-300 dark:border-neutral-600 border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 placeholder-gray-400 dark:placeholder-neutral-500" />
+                    </div>
+                    <div class="space-y-2">
+                      <label for="videoURL" class="block text-sm font-medium text-gray-700 dark:text-neutral-300">
+                        Đường dẫn video *
+                      </label>
+                      <input id="videoURL" type="text"
+                        placeholder="https://www.youtube.com/embed/... hoặc đường dẫn video khác"
+                        class="w-full border rounded-lg p-3 text-sm bg-white text-gray-700 dark:bg-neutral-700 dark:text-neutral-300 dark:border-neutral-600 border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 placeholder-gray-400 dark:placeholder-neutral-500" />
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div class="flex flex-col sm:flex-row gap-3">
+                    <button id="addVideoBtn"
+                      class="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-sm transition duration-300 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                      <span class="material-symbols-outlined text-lg">add</span>
+                      Thêm Video
+                    </button>
+                    <button onclick="window.open('https://youtu.be/3MhCCaNAvcg?si=4ekGsC9QH_DQYEVz', '_blank')"
+                      class="flex items-center justify-center gap-2 bg-gray-600 hover:bg-gray-700 dark:bg-neutral-600 text-white px-6 py-3 rounded-lg shadow-sm hover:bg-neutral-900 dark:hover:bg-neutral-700 transition duration-300 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                      <span class="material-symbols-outlined text-lg">help</span>
+                      <span class="hidden sm:inline">Hướng dẫn lấy đường dẫn từ YouTube</span>
+                      <span class="sm:hidden">Hướng dẫn</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Video List Section -->
+                <div class="border-t border-gray-200 dark:border-neutral-600 pt-6">
+                  <h3 class="text-lg font-semibold text-gray-800 dark:text-neutral-200 mb-4">Danh sách video</h3>
+
+                  <!-- Responsive Table -->
+                  <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-neutral-600">
+                    <table class="w-full text-left table-auto min-w-max">
+                      <thead>
+                        <tr class="bg-gray-50 dark:bg-neutral-700">
+                          <th
+                            class="p-3 sm:p-4 border-b border-gray-200 dark:border-neutral-600 text-sm font-semibold text-gray-700 dark:text-neutral-300 w-12 sm:w-20">
+                            #
+                          </th>
+                          <th
+                            class="p-3 sm:p-4 border-b border-gray-200 dark:border-neutral-600 text-sm font-semibold text-gray-700 dark:text-neutral-300">
+                            Tên video
+                          </th>
+                          <th
+                            class="p-3 sm:p-4 border-b border-gray-200 dark:border-neutral-600 text-sm font-semibold text-gray-700 dark:text-neutral-300 hidden md:table-cell">
+                            Đường dẫn
+                          </th>
+                          <th
+                            class="p-3 sm:p-4 border-b border-gray-200 dark:border-neutral-600 text-sm font-semibold text-gray-700 dark:text-neutral-300 w-24 sm:w-32">
+                            Hành động
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody id="videoTableBody">
+                        <tr>
+                          <td colspan="4" class="p-6 sm:p-8 text-center text-gray-500 dark:text-neutral-400">
+                            <div class="flex flex-col items-center gap-3">
+                              <span
+                                class="material-symbols-outlined text-4xl sm:text-5xl text-gray-300 dark:text-neutral-600">video_library</span>
+                              <div>
+                                <p class="text-base sm:text-lg font-medium mb-1">Chưa có video nào</p>
+                                <p class="text-sm text-gray-400 dark:text-neutral-500">Thêm video đầu tiên của bạn để
+                                  bắt đầu</p>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="flex justify-between items-center p-6 border-b-2 border-neutral-100 dark:border-gray-500 w-full">
@@ -686,7 +753,7 @@
           <div data-collapse="collapse"
             class="block h-0 w-full basis-full overflow-hidden transition-all duration-300 ease-in-out">
             <div
-              class="relative mx-auto my-4 flex w-8/12 flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-md dark:bg-gray-900">
+              class="relative mx-auto my-4 flex w-8/12 flex-col rounded-xl bg-white bg-clip-border text-gray-700 shadow-md dark:bg-neutral-800">
               <div class="p-6">
                 <h2 class="text-2xl font-semibold text-black dark:text-white">Chỉnh sửa thông tin</h2>
                 <div>
@@ -795,7 +862,7 @@
     <div data-dialog-backdrop="match-join-dialog" data-dialog-backdrop-close="true"
       class="pointer-events-none fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 backdrop-blur-sm transition-opacity duration-300">
       <div data-dialog="match-join-dialog"
-        class="relative mx-auto flex w-full max-w-[24rem] flex-col rounded-xl bg-white dark:bg-black dark:text-white bg-clip-border text-gray-700 shadow-md">
+        class="relative mx-auto flex w-full max-w-[24rem] flex-col rounded-xl bg-white dark:bg-neutral-900 dark:text-white bg-clip-border text-gray-700 shadow-md">
         <div class="flex flex-col gap-4 p-6">
           <h6 class="block -mb-2 text-base antialiased font-semibold leading-relaxed tracking-normal text-inherit">
             Mã trận
@@ -855,11 +922,11 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <p class="font-semibold dark:text-white">Tham gia phòng trò chơi</p>
+          <p class="font-semibold dark:text-white">Tham gia trận đấu</p>
         </div>
       </div>
       <div
-        class="relative border-b border-t border-b-blue-gray-100 border-t-blue-gray-100 p-0 text-base font-light leading-relaxed text-blue-gray-500 antialiased"
+        class="relative border-b border-t border-b-blue-gray-100 border-t-blue-gray-100 p-0 text-base font-light leading-relaxed text-blue-gray-500 antialiased max-h-[32rem] overflow-y-auto scrollbar-modal"
         id="competition-container">
         <!-- <div
           class="competition-item flex flex-row items-center justify-between cursor-pointer text-slate-800 p-4 hover:bg-slate-100 dark:hover:bg-neutral-700 transition-all"
@@ -889,7 +956,7 @@
           <span class="material-icons">
             check
           </span>
-          Tham gia phòng trò chơi
+          Tham gia trận đấu
         </button>
       </div>
     </div>
@@ -900,7 +967,7 @@
     <div data-dialog="match-creation-modal"
       class="relative m-4 p-4 w-2/5 rounded-lg bg-white shadow-sm dark:bg-neutral-900">
       <div class="flex shrink-0 items-center pb-4 text-xl font-medium text-slate-800 dark:text-white">
-        Tạo phòng trò chơi mới
+        Tạo trận đấu mới
       </div>
 
 
@@ -908,24 +975,24 @@
       <!-- Form Inputs Start -->
       <form id="matchCreateForm" class="space-y-4">
         <div>
-          <label for="matchshortname" class="block text-sm font-medium text-gray-700">Mã trận</label>
+          <label for="matchshortname" class="block text-sm font-medium text-gray-700 dark:text-white">Mã trận</label>
           <input type="text" id="matchshortname" name="matchshortname"
             class="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300 dark:bg-neutral-900 dark:text-white">
         </div>
         <div>
-          <label for="matchfullname" class="block text-sm font-medium text-gray-700">Tên trận</label>
+          <label for="matchfullname" class="block text-sm font-medium text-gray-700 dark:text-white">Tên trận</label>
           <input type="text" id="matchfullname" name="matchfullname"
             class="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300 dark:bg-neutral-900 dark:text-white">
         </div>
         <div>
-          <label for="matchpassword" class="block text-sm font-medium text-gray-700">Mât khẩu</label>
+          <label for="matchpassword" class="block text-sm font-medium text-gray-700 dark:text-white">Mât khẩu</label>
           <input type="text" id="matchpassword" name="matchpassword"
             class="mt-1 p-2 w-full border rounded-md focus:border-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300 transition-colors duration-300 dark:bg-neutral-900 dark:text-white">
         </div>
         <div>
           <button type="submit" data-ripple-dark="true" data-dialog-close="true"
             class="w-full bg-black text-white p-2 rounded-md hover:bg-gray-800 focus:outline-none focus:bg-black focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-colors duration-300">Tạo
-            phòng trò chơi mới</button>
+            trận đấu mới</button>
         </div>
       </form>
       <!-- Form Inputs End -->
@@ -936,12 +1003,14 @@
     </div>
   </div>
 </body>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-functions.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-firestore-compat.js"></script>
+<!-- Firebase Storage removed - now using Cloudinary -->
+<!-- <script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-storage-compat.js"></script> -->
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-functions-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-app-check-compat.js"></script>
 <script src="js/Utilities.js"></script>
 <!-- <script src="https://unpkg.com/@material-tailwind/html@latest/scripts/tabs.js"></script> -->
 <script src="js/components/ripple/ripple.js"></script>
@@ -949,13 +1018,16 @@
 <script type="module" src="js/components/tooltip/tooltip.js"></script>
 <script src="js/components/dialog/dialog.js"></script>
 <script src="js/components/collapse/collapse.js"></script>
+<script src="js/keypress-2.1.5.min.js"></script>
 <!-- <script src="https://unpkg.com/@material-tailwind/html@latest/scripts/collapse.js"></script> -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"
   integrity="sha512-JyCZjCOZoyeQZSd5+YEAcFgz2fowJ1F1hyJOXgtKu4llIa0KneLcidn5bwfutiehUTiOuK87A986BZJMko0eWQ=="
   crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="js/firebaseConfig.js"></script>
+<script src="js/cloudinaryConfig.js"></script>
 <script src="js/main/firebaseDefenition.js"></script>
+<script src="js/utilities/syncPlayerPhotoURL.js"></script>
 <script src="js/authentication/UserLoggedin.js"></script>
 <script src="js/main/matchCodeHandler.js"></script>
 <script src="js/main/matchJoinHandler.js"></script>
@@ -963,8 +1035,27 @@
 <script src="js/main/promotion.js"></script>
 <script src="js/main/matchManagement.js"></script>
 <script src="js/components/toast/toast.js"></script>
+<script src="js/components/loading/LoadingAnimation.js"></script>
 <script src="js/main/intro.js"></script>
-<script src="js/blockConsole.js"></script>
-<script src="js/Theme.js"></script>
+<!-- <script src="js/Theme.js"></script> -->
+
+<script src="js/main/projectorConfig.js"></script>
+<script>
+// Lazy load themes/images only when #theme tab is activated
+document.addEventListener('DOMContentLoaded', function () {
+  var themeTabButton = document.getElementById('themeCustomizationButton');
+  if (themeTabButton) {
+    themeTabButton.addEventListener('click', function () {
+      // Only initialize if not already loaded
+      if (typeof initializeProjectorConfig === 'function' && !window.themesLoaded) {
+        initializeProjectorConfig().then(function() {
+          // Set global flag to indicate themes are loaded
+          window.themesLoaded = true;
+        });
+      }
+    });
+  }
+});
+</script>
 
 </html>

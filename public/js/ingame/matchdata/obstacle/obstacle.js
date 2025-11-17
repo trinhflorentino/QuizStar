@@ -1,394 +1,535 @@
-auth.onAuthStateChanged(_0x4c3960 => {
-    if (!_0x4c3960) {
+auth.onAuthStateChanged(_0x4b5570 => {
+    if (!_0x4b5570) {
       return;
     }
-    const _0x5954f3 = firestoreDB.collection("match").doc(auth.currentUser.uid);
-    _0x5954f3.onSnapshot(_0x340592 => {
-      if (!_0x340592.exists) {
+    const _0x378e9a = firestoreDB.collection("match").doc(auth.currentUser.uid);
+    _0x378e9a.onSnapshot(_0x56c8ff => {
+      if (!_0x56c8ff.exists) {
         return;
       }
-      const _0x15a7fa = _0x340592.data().match;
-      var _0x51c846 = realtimeDB.ref(_0x15a7fa + "/VCNVQuestion");
-      var _0x27db31 = realtimeDB.ref(_0x15a7fa + '/VCNV/hangngang');
-      var _0x6e72c4 = realtimeDB.ref(_0x15a7fa + "/phanthistatus/vcnv");
-      var _0x54dd29 = realtimeDB.ref(_0x15a7fa + '/VCNVOpenAnswer');
-      var _0x47000b = realtimeDB.ref(_0x15a7fa + "/ObstacleAnswers");
-      var _0x53de52 = realtimeDB.ref(_0x15a7fa + '/VCNVRowStatus');
-      var _0x51cb6d = realtimeDB.ref(_0x15a7fa + "/CompetitonAnswerCheckStatus/Obstacle");
-      var _0x18a7b1 = realtimeDB.ref(_0x15a7fa + '/ObstacleBuzzer');
-      var _0x2a02ff = realtimeDB.ref(_0x15a7fa + "/VCNVImageStatus");
-      var _0xe336ae = realtimeDB.ref(_0x15a7fa + "/VCNVChuong/OpenAll");
-      var _0x2fed44 = realtimeDB.ref(_0x15a7fa + "/ObstacleDisabledId");
-      var _0x45dbd2 = realtimeDB.ref(_0x15a7fa + "/VCNVAudio");
-      var _0x14aeb5 = realtimeDB.ref(_0x15a7fa + "/VCNV15sCountdown");
-      var _0x51d1dc = realtimeDB.ref(_0x15a7fa + "/AlreadyOpenAnswer");
-      var _0x2dc569 = storage.ref(_0x15a7fa + "/img/cnv/cnv.jpg");
-      let _0xd2be89 = null;
-      _0x51c846.on('value', _0x9f771c => {
-        _0xd2be89 = _0x9f771c.val();
-        const _0x983aa5 = _0x9f771c.val().CNV.cnv;
-        let _0x154274 = _0x983aa5.replace(/\s/g, '');
-        let _0x5df019;
-        if (/^[\p{L}]+$/u.test(_0x154274)) {
-          _0x5df019 = " CHỮ CÁI";
+      const _0x829296 = _0x56c8ff.data().match;
+      var _0xdb8fda = realtimeDB.ref(_0x829296 + "/VCNVQuestion");
+      var _0x2b366e = realtimeDB.ref(_0x829296 + "/VCNV/hangngang");
+      var _0x236948 = realtimeDB.ref(_0x829296 + "/phanthistatus/vcnv");
+      var _0x56d275 = realtimeDB.ref(_0x829296 + '/gamestatus/vcnv');
+      var _0x3c0c1c = realtimeDB.ref(_0x829296 + "/VCNVOpenAnswer");
+      var _0x354e66 = realtimeDB.ref(_0x829296 + "/ObstacleAnswers");
+      var _0x58b2d4 = realtimeDB.ref(_0x829296 + "/VCNVRowStatus");
+      var _0x1298b9 = realtimeDB.ref(_0x829296 + "/CompetitonAnswerCheckStatus/Obstacle");
+      var _0x56b0c1 = realtimeDB.ref(_0x829296 + '/ObstacleBuzzer');
+      var _0xe8303d = realtimeDB.ref(_0x829296 + '/VCNVImageStatus');
+      var _0x11bdbf = realtimeDB.ref(_0x829296 + '/VCNVChuong/OpenAll');
+      var _0x54cab5 = realtimeDB.ref(_0x829296 + "/ObstacleDisabledId");
+      var _0x432d64 = realtimeDB.ref(_0x829296 + "/VCNVAudio");
+      var _0x46c8b3 = realtimeDB.ref(_0x829296 + "/VCNV15sCountdown");
+      var _0x52eaae = realtimeDB.ref(_0x829296 + "/AlreadyOpenAnswer");
+      var _0x4be2c7 = realtimeDB.ref(_0x829296 + '/ObstacleCompetitionActive');
+      var _0x2b260a = realtimeDB.ref(_0x829296 + "/Sounds");
+      var _0x10e9b5 = realtimeDB.ref(_0x829296 + "/QuestionMedia");
+      var _0x5d8a1f = realtimeDB.ref(_0x829296 + "/AudioControl/obstacle");
+      let _0x4d01b1 = null;
+      _0xdb8fda.on("value", _0x32a739 => {
+        _0x4d01b1 = _0x32a739.val();
+        const _0x2de046 = _0x32a739.val().CNV.cnv;
+        let _0x541409 = _0x2de046.replace(/\s/g, '');
+        let _0x4952ab;
+        if (/^[\p{L}]+$/u.test(_0x541409)) {
+          _0x4952ab = " CHỮ CÁI";
         } else {
-          if (/^\d+$/.test(_0x154274)) {
-            _0x5df019 = " CHỮ SỐ";
-          } else if (/^[\p{L}\d]+$/u.test(_0x154274)) {
-            _0x5df019 = " KÝ TỰ";
+          if (/^\d+$/.test(_0x541409)) {
+            _0x4952ab = " CHỮ SỐ";
+          } else if (/^[\p{L}\d]+$/u.test(_0x541409)) {
+            _0x4952ab = " KÝ TỰ";
           } else {
-            _0x5df019 = " KÝ TỰ";
+            _0x4952ab = " KÝ TỰ";
           }
         }
-        _0xe336ae.on('value', _0x1a2313 => {
-          if (_0x1a2313.val().correct === 0x1) {
-            document.getElementById("ObstacleCharacterCount").textContent = "CHƯỚNG NGẠI VẬT:  " + _0x983aa5;
+        _0x11bdbf.on('value', _0x3909c3 => {
+          if (_0x3909c3.val().correct === 0x1) {
+            document.getElementById("ObstacleCharacterCount").textContent = "CHƯỚNG NGẠI VẬT:  " + _0x2de046.toUpperCase();
             document.getElementById("audio_ObstacleRight").currentTime = 0x0;
-            document.getElementById("audio_ObstacleRight").play();
-          } else if (_0x1a2313.val().correct === 0x2) {
-            document.getElementById('audio_ObstacleRowWrongAnswer').currentTime = 0x0;
+            document.getElementById('audio_ObstacleRight').play();
+          } else if (_0x3909c3.val().correct === 0x2) {
+            document.getElementById("audio_ObstacleRowWrongAnswer").currentTime = 0x0;
             document.getElementById("audio_ObstacleRowWrongAnswer").play();
           } else {
-            document.getElementById('ObstacleCharacterCount').textContent = "CHƯỚNG NGẠI VẬT CÓ " + (_0x983aa5.replace(/\s/g, '').length + _0x5df019);
+            document.getElementById("ObstacleCharacterCount").textContent = "CHƯỚNG NGẠI VẬT CÓ " + (_0x2de046.replace(/\s/g, '').length + _0x4952ab);
           }
         });
-        const _0x5f4f21 = document.getElementById("obstacleContainer");
-        const _0x146037 = _0x4e4bc6 => {
-          _0x5f4f21.innerHTML = '';
-          for (let _0x440b06 = 0x1; _0x440b06 <= 0x4; _0x440b06++) {
-            const _0x4986f1 = 'HN' + _0x440b06;
-            const _0x2ab4ab = _0xd2be89[_0x4986f1]?.["dapan"]?.["replace"](/\s/g, '');
-            const _0xce5665 = _0x4e4bc6[_0x4986f1]?.["status"];
-            if (!_0x2ab4ab) {
-              console.warn("Answer for " + _0x4986f1 + " is missing or invalid");
+        const _0x10e50f = document.getElementById("obstacleContainer");
+        const _0x4ecf6e = _0x5e08ab => {
+          _0x10e50f.innerHTML = '';
+          const _0x57a6d3 = document.createElement("div");
+          _0x57a6d3.className = "flex flex-col space-y-4 mt-4";
+          for (let _0x3d9bbc = 0x1; _0x3d9bbc <= 0x4; _0x3d9bbc++) {
+            const _0x2eb18c = 'HN' + _0x3d9bbc;
+            const _0xd84470 = _0x4d01b1[_0x2eb18c]?.['dapan']?.["replace"](/\s/g, '');
+            const _0x2fcac6 = _0x5e08ab[_0x2eb18c]?.["status"];
+            if (!_0xd84470) {
+              console.warn("Answer for " + _0x2eb18c + " is missing or invalid");
               continue;
             }
-            const _0xb2c323 = document.createElement("div");
-            _0xb2c323.className = "flex space-x-4 mt-4 obstacle-row-" + _0x440b06;
-            for (let _0x4128ca of _0x2ab4ab) {
-              const _0x1633c4 = document.createElement("div");
-              _0x1633c4.className = _0xce5665 === 0x2 ? "w-12 h-12 bg-red-300 dark:bg-red-700 rounded-full flex items-center justify-center" : "w-12 h-12 bg-gray-300 dark:bg-neutral-700 rounded-full flex items-center justify-center";
-              const _0x4edd8d = document.createElement("span");
-              _0x4edd8d.className = "text-xl font-bold text-black dark:text-white";
-              _0x4edd8d.textContent = _0xce5665 === 0x1 ? _0x4128ca : '';
-              _0x1633c4.appendChild(_0x4edd8d);
-              _0xb2c323.appendChild(_0x1633c4);
+            const _0x54ec24 = document.createElement("div");
+            _0x54ec24.className = "flex justify-between items-start";
+            const _0x1445ef = document.createElement("div");
+            _0x1445ef.className = "flex flex-wrap space-x-0.5 gap-0.5 obstacle-row-" + _0x3d9bbc;
+            _0x1445ef.style.maxWidth = "calc(13 * 3.5rem)";
+            for (let _0x347323 of _0xd84470) {
+              const _0xb5c9cb = document.createElement('div');
+              if (_0x2fcac6 === 0x1) {
+                _0xb5c9cb.className = "w-14 h-14 bg-green-700 border-4 border-white rounded-full flex items-center justify-center shadow-lg";
+              } else if (_0x2fcac6 === 0x2) {
+                _0xb5c9cb.className = "w-14 h-14 bg-red-700 border-4 border-white rounded-full flex items-center justify-center shadow-lg";
+              } else {
+                _0xb5c9cb.className = "w-14 h-14 bg-gray-300 border-4 border-white rounded-full flex items-center justify-center shadow-lg";
+              }
+              const _0x4e9374 = document.createElement("span");
+              _0x4e9374.className = "text-2xl font-bold text-white";
+              _0x4e9374.textContent = _0x2fcac6 === 0x1 ? _0x347323 : '';
+              _0xb5c9cb.appendChild(_0x4e9374);
+              _0x1445ef.appendChild(_0xb5c9cb);
             }
-            _0x5f4f21.appendChild(_0xb2c323);
+            const _0xe8b643 = document.createElement("div");
+            _0xe8b643.className = "w-14 flex justify-center ml-2";
+            const _0x32ea96 = document.createElement("div");
+            _0x32ea96.className = "w-14 h-14 bg-white dark:bg-neutral-700 border-2 border-gray-200 dark:border-white rounded-full flex items-center justify-center shadow-lg";
+            const _0x5f1467 = document.createElement("span");
+            _0x5f1467.className = "text-2xl font-bold text-black dark:text-white";
+            _0x5f1467.textContent = _0x3d9bbc;
+            _0x32ea96.appendChild(_0x5f1467);
+            _0xe8b643.appendChild(_0x32ea96);
+            _0x54ec24.appendChild(_0x1445ef);
+            _0x54ec24.appendChild(_0xe8b643);
+            _0x57a6d3.appendChild(_0x54ec24);
           }
+          _0x10e50f.appendChild(_0x57a6d3);
         };
-        _0x53de52.on("value", _0x1b5cc0 => {
-          const _0x4bab10 = _0x1b5cc0.val();
-          _0x146037(_0x4bab10);
+        _0x58b2d4.on("value", _0x21cb8b => {
+          const _0x12c1bd = _0x21cb8b.val();
+          _0x4ecf6e(_0x12c1bd);
         });
       });
-      _0x27db31.on("value", _0x3f25a6 => {
-        const _0x3bd1e6 = _0x3f25a6.val().hn;
-        const _0x29cd31 = document.getElementById("ObstacleQuestion");
-        const _0x3653c3 = document.getElementById("ObstacleQuestionTitle");
-        const _0x548bef = document.querySelector(".obstacle-row-" + _0x3bd1e6);
-        if (_0x548bef) {
-          _0x548bef.querySelectorAll("div").forEach(_0x54350c => {
-            _0x54350c.classList.remove("bg-gray-300", "dark:bg-neutral-700");
-            _0x54350c.classList.add('bg-blue-300', "dark:bg-blue-700");
+      _0x2b366e.on("value", async _0x54879d => {
+        const _0x58a5cf = _0x54879d.val().hn;
+        const _0x42d07c = document.getElementById("ObstacleQuestion");
+        const _0x4337f1 = document.getElementById('ObstacleQuestionTitle');
+        const _0x468f81 = document.querySelector('.obstacle-row-' + _0x58a5cf);
+        window.stopCurrentQuestionAudio();
+        if (_0x58a5cf === 0x0) {
+          document.querySelectorAll(".obstacle-row-1, .obstacle-row-2, .obstacle-row-3, .obstacle-row-4").forEach(_0x3447d9 => {
+            _0x3447d9.querySelectorAll("div").forEach(_0x108c9e => {
+              _0x108c9e.classList.remove('bg-blue-300', 'dark:bg-blue-500');
+              _0x108c9e.classList.add("bg-gray-300");
+            });
+          });
+          window.stopCurrentQuestionAudio();
+        }
+        try {
+          console.log("Loading question media for HN" + _0x58a5cf);
+          const _0x31abf9 = await getQuestionMedia("VCNVQuestion", 'HN' + _0x58a5cf, 0x1);
+          await displayQuestionImage(_0x31abf9.image, document.getElementById("ObstacleQuestionImage"), document.getElementById('ObstacleMediaContainer'));
+        } catch (_0x5584f4) {
+          console.error("Error loading question media:", _0x5584f4);
+        }
+        if (_0x468f81) {
+          _0x468f81.querySelectorAll("div").forEach(_0x2a48b6 => {
+            _0x2a48b6.classList.remove("bg-gray-300");
+            _0x2a48b6.classList.add("bg-blue-300", "dark:bg-blue-500");
           });
         }
-        document.getElementById('ObstacleAnswerTime').textContent = "00:15";
-        if (!_0x29cd31) {
+        document.getElementById("ObstacleAnswerTime").textContent = "00:15";
+        if (!_0x42d07c) {
           console.warn("ObstacleQuestion container not found.");
           return;
         }
-        let _0x403fde = '';
-        let _0x5c392d = '';
-        switch (_0x3bd1e6) {
+        let _0x381256 = '';
+        let _0x57b720 = '';
+        switch (_0x58a5cf) {
           case 0x1:
           case 0x2:
           case 0x3:
           case 0x4:
-            _0x403fde = _0xd2be89['HN' + _0x3bd1e6]?.["cauhoi"] || "Câu hỏi HN" + _0x3bd1e6 + " không có dữ liệu";
-            _0x5c392d = _0x1ae2a6(_0xd2be89['HN' + _0x3bd1e6]?.["dapan"], _0x3bd1e6);
+            _0x381256 = _0x4d01b1['HN' + _0x58a5cf]?.["cauhoi"] || "Câu hỏi HN" + _0x58a5cf + " không có dữ liệu";
+            _0x57b720 = _0x1a8255(_0x4d01b1['HN' + _0x58a5cf]?.["dapan"], _0x58a5cf);
             break;
           case 0x5:
-            _0x403fde = _0xd2be89.HNTT?.["cauhoi"] || "Câu hỏi HNTT không có dữ liệu";
-            _0x5c392d = _0x1ae2a6(_0xd2be89.HNTT?.["dapan"], "trung tâm");
+            _0x381256 = _0x4d01b1.HNTT?.["cauhoi"] || "Câu hỏi HNTT không có dữ liệu";
+            _0x57b720 = _0x1a8255(_0x4d01b1.HNTT?.['dapan'], "trung tâm");
             break;
           default:
-            _0x5c392d = "Câu hỏi";
+            _0x57b720 = "Câu hỏi";
             break;
         }
-        function _0x1ae2a6(_0x5b3815, _0x167f6d) {
-          if (!_0x5b3815) {
-            return "Câu hỏi hàng ngang " + _0x167f6d + " không có dữ liệu";
+        _0x2b260a.on("value", _0x1b0821 => {
+          const _0x1ce15f = _0x1b0821.val();
+          if (_0x1ce15f?.["EnglishVoice"] && _0x381256) {
+            _0x56d275.once('value', _0x454f86 => {
+              if (_0x454f86.val().vcnv === 0x1) {
+                speakText(_0x381256);
+              }
+            });
           }
-          _0x5b3815 = _0x5b3815.replace(/\s/g, '');
-          if (/^[0-9]+$/.test(_0x5b3815)) {
-            return "Câu hỏi hàng ngang " + _0x167f6d + " (" + _0x5b3815.length + " chữ số)";
+        });
+        function _0x1a8255(_0x31d13d, _0xde1710) {
+          if (!_0x31d13d) {
+            return "Câu hỏi hàng ngang " + _0xde1710 + " không có dữ liệu";
+          }
+          let _0xa2c3c7 = _0x31d13d.replace(/\s/g, '');
+          let _0xf31736;
+          if (/^[\p{L}]+$/u.test(_0xa2c3c7)) {
+            _0xf31736 = " chữ cái";
           } else {
-            return /^[a-zA-Z]+$/.test(_0x5b3815) ? "Câu hỏi hàng ngang " + _0x167f6d + " (" + _0x5b3815.length + " chữ cái)" : "Câu hỏi hàng ngang " + _0x167f6d + " (" + _0x5b3815.length + " ký tự)";
+            if (/^\d+$/.test(_0xa2c3c7)) {
+              _0xf31736 = " chữ số";
+            } else if (/^[\p{L}\d]+$/u.test(_0xa2c3c7)) {
+              _0xf31736 = " ký tự";
+            } else {
+              _0xf31736 = " ký tự";
+            }
           }
+          return "Câu hỏi hàng ngang " + _0xde1710 + " (" + _0xa2c3c7.length + _0xf31736 + ')';
         }
-        if (_0x3bd1e6 !== 0x0) {
-          const _0xb9a7cc = document.getElementById("audio_ObstacleRowChoose");
-          if (_0xb9a7cc) {
-            _0xb9a7cc.currentTime = 0x0;
-            _0xb9a7cc.play();
+        if (_0x58a5cf !== 0x0) {
+          const _0x56f31a = document.getElementById('audio_ObstacleRowChoose');
+          if (_0x56f31a) {
+            _0x56f31a.currentTime = 0x0;
+            _0x56f31a.play();
           } else {
             console.warn("Audio element with id 'audio_ObstacleRowChoose' not found.");
           }
         }
-        _0x29cd31.textContent = _0x403fde;
-        _0x3653c3.textContent = _0x5c392d;
+        _0x42d07c.textContent = _0x381256;
+        _0x4337f1.textContent = _0x57b720;
       });
-      let _0x88e42f = [];
-      _0x2fed44.on("value", _0x4394c9 => {
-        _0x88e42f = [];
-        _0x4394c9.forEach(_0x4ece7c => {
-          _0x88e42f.push(parseInt(_0x4ece7c.val(), 0xa));
+      let _0x4c864f = [];
+      _0x54cab5.on('value', _0x2e4c0e => {
+        _0x4c864f = [];
+        _0x2e4c0e.forEach(_0x635a92 => {
+          _0x4c864f.push(parseInt(_0x635a92.val(), 0xa));
         });
       });
-      document.getElementById("ObstacleAnswerInput").addEventListener("keypress", _0x559f5e => {
-        if (_0x559f5e.key === "Enter") {
-          const _0x53d6e7 = parseInt(localStorage.getItem('id'), 0xa);
-          if (_0x88e42f.includes(_0x53d6e7)) {
+      document.getElementById("ObstacleAnswerInput").addEventListener("keypress", _0x40fd0b => {
+        if (_0x40fd0b.key === 'Enter') {
+          const _0x2d9534 = parseInt(localStorage.getItem('id'), 0xa);
+          if (_0x4c864f.includes(_0x2d9534)) {
             console.log("Player is disabled");
             return;
           }
-          _0x47000b.push({
+          _0x354e66.push({
             'id': localStorage.getItem('id'),
-            'answer': _0x559f5e.target.value,
+            'answer': _0x40fd0b.target.value,
             'timestamp': firebase.database.ServerValue.TIMESTAMP
           });
-          _0x559f5e.target.value = '';
+          _0x40fd0b.target.value = '';
         }
       });
-      _0x6e72c4.on("value", _0x389bdb => {
-        const _0x506c12 = _0x389bdb.val().batdau;
-        if (_0x506c12 === 0x1) {
-          document.getElementById("audio_ObstacleRowThinking").currentTime = 0x0;
-          document.getElementById('audio_ObstacleRowThinking').play();
-          document.getElementById('ObstacleAnswerInput').disabled = false;
+      let _0x1dabe8 = null;
+      _0x236948.on("value", _0x540b2c => {
+        const _0x260844 = _0x540b2c.val().batdau;
+        if (_0x260844 === 0x1) {
+          if (_0x1dabe8) {
+            clearInterval(_0x1dabe8);
+            _0x1dabe8 = null;
+          }
+          document.getElementById('audio_ObstacleRowThinking').currentTime = 0x0;
+          document.getElementById("audio_ObstacleRowThinking").play();
+          document.getElementById("ObstacleAnswerInput").disabled = false;
           document.getElementById("ObstacleAnswerInput").focus();
-          document.getElementById('ObstacleAnswerInput').scrollIntoView();
-          let _0x28d62f = 0xf;
-          document.getElementById('ObstacleAnswerTime').textContent = "00:" + (_0x28d62f < 0xa ? '0' : '') + _0x28d62f;
-          document.getElementById('ObstacleAnswerCircleStatus').classList.remove('text-red-500');
-          document.getElementById("ObstacleAnswerCircleStatus").classList.add("text-green-500");
-          const _0x2af704 = setInterval(() => {
-            _0x28d62f -= 0x1;
-            if (_0x28d62f <= 0x0) {
-              clearInterval(_0x2af704);
-              document.getElementById('ObstacleAnswerInput').disabled = true;
+          document.getElementById("ObstacleAnswerInput").scrollIntoView();
+          let _0x3a5f48 = 0xf;
+          document.getElementById("ObstacleAnswerTime").textContent = "00:" + (_0x3a5f48 < 0xa ? '0' : '') + _0x3a5f48;
+          document.getElementById("ObstacleAnswerCircleStatus").classList.remove('text-red-500');
+          document.getElementById('ObstacleAnswerCircleStatus').classList.add("text-green-500");
+          _0x1dabe8 = setInterval(() => {
+            _0x3a5f48 -= 0x1;
+            if (_0x3a5f48 <= 0x0) {
+              clearInterval(_0x1dabe8);
+              _0x1dabe8 = null;
+              document.getElementById("ObstacleAnswerInput").disabled = true;
               document.getElementById("ObstacleAnswerInput").value = '';
               document.getElementById("ObstacleAnswerCircleStatus").classList.remove("text-green-500");
               document.getElementById("ObstacleAnswerCircleStatus").classList.add("text-red-500");
               document.getElementById("ObstacleAnswerTime").textContent = "00:00";
             } else {
-              document.getElementById('ObstacleAnswerTime').textContent = "00:" + (_0x28d62f < 0xa ? '0' : '') + _0x28d62f;
+              document.getElementById("ObstacleAnswerTime").textContent = "00:" + (_0x3a5f48 < 0xa ? '0' : '') + _0x3a5f48;
             }
           }, 0x3e8);
         }
       });
-      _0x54dd29.on("value", _0xf65fa3 => {
-        const _0x321b84 = _0xf65fa3.val().OpenAnswer;
-        const _0x22f69a = document.getElementById("ObstacleAnswerLockStatusIcon");
-        const _0x526b9f = document.querySelector("[aria-controls=\"obstacle-contestant-answer\"]").parentElement;
-        const _0x5df79a = _0x526b9f.querySelector('[data-tab-target]');
-        const _0x4e5b8e = document.querySelector("[aria-controls=\"obstacle-answer-question\"]");
-        const _0x21c322 = document.getElementById('obstacle-contestant-answer');
-        const _0x5ea6a6 = document.getElementById("obstacle-answer-question");
-        if (_0x321b84 === 0x1) {
-          _0x51d1dc.once("value", _0x2cd6b6 => {
-            if (_0x2cd6b6.val().status === true) {
+      _0x3c0c1c.on('value', _0x3f5952 => {
+        const _0xdd52fd = _0x3f5952.val().OpenAnswer;
+        const _0x5f4624 = document.getElementById('ObstacleAnswerLockStatusIcon');
+        const _0x3736e5 = document.querySelector("[aria-controls=\"obstacle-contestant-answer\"]").parentElement;
+        const _0x4a2710 = _0x3736e5.querySelector('[data-tab-target]');
+        const _0x115896 = document.querySelector("[aria-controls=\"obstacle-answer-question\"]");
+        const _0x53fec5 = document.getElementById('obstacle-contestant-answer');
+        const _0x2e9881 = document.getElementById("obstacle-answer-question");
+        if (_0xdd52fd === 0x1) {
+          _0x52eaae.once("value", _0x598b90 => {
+            if (_0x598b90.val().status === true) {
               return;
             }
             document.getElementById("audio_ObstacleAnswers").currentTime = 0x0;
             document.getElementById("audio_ObstacleAnswers").play();
           });
-          _0x22f69a.textContent = "lock_open";
-          _0x526b9f.classList.remove("pointer-events-none", "opacity-50");
-          _0x5df79a.classList.remove('cursor-not-allowed');
-          _0x5df79a.classList.add("cursor-pointer");
-          _0x21c322.classList.remove("hidden", "opacity-0");
-          _0x21c322.classList.add("block", "opacity-100");
-          _0x5ea6a6.classList.remove('block', "opacity-100");
-          _0x5ea6a6.classList.add("hidden", 'opacity-0');
+          _0x5f4624.textContent = 'lock_open';
+          _0x3736e5.classList.remove("pointer-events-none", "opacity-50");
+          _0x4a2710.classList.remove('cursor-not-allowed');
+          _0x4a2710.classList.add("cursor-pointer");
+          _0x53fec5.classList.remove("hidden", "opacity-0");
+          _0x53fec5.classList.add("block", "opacity-100");
+          _0x2e9881.classList.remove("block", "opacity-100");
+          _0x2e9881.classList.add('hidden', "opacity-0");
           setTimeout(() => {
-            _0x5df79a.click();
-            _0x1f029a(_0x526b9f);
+            _0x4a2710.click();
+            _0x163aab(_0x3736e5);
           }, 0x64);
         } else {
-          _0x22f69a.textContent = 'lock';
-          _0x526b9f.classList.add('pointer-events-none', "opacity-50");
-          _0x5df79a.classList.remove("cursor-pointer");
-          _0x5df79a.classList.add("cursor-not-allowed");
-          _0x5ea6a6.classList.remove("hidden", "opacity-0");
-          _0x5ea6a6.classList.add('block', "opacity-100");
-          _0x21c322.classList.remove("block", "opacity-100");
-          _0x21c322.classList.add("hidden", "opacity-0");
+          _0x5f4624.textContent = "lock";
+          _0x3736e5.classList.add('pointer-events-none', "opacity-50");
+          _0x4a2710.classList.remove("cursor-pointer");
+          _0x4a2710.classList.add("cursor-not-allowed");
+          _0x2e9881.classList.remove("hidden", "opacity-0");
+          _0x2e9881.classList.add("block", "opacity-100");
+          _0x53fec5.classList.remove("block", "opacity-100");
+          _0x53fec5.classList.add("hidden", "opacity-0");
           setTimeout(() => {
-            _0x4e5b8e.click();
-            _0x1f029a(_0x4e5b8e.parentElement);
+            _0x115896.click();
+            _0x163aab(_0x115896.parentElement);
           }, 0x64);
         }
       });
-      function _0x1f029a(_0x1778ec) {
-        const _0xbff521 = _0x1778ec.closest('ul');
-        if (!_0xbff521) {
+      function _0x163aab(_0x453ebc) {
+        const _0x11d6f4 = _0x453ebc.closest('ul');
+        if (!_0x11d6f4) {
           return;
         }
-        const _0x1c197c = document.querySelectorAll("[moving-tab]");
-        const _0x4a27ce = Array.from(_0xbff521.children);
-        const _0x1b4c2d = _0x4a27ce.indexOf(_0x1778ec) + 0x1;
-        let _0x29fffe = 0x0;
-        if (_0xbff521.classList.contains("flex-col")) {
-          for (let _0xf2b95 = 0x1; _0xf2b95 <= _0x4a27ce.indexOf(_0x1778ec); _0xf2b95++) {
-            _0x29fffe += _0xbff521.querySelector("li:nth-child(" + _0xf2b95 + ')').offsetHeight;
+        const _0x4109a8 = document.querySelectorAll("[moving-tab]");
+        const _0x137d45 = Array.from(_0x11d6f4.children);
+        const _0x282b2f = _0x137d45.indexOf(_0x453ebc) + 0x1;
+        let _0x4e557d = 0x0;
+        if (_0x11d6f4.classList.contains('flex-col')) {
+          for (let _0x361d95 = 0x1; _0x361d95 <= _0x137d45.indexOf(_0x453ebc); _0x361d95++) {
+            _0x4e557d += _0x11d6f4.querySelector('li:nth-child(' + _0x361d95 + ')').offsetHeight;
           }
-          _0x1c197c.forEach(_0x5ee650 => {
-            _0x5ee650.style.transform = "translate3d(0px, " + _0x29fffe + "px, 0px)";
-            _0x5ee650.style.height = _0xbff521.querySelector("li:nth-child(" + _0x1b4c2d + ')').offsetHeight + 'px';
+          _0x4109a8.forEach(_0x475309 => {
+            _0x475309.style.transform = "translate3d(0px, " + _0x4e557d + "px, 0px)";
+            _0x475309.style.height = _0x11d6f4.querySelector("li:nth-child(" + _0x282b2f + ')').offsetHeight + 'px';
           });
         } else {
-          for (let _0x4eb303 = 0x1; _0x4eb303 <= _0x4a27ce.indexOf(_0x1778ec); _0x4eb303++) {
-            _0x29fffe += _0xbff521.querySelector('li:nth-child(' + _0x4eb303 + ')').offsetWidth;
+          for (let _0x1ef6d6 = 0x1; _0x1ef6d6 <= _0x137d45.indexOf(_0x453ebc); _0x1ef6d6++) {
+            _0x4e557d += _0x11d6f4.querySelector("li:nth-child(" + _0x1ef6d6 + ')').offsetWidth;
           }
-          _0x1c197c.forEach(_0x29d57f => {
-            _0x29d57f.style.transform = "translate3d(" + _0x29fffe + "px, 0px, 0px)";
-            _0x29d57f.style.width = _0xbff521.querySelector("li:nth-child(" + _0x1b4c2d + ')').offsetWidth + 'px';
+          _0x4109a8.forEach(_0xa6c206 => {
+            _0xa6c206.style.transform = "translate3d(" + _0x4e557d + "px, 0px, 0px)";
+            _0xa6c206.style.width = _0x11d6f4.querySelector("li:nth-child(" + _0x282b2f + ')').offsetWidth + 'px';
           });
         }
       }
-      _0x47000b.orderByChild("timestamp").limitToLast(0x1).on('value', _0x20f45b => {
-        if (!_0x20f45b.exists()) {
-          document.getElementById("ObstacleAnswerOutput").textContent = "Đáp án của bạn:  ";
+      _0x354e66.orderByChild('timestamp').limitToLast(0x1).on("value", _0x461207 => {
+        if (!_0x461207.exists()) {
+          document.getElementById("ObstacleAnswerOutput").textContent = "Câu trả lời của bạn:  ";
           return;
         }
-        _0x20f45b.forEach(_0x1e054c => {
-          const _0x1639eb = _0x1e054c.val();
-          if (_0x1639eb.id === localStorage.getItem('id')) {
-            document.getElementById("ObstacleAnswerOutput").textContent = "Đáp án của bạn: " + _0x1639eb.answer.toUpperCase();
+        _0x461207.forEach(_0x56e97b => {
+          const _0x53f009 = _0x56e97b.val();
+          if (_0x53f009.id === localStorage.getItem('id')) {
+            document.getElementById("ObstacleAnswerOutput").textContent = "Câu trả lời của bạn: " + _0x53f009.answer.toUpperCase();
           }
-          if (_0x1639eb === null) {
-            console.log('True');
-            document.getElementById('ObstacleAnswerOutput').textContent = "Đáp án của bạn:  ";
+          if (_0x53f009 === null) {
+            console.log("True");
+            document.getElementById("ObstacleAnswerOutput").textContent = "Câu trả lời của bạn:  ";
           }
         });
       });
-      _0x47000b.orderByChild('timestamp').on("value", _0x41549d => {
-        const _0x1c55d2 = {};
-        _0x41549d.forEach(_0x3df2f4 => {
-          const _0x2be881 = _0x3df2f4.val();
-          const _0x501730 = _0x2be881.id;
-          if (!_0x1c55d2[_0x501730] || _0x1c55d2[_0x501730].timestamp < _0x2be881.timestamp) {
-            _0x1c55d2[_0x501730] = _0x2be881;
+      _0x354e66.orderByChild("timestamp").on("value", _0xe7a05b => {
+        const _0x3b7d7d = {};
+        _0xe7a05b.forEach(_0x13a537 => {
+          const _0x19e33 = _0x13a537.val();
+          const _0x52ddcd = _0x19e33.id;
+          if (!_0x3b7d7d[_0x52ddcd] || _0x3b7d7d[_0x52ddcd].timestamp < _0x19e33.timestamp) {
+            _0x3b7d7d[_0x52ddcd] = _0x19e33;
           }
         });
-        for (let _0x2c10d3 = 0x1; _0x2c10d3 <= 0x4; _0x2c10d3++) {
-          const _0x3690eb = document.getElementById("ObstacleAnswerPlayer" + _0x2c10d3);
-          if (_0x3690eb) {
-            const _0x12407d = _0x1c55d2[_0x2c10d3] ? _0x1c55d2[_0x2c10d3].answer : '';
-            _0x3690eb.textContent = '' + _0x12407d.toUpperCase();
+        const _0x598b10 = getPlayerLimit();
+        for (let _0x420eb8 = 0x1; _0x420eb8 <= _0x598b10; _0x420eb8++) {
+          const _0x280db9 = document.getElementById("ObstacleAnswerPlayer" + _0x420eb8);
+          if (_0x280db9) {
+            const _0x55910a = _0x3b7d7d[_0x420eb8] ? _0x3b7d7d[_0x420eb8].answer : '';
+            _0x280db9.textContent = '' + _0x55910a.toUpperCase();
           }
         }
       });
-      _0x51cb6d.on("value", _0x24538e => {
-        if (_0x24538e.val().status === true) {
-          const _0x281acd = _0x24538e.val().correctAnswerIds;
-          if (_0x281acd && _0x281acd.length > 0x0) {
-            document.getElementById("audio_ObstacleRightAnswer").currentTime = 0x0;
+      _0x1298b9.on("value", _0x224dde => {
+        if (!_0x224dde.exists()) {
+          return;
+        }
+        if (_0x224dde.val().status === true) {
+          const _0x5bce10 = _0x224dde.val().correctAnswerIds;
+          if (_0x5bce10 && _0x5bce10.length > 0x0) {
+            document.getElementById('audio_ObstacleRightAnswer').currentTime = 0x0;
             document.getElementById("audio_ObstacleRightAnswer").play();
           } else {
             document.getElementById('audio_ObstacleRowWrongAnswer').currentTime = 0x0;
-            document.getElementById("audio_ObstacleRowWrongAnswer").play();
+            document.getElementById('audio_ObstacleRowWrongAnswer').play();
           }
         }
       });
       document.getElementById('ObstacleBuzzerButton').addEventListener('click', () => {
-        _0xe336ae.once('value', _0x2d5643 => {
-          if (_0x2d5643.val().correct === 0x1) {
+        _0x11bdbf.once("value", _0x61d7ef => {
+          if (_0x61d7ef.val().correct === 0x1) {
             return;
           }
-          const _0x4c300a = parseInt(localStorage.getItem('id'), 0xa);
-          if (_0x88e42f.includes(_0x4c300a)) {
+          const _0x1cba8c = parseInt(localStorage.getItem('id'), 0xa);
+          if (_0x4c864f.includes(_0x1cba8c)) {
             console.log("Player is disabled");
             return;
           }
-          _0x18a7b1.push({
+          _0x56b0c1.push({
             'id': localStorage.getItem('id'),
             'timestamp': firebase.database.ServerValue.TIMESTAMP
           });
         });
       });
-      _0x18a7b1.orderByChild('id').equalTo(localStorage.getItem('id')).on("value", _0x14fdd8 => {
-        const _0x55556c = document.getElementById('ObstacleBuzzerButton');
-        if (_0x14fdd8.exists()) {
-          _0x55556c.disabled = true;
+      _0x56b0c1.orderByChild('id').equalTo(localStorage.getItem('id')).on('value', _0x485df3 => {
+        const _0x5b9077 = document.getElementById("ObstacleBuzzerButton");
+        if (_0x485df3.exists()) {
+          _0x5b9077.disabled = true;
         } else {
-          _0x55556c.disabled = false;
+          _0x5b9077.disabled = false;
         }
       });
-      _0x18a7b1.orderByChild("timestamp").on("value", _0x30e0e4 => {
-        const _0x1fbdd9 = document.getElementById("ObstacleBuzzerList");
-        _0x1fbdd9.innerHTML = '';
-        _0x30e0e4.forEach(_0x33a08d => {
-          const _0x198e69 = _0x33a08d.val();
-          const _0x280257 = _0x198e69.id;
-          const _0x189440 = new Date(_0x198e69.timestamp);
-          const _0x331fe0 = _0x189440.getHours().toString().padStart(0x2, '0');
-          const _0x173746 = _0x189440.getMinutes().toString().padStart(0x2, '0');
-          const _0x324288 = _0x189440.getSeconds().toString().padStart(0x2, '0');
-          const _0xe4164 = _0x189440.getMilliseconds().toString().padStart(0x3, '0');
-          const _0x120337 = realtimeDB.ref(_0x15a7fa + "/games/player" + _0x280257);
-          _0x120337.once("value", _0x5825a9 => {
-            const _0x940037 = _0x5825a9.val().displayName;
-            const _0x260db9 = document.createElement("div");
-            _0x260db9.className = "w-full mt-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-center font-semibold py-4 rounded-xl dark:from-blue-700 dark:to-indigo-700";
-            _0x260db9.textContent = "Thí sinh " + _0x940037 + " đã giành quyền trả lời chướng ngại vật lúc " + _0x331fe0 + ':' + _0x173746 + ':' + _0x324288 + ':' + _0xe4164;
-            _0x1fbdd9.appendChild(_0x260db9);
-            const _0x5854d4 = document.getElementById("audio_ObstacleAnswerBuzzer");
-            if (_0x5854d4) {
-              _0x5854d4.currentTime = 0x0;
-              _0x5854d4.play();
+      _0x56b0c1.orderByChild("timestamp").on("value", _0x4d4332 => {
+        const _0x4713e8 = document.getElementById('ObstacleBuzzerList');
+        _0x4713e8.innerHTML = '';
+        _0x4d4332.forEach(_0x4615e6 => {
+          const _0x2a5898 = _0x4615e6.val();
+          const _0x358323 = _0x2a5898.id;
+          const _0x203e2c = new Date(_0x2a5898.timestamp);
+          const _0x4d6abe = _0x203e2c.getHours().toString().padStart(0x2, '0');
+          const _0xa999c8 = _0x203e2c.getMinutes().toString().padStart(0x2, '0');
+          const _0x2b84e9 = _0x203e2c.getSeconds().toString().padStart(0x2, '0');
+          const _0x1ce4ed = _0x203e2c.getMilliseconds().toString().padStart(0x3, '0');
+          const _0x42c981 = realtimeDB.ref(_0x829296 + "/games/player" + _0x358323);
+          _0x42c981.once("value", _0x2cfb88 => {
+            const _0x6a385a = _0x2cfb88.val().displayName;
+            const _0x9153fb = document.createElement("div");
+            _0x9153fb.className = "w-full mt-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-center font-semibold py-4 rounded-xl dark:from-blue-700 dark:to-indigo-700";
+            _0x9153fb.textContent = "Thí sinh " + _0x6a385a + " đã giành quyền trả lời chướng ngại vật lúc " + _0x4d6abe + ':' + _0xa999c8 + ':' + _0x2b84e9 + ':' + _0x1ce4ed;
+            _0x4713e8.appendChild(_0x9153fb);
+            const _0x27715c = document.getElementById("audio_ObstacleAnswerBuzzer");
+            if (_0x27715c) {
+              _0x27715c.currentTime = 0x0;
+              _0x27715c.play();
             } else {
               console.warn("Audio element with id 'audio_ObstacleAnswerBuzzer' not found.");
             }
           });
         });
       });
-      _0x2dc569.getDownloadURL().then(_0xeca09c => {
-        document.getElementById("ObstacleImage").src = _0xeca09c;
+      _0x10e9b5.on("value", async _0xc38995 => {
+        try {
+          const _0x5527a8 = await getQuestionMedia("VCNVQuestion", "CNV", "background");
+          await displayQuestionImage(_0x5527a8.image, document.getElementById("ObstacleImage"), document.getElementById("ObstacleImageContainer"));
+        } catch (_0xd3e0a3) {
+          console.error("Error displaying question image:", _0xd3e0a3);
+        }
       });
-      _0x2a02ff.on('value', _0x34f217 => {
-        const _0x3e6fe7 = document.querySelector(".ObstacleImageOverlay");
-        for (let _0x4e7d17 = 0x1; _0x4e7d17 <= 0x5; _0x4e7d17++) {
-          const _0x2ab8d9 = _0x34f217.val()['HA' + _0x4e7d17].status;
-          const _0x23f15d = _0x3e6fe7.children[_0x4e7d17 - 0x1];
-          if (_0x2ab8d9 === 0x0) {
-            _0x23f15d.classList.remove("hidden");
-          } else if (_0x2ab8d9 === 0x1) {
-            _0x23f15d.classList.add("hidden");
-            document.getElementById("audio_ObstacleImageShow").play();
+      _0xe8303d.on('value', _0x1e4021 => {
+        const _0x7a2179 = document.querySelector(".ObstacleImageOverlay");
+        for (let _0x5532ba = 0x1; _0x5532ba <= 0x5; _0x5532ba++) {
+          const _0x26ff62 = _0x1e4021.val()['HA' + _0x5532ba].status;
+          const _0x34472e = _0x7a2179.children[_0x5532ba - 0x1];
+          if (_0x26ff62 === 0x0) {
+            _0x34472e.classList.remove("hidden");
+          } else if (_0x26ff62 === 0x1) {
+            _0x34472e.classList.add("hidden");
+            _0x11bdbf.once("value").then(_0x5aecf6 => {
+              if (_0x5aecf6.val().correct != 0x1) {
+                document.getElementById("audio_ObstacleImageShow").currentTime = 0x0;
+                document.getElementById("audio_ObstacleImageShow").play();
+              }
+            });
           }
         }
       });
-      _0x45dbd2.on("value", _0xe885dd => {
-        const _0x300dc5 = _0xe885dd.val().audio;
-        if (_0x300dc5 === 0x1) {
+      _0x432d64.on('value', _0x6fa20f => {
+        const _0x1f3ae7 = _0x6fa20f.val().audio;
+        if (_0x1f3ae7 === 0x1) {
           document.getElementById("ObstacleAudio").currentTime = 0x0;
-          document.getElementById("ObstacleAudio").play();
+          document.getElementById('ObstacleAudio').play();
         } else {
           document.getElementById("ObstacleAudio").currentTime = 0x0;
           document.getElementById("ObstacleAudio").pause();
         }
       });
-      firebase.storage().ref(_0x15a7fa + '/audio/cnv/hn.mp3').getDownloadURL().then(_0x2c042f => {
-        document.getElementById('ObstacleAudio').src = _0x2c042f;
-      });
-      _0x14aeb5.on('value', _0x290e21 => {
-        const _0x37cf32 = _0x290e21.val().countdown;
-        if (_0x37cf32 === 0x1) {
+      _0x46c8b3.on("value", _0x3e006a => {
+        const _0xea3e47 = _0x3e006a.val().countdown;
+        if (_0xea3e47 === 0x1) {
           document.getElementById("audio_ObstacleRowThinking").currentTime = 0x0;
           document.getElementById('audio_ObstacleRowThinking').play();
+        }
+      });
+      function _0x23f52e() {
+        const _0x55e5c7 = document.getElementById("obstacleAnswersTableBody");
+        if (!_0x55e5c7) {
+          return;
+        }
+        _0x55e5c7.innerHTML = '';
+        const _0x2f8acf = getPlayerLimit();
+        for (let _0xeeb2d7 = 0x1; _0xeeb2d7 <= _0x2f8acf; _0xeeb2d7++) {
+          const _0x5a52cd = document.createElement('tr');
+          if (_0xeeb2d7 % 0x2 === 0x1) {
+            _0x5a52cd.className = "bg-white dark:bg-neutral-700";
+          } else {
+            _0x5a52cd.className = "bg-gray-50 dark:bg-neutral-600";
+          }
+          const _0x24fff5 = document.createElement('td');
+          _0x24fff5.className = "px-6 py-4 text-black dark:text-white font-medium";
+          _0x24fff5.id = 'ObstacleAnswerPlayer' + _0xeeb2d7 + "Name";
+          const _0x5ce23e = document.createElement('td');
+          _0x5ce23e.className = "px-6 py-4 text-gray-700 dark:text-gray-300 font-medium";
+          _0x5ce23e.id = 'ObstacleAnswerPlayer' + _0xeeb2d7;
+          _0x5a52cd.appendChild(_0x24fff5);
+          _0x5a52cd.appendChild(_0x5ce23e);
+          _0x55e5c7.appendChild(_0x5a52cd);
+        }
+      }
+      _0x23f52e();
+      window.addEventListener("playerLimitChanged", function (_0x315a6e) {
+        _0x23f52e();
+      });
+      _0x4be2c7.on("value", async _0x2e0476 => {
+        if (!_0x2e0476.exists()) {
+          return;
+        }
+        const _0x5dda7b = _0x2e0476.val().status;
+        if (_0x5dda7b === true) {
+          document.getElementById("Obstacle").classList.remove("hidden");
+          document.getElementById("audio_ObstacleRowShow").currentTime = 0x0;
+          document.getElementById('audio_ObstacleRowShow').play();
+          try {
+            const _0x3a6313 = await getQuestionMedia('VCNVQuestion', 'CNV', "background");
+            await displayQuestionImage(_0x3a6313.image, document.getElementById('ObstacleImage'), document.getElementById('ObstacleImageContainer'));
+          } catch (_0x275949) {
+            console.error("Error displaying question image:", _0x275949);
+          }
+        } else {
+          document.getElementById("Obstacle").classList.add("hidden");
+        }
+      });
+      _0x5d8a1f.on("value", _0x3b9d2e => {
+        const _0x2f8e1a = _0x3b9d2e.val();
+        if (!_0x2f8e1a || !_0x2f8e1a.audioData) {
+          return;
+        }
+        if (_0x2f8e1a.isPlaying) {
+          window.stopCurrentQuestionAudio();
+          setTimeout(() => {
+            playQuestionAudio(_0x2f8e1a.audioData);
+          }, 100);
+        } else {
+          window.stopCurrentQuestionAudio();
         }
       });
     });

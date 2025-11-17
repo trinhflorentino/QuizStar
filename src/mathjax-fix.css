@@ -1,0 +1,67 @@
+/* MathJax Font Weight Fix - High Priority CSS */
+/* This file ensures MathJax renders with normal font weight and crisp rendering */
+
+/* Override Montserrat font for all MathJax elements */
+/* Use MathJax default fonts which are optimized for math rendering */
+.MathJax,
+.mjx-container,
+mjx-container,
+[class*="mjx-"],
+.MathJax *,
+.mjx-container *,
+mjx-container *,
+[class*="mjx-"] * {
+  font-family: "STIX Two Math", "Latin Modern Math", "Computer Modern", "TeX", "STIX", "STIXGeneral", "Asana Math", "Gyre Pagella", "Gyre Termes", "Latin Modern Roman", "DejaVu Serif", "DejaVu Sans", serif !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1;
+}
+
+/* Target all MathJax internal elements */
+mjx-math,
+mjx-annotation,
+mjx-annotation-xml,
+mjx-char,
+mjx-char-boxed,
+mjx-char-label,
+mjx-char-italic,
+mjx-char-roman,
+mjx-char-stacked,
+mjx-char-stretched,
+mjx-char-symbol,
+mjx-char-text,
+mjx-char-variant,
+mjx-char-vert,
+mjx-char-horiz,
+mjx-math *,
+mjx-annotation *,
+mjx-annotation-xml *,
+mjx-char *,
+mjx-char-boxed *,
+mjx-char-label *,
+mjx-char-italic *,
+mjx-char-roman *,
+mjx-char-stacked *,
+mjx-char-stretched *,
+mjx-char-symbol *,
+mjx-char-text *,
+mjx-char-variant *,
+mjx-char-vert *,
+mjx-char-horiz * {
+  font-weight: 400 !important;
+  font-style: normal !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Override inline styles if any */
+[class*="mjx-"][style],
+mjx-container[style],
+mjx-math[style] {
+  font-weight: 400 !important;
+}
+

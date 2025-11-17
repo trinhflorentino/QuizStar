@@ -1,17 +1,50 @@
-function signOut() {
-    successToast("Đăng xuất thành công", 0xbb8, "bottom", "right", false, "radial-gradient(circle at 74.2% 50.9%, rgb(14, 72, 222) 5.2%, rgb(3, 22, 65) 75.3%)", '');
+(function () {
+  var redirectTarget = 'index.html';
+
+  function resolveRedirect() {
+    // Resolve the login page URL and avoid falling back to about:blank/popups
+    var origin = window.location.origin && window.location.origin !== 'null'
+      ? window.location.origin
+      : '';
+
+    // Prefer absolute path to avoid base-path edge cases in dev server
+    if (redirectTarget.charAt(0) === '/') {
+      return (origin || '') + redirectTarget;
+    }
+
+    try {
+      var resolvedUrl = new URL(redirectTarget, window.location.href).href;
+      if (!resolvedUrl.startsWith('about:')) {
+        return resolvedUrl;
+      }
+    } catch (err) {
+      // fall through to manual build
+    }
+
+    // Manual fallback: stick to same origin + root to prevent about:blank
+    return (origin || '') + '/' + redirectTarget.replace(/^\\//, '');
+  }
+
+  function redirectToLogin() {
+    window.location.href = resolveRedirect();
+  }
+
+  // Keep signOut available globally
+  window.signOut = function signOut() {
+    loadingAnimation.show('Dang dang xu?t...');
     setTimeout(function () {
       auth.signOut();
-      window.location.href = '/index.html';
-      localStorage.removeItem("iduser");
-      localStorage.removeItem("name");
+      localStorage.removeItem('iduser');
+      localStorage.removeItem('name');
+      redirectToLogin();
     }, 0xbb8);
-  }
-  firebase.auth().onAuthStateChanged(function (_0x30588f) {
-    if (_0x30588f) {
-      localStorage.setItem('iduser', _0x30588f.uid);
+  };
+
+  firebase.auth().onAuthStateChanged(function (user) {
+    if (user) {
+      localStorage.setItem('iduser', user.uid);
+      return;
     }
-    if (!_0x30588f) {
-      window.location.href = "/index.html";
-    }
+    redirectToLogin();
   });
+})();

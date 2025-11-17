@@ -1,107 +1,198 @@
-auth.onAuthStateChanged(_0x2e822b => {
-  if (!_0x2e822b) {
-    return;
+auth.onAuthStateChanged(_0xd13e4d => {
+    if (!_0xd13e4d) {
+      return;
+    }
+    
+    // Ưu tiên sử dụng photoURL từ Firebase Auth profile
+    if (_0xd13e4d.photoURL) {
+      console.log("Load ảnh đại diện từ Firebase photoURL:", _0xd13e4d.photoURL);
+      const avatarUrl = _0xd13e4d.photoURL + '?t=' + Date.now(); // Cache busting
+      document.getElementById("userAvatar").src = avatarUrl;
+      document.getElementById("userProfileImage").src = avatarUrl;
+    } else {
+      // Fallback: thử tìm ảnh mặc định hoặc ảnh default
+      console.log("Không có photoURL, sử dụng ảnh mặc định");
+      window.cloudinaryService.ref("users/profile.jpg").getDownloadURL().then(_0x5c3c94 => {
+        document.getElementById('userAvatar').src = _0x5c3c94;
+        document.getElementById('userProfileImage').src = _0x5c3c94;
+      }).catch(_0x191302 => {
+        console.log("Không tìm thấy ảnh mặc định, giữ nguyên ảnh logo");
+        // Giữ nguyên img/appLogo.png như trong HTML
+      });
+    }
+    
+    document.getElementById('userDisplayName').innerHTML = _0xd13e4d.displayName;
+    document.getElementById('userNameInput').value = _0xd13e4d.displayName;
+    if (_0xd13e4d.metadata.creationTime) {
+      document.getElementById("joinDate").innerHTML = "Bạn đã tham gia The Olympus Online từ ngày " + convertToDDMMYYYY(_0xd13e4d.metadata.creationTime);
+    }
+  });
+  function convertToDDMMYYYY(_0x3220a5) {
+    const _0x25a7c5 = new Date(_0x3220a5);
+    const _0x5cc653 = new Date(_0x25a7c5.getTime() + 25200000);
+    const _0x4e1eed = String(_0x5cc653.getDate()).padStart(0x2, '0');
+    const _0x49280c = String(_0x5cc653.getMonth() + 0x1).padStart(0x2, '0');
+    const _0x2fe909 = _0x5cc653.getFullYear();
+    return _0x4e1eed + '/' + _0x49280c + '/' + _0x2fe909;
   }
-  firebase.storage().ref('users/' + _0x2e822b.uid + "/profile.jpg").getDownloadURL().then(_0x2d0b94 => {
-    document.getElementById("userAvatar").src = _0x2d0b94;
-    document.getElementById("userProfileImage").src = _0x2d0b94;
-  })["catch"](_0x39bca8 => {
-    firebase.storage().ref("users/profile.jpg").getDownloadURL().then(_0x25fc47 => {
-      document.getElementById('userAvatar').src = _0x25fc47;
-      document.getElementById("userProfileImage").src = _0x25fc47;
+  const nameChangeForm = document.getElementById("nameChangeForm");
+  nameChangeForm.addEventListener('submit', _0x1691a4 => {
+    _0x1691a4.preventDefault();
+    const _0x1cfe0d = document.getElementById('userNameInput').value;
+    if (_0x1cfe0d === '') {
+      failToast("Họ và tên không được để trống", 0xbb8, 'top', "right", true, false, '');
+      return;
+    }
+    const _0x2ebe1c = auth.currentUser;
+    _0x2ebe1c.updateProfile({
+      'displayName': _0x1cfe0d
+    }).then(() => {
+      successToast("Đổi họ và tên thành công", 0xbb8, "top", 'right', true, false, '');
+      document.getElementById("userDisplayName").innerHTML = _0x1cfe0d;
+    })["catch"](_0x2b7b27 => {
+      failToast("Đổi họ và tên thất bại", 0xbb8, "top", "right", true, false, '');
     });
   });
-  document.getElementById("userDisplayName").innerHTML = _0x2e822b.displayName;
-  document.getElementById("userNameInput").value = _0x2e822b.displayName;
-  if (_0x2e822b.metadata.creationTime) {
-    document.getElementById("joinDate").innerHTML = "Bạn đã tham gia QuizStar từ ngày " + convertToDDMMYYYY(_0x2e822b.metadata.creationTime);
-  }
-});
-function convertToDDMMYYYY(_0x389ff3) {
-  const _0x2ab7bd = new Date(_0x389ff3);
-  const _0x1fbe47 = new Date(_0x2ab7bd.getTime() + 25200000);
-  const _0x5a91fe = String(_0x1fbe47.getDate()).padStart(0x2, '0');
-  const _0x269ff7 = String(_0x1fbe47.getMonth() + 0x1).padStart(0x2, '0');
-  const _0x31b9eb = _0x1fbe47.getFullYear();
-  return _0x5a91fe + '/' + _0x269ff7 + '/' + _0x31b9eb;
-}
-const nameChangeForm = document.getElementById('nameChangeForm');
-nameChangeForm.addEventListener("submit", _0x524e79 => {
-  _0x524e79.preventDefault();
-  const _0x48b501 = document.getElementById('userNameInput').value;
-  if (_0x48b501 === '') {
-    failToast("Họ và tên không được để trống", 0xbb8, "top", "right", true, false, '');
-    return;
-  }
-  const _0x4f46b1 = auth.currentUser;
-  _0x4f46b1.updateProfile({
-    'displayName': _0x48b501
-  }).then(() => {
-    successToast("Đổi họ và tên thành công", 0xbb8, "top", 'right', true, false, '');
-    document.getElementById("userDisplayName").innerHTML = _0x48b501;
-  })["catch"](_0x557d20 => {
-    failToast("Đổi họ và tên thất bại", 0xbb8, "top", "right", true, false, '');
-  });
-});
-const passwordChangeForm = document.getElementById("passwordChangeForm");
-passwordChangeForm.addEventListener("submit", _0xb2bbdf => {
-  _0xb2bbdf.preventDefault();
-  const _0x869b84 = document.getElementById("currentPassword").value;
-  const _0x64287c = document.getElementById('newPassword').value;
-  const _0x301499 = document.getElementById("confirmPassword").value;
-  if (_0x64287c !== _0x301499) {
-    failToast("Mật khẩu mới không khớp", 0xbb8, "top", 'right', true, false, '');
-    return;
-  }
-  const _0xb443a3 = auth.currentUser;
-  const _0x2eb265 = firebase.auth.EmailAuthProvider.credential(_0xb443a3.email, _0x869b84);
-  _0xb443a3.reauthenticateWithCredential(_0x2eb265).then(() => {
-    _0xb443a3.updatePassword(_0x64287c).then(() => {
-      successToast("Đổi mật khẩu thành công", 0xbb8, 'top', "right", true, false, '');
-      document.getElementById("currentPassword").value = '';
-      document.getElementById("newPassword").value = '';
-      document.getElementById("confirmPassword").value = '';
-    })["catch"](_0x59de9e => {
-      failToast("Đổi mật khẩu thất bại", 0xbb8, "top", 'right', true, false, '');
+  const passwordChangeForm = document.getElementById("passwordChangeForm");
+  passwordChangeForm.addEventListener('submit', _0x7e4d8d => {
+    _0x7e4d8d.preventDefault();
+    const _0x11c2f1 = document.getElementById('currentPassword').value;
+    const _0x6866b9 = document.getElementById("newPassword").value;
+    const _0xf400e1 = document.getElementById("confirmPassword").value;
+    if (_0x6866b9 !== _0xf400e1) {
+      failToast("Mật khẩu mới không khớp", 0xbb8, 'top', "right", true, false, '');
+      return;
+    }
+    const _0x3f99e5 = auth.currentUser;
+    const _0x5304ca = firebase.auth.EmailAuthProvider.credential(_0x3f99e5.email, _0x11c2f1);
+    _0x3f99e5.reauthenticateWithCredential(_0x5304ca).then(() => {
+      _0x3f99e5.updatePassword(_0x6866b9).then(() => {
+        successToast("Đổi mật khẩu thành công", 0xbb8, "top", "right", true, false, '');
+        document.getElementById("currentPassword").value = '';
+        document.getElementById("newPassword").value = '';
+        document.getElementById("confirmPassword").value = '';
+      })["catch"](_0x46ca92 => {
+        failToast("Đổi mật khẩu thất bại", 0xbb8, "top", "right", true, false, '');
+      });
+    })['catch'](_0xe2b8cd => {
+      failToast("Mật khẩu hiện tại không đúng", 0xbb8, "top", 'right', true, false, '');
     });
-  })["catch"](_0x1266d6 => {
-    failToast("Mật khẩu hiện tại không đúng", 0xbb8, "top", "right", true, false, '');
   });
-});
-function deleteAvatar() {
-  const _0x237d7f = auth.currentUser;
-  firebase.storage().ref('users/' + _0x237d7f.uid + '/profile.jpg')['delete']().then(() => {
-    successToast("Xóa ảnh đại diện thành công", 0xbb8, "top", "right", true, false, '');
-  })['catch'](_0x249f14 => {
-    console.error("Error deleting avatar:", _0x249f14);
-  });
-}
-function uploadAvatar() {
-  const _0xd77b40 = auth.currentUser;
-  const _0x5a7dee = document.createElement("input");
-  _0x5a7dee.type = "file";
-  _0x5a7dee.accept = "image/*";
-  _0x5a7dee.click();
-  _0x5a7dee.addEventListener("change", _0x1872e3 => {
-    const _0x5d6865 = _0x1872e3.target.files[0x0];
-    const _0x295530 = firebase.storage().ref("users/" + _0xd77b40.uid + "/profile.jpg");
-    const _0x1f8323 = _0x295530.put(_0x5d6865);
-    _0x1f8323.on('state_changed', _0x543b44 => {
-      successToast("Đang tải ảnh đại diện lên...", 0xbb8, 'top', 'right', true, false, '');
-    }, _0x32b7dc => {
-      failToast("Tải ảnh đại diện lên thất bại", 0xbb8, 'top', "right", true, false, '');
-    }, () => {
-      _0x1f8323.snapshot.ref.getDownloadURL().then(_0x3b467c => {
-        _0xd77b40.updateProfile({
-          'photoURL': _0x3b467c
-        }).then(() => {
-          successToast("Tải ảnh đại diện lên thành công", 0xbb8, "top", "right", true, false, '');
-          document.getElementById("userAvatar").src = _0x3b467c;
-          document.getElementById("userProfileImage").src = _0x3b467c;
-        })["catch"](_0x55d0a5 => {
-          console.error("Error updating user profile:", _0x55d0a5);
+  function deleteAvatar() {
+    const _0xe2a0a1 = auth.currentUser;
+    loadingAnimation.show("Đang xóa ảnh đại diện...");
+    window.cloudinaryService.ref("users/" + _0xe2a0a1.uid + "/profile.jpg")["delete"]().then(() => {
+      loadingAnimation.hide();
+      successToast("Xóa ảnh đại diện thành công", 0xbb8, "top", 'right', true, false, '');
+    })["catch"](_0x313725 => {
+      loadingAnimation.hide();
+      console.error("Error deleting avatar:", _0x313725);
+    });
+  }
+  function uploadAvatar() {
+    const _0x4cb777 = auth.currentUser;
+    
+    // Kiểm tra xem cloudinaryService đã sẵn sàng chưa
+    if (!window.cloudinaryService) {
+      console.error("Cloudinary service chưa được khởi tạo!");
+      failToast("Dịch vụ upload chưa sẵn sàng. Vui lòng thử lại sau.", 0xbb8, 'top', "right", true, false, '');
+      return;
+    }
+    
+    const _0x457216 = document.createElement("input");
+    _0x457216.type = "file";
+    _0x457216.accept = "image/*";
+    _0x457216.click();
+    _0x457216.addEventListener('change', _0x507871 => {
+      const _0x2be7ae = _0x507871.target.files[0x0];
+      
+      // Kiểm tra xem có file được chọn không
+      if (!_0x2be7ae) {
+        console.log("Không có file nào được chọn");
+        return;
+      }
+      
+      // Kiểm tra kích thước file (giới hạn 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+      if (_0x2be7ae.size > maxSize) {
+        failToast("File quá lớn. Vui lòng chọn file nhỏ hơn 10MB", 0xbb8, 'top', "right", true, false, '');
+        return;
+      }
+      
+      console.log("Đang upload file:", _0x2be7ae.name, "Size:", _0x2be7ae.size, "Type:", _0x2be7ae.type);
+      console.log("Cloudinary config:", {
+        cloudName: window.cloudinaryService.cloudName,
+        uploadPreset: window.cloudinaryService.uploadPreset
+      });
+      loadingAnimation.show("Đang tải ảnh đại diện lên...");
+      
+      // Thêm timestamp vào tên file để tránh conflict
+      const timestamp = Date.now();
+      const _0x8515b0 = window.cloudinaryService.ref("users/" + _0x4cb777.uid + "/profile_" + timestamp + ".jpg");
+      console.log("Upload path:", "users/" + _0x4cb777.uid + "/profile_" + timestamp + ".jpg");
+      const _0x3eb946 = _0x8515b0.put(_0x2be7ae);
+      _0x3eb946.on("state_changed", _0x59c179 => {
+        loadingAnimation.updateMessage("Đang tải ảnh đại diện lên... (" + Math.round(_0x59c179.bytesTransferred / _0x59c179.totalBytes * 0x64) + '%)');
+      }, _0x58c35d => {
+        loadingAnimation.hide();
+        console.error("Lỗi khi upload ảnh đại diện:", _0x58c35d);
+        console.error("Chi tiết lỗi:", _0x58c35d.message || _0x58c35d);
+        failToast("Tải ảnh đại diện lên thất bại: " + (_0x58c35d.message || "Lỗi không xác định"), 0xbb8, 'top', "right", true, false, '');
+      }, () => {
+        _0x3eb946.snapshot.ref.getDownloadURL().then(_0x34c0c6 => {
+          console.log("Upload thành công! URL:", _0x34c0c6);
+          
+          // Thêm cache busting để force browser load ảnh mới
+          const urlWithCacheBust = _0x34c0c6 + '?t=' + Date.now();
+          
+          console.log("Đang cập nhật Firebase profile với URL:", _0x34c0c6);
+          console.log("Đang cập nhật UI với URL (cache busted):", urlWithCacheBust);
+          
+          _0x4cb777.updateProfile({
+            'photoURL': _0x34c0c6
+          }).then(() => {
+            console.log("✅ Firebase profile đã được cập nhật!");
+            console.log("Đang cập nhật avatar elements...");
+            
+            // Kiểm tra elements có tồn tại không
+            const userAvatar = document.getElementById("userAvatar");
+            const userProfileImage = document.getElementById("userProfileImage");
+            
+            console.log("userAvatar element:", userAvatar);
+            console.log("userProfileImage element:", userProfileImage);
+            
+            if (userAvatar) {
+              userAvatar.src = urlWithCacheBust;
+              console.log("✅ Đã cập nhật userAvatar");
+            } else {
+              console.error("❌ Không tìm thấy element #userAvatar");
+            }
+            
+            if (userProfileImage) {
+              userProfileImage.src = urlWithCacheBust;
+              console.log("✅ Đã cập nhật userProfileImage");
+            } else {
+              console.error("❌ Không tìm thấy element #userProfileImage");
+            }
+            
+            // Sync photoURL to match if user is in a match
+            if (typeof window.updatePhotoURLInMatch === 'function') {
+              console.log("🔄 Syncing photoURL to match...");
+              window.updatePhotoURLInMatch(_0x34c0c6);
+            }
+            
+            loadingAnimation.hide();
+            successToast("Tải ảnh đại diện lên thành công", 0xbb8, 'top', "right", true, false, '');
+          })['catch'](_0x583ef8 => {
+            loadingAnimation.hide();
+            console.error("Error updating user profile:", _0x583ef8);
+            failToast("Cập nhật profile thất bại: " + _0x583ef8.message, 0xbb8, 'top', "right", true, false, '');
+          });
+        })['catch'](_0x2d8f9a => {
+          loadingAnimation.hide();
+          console.error("Error getting download URL:", _0x2d8f9a);
+          failToast("Không thể lấy URL ảnh: " + _0x2d8f9a.message, 0xbb8, 'top', "right", true, false, '');
         });
       });
     });
-  });
-}
+  }

@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Ingame | QuizStar</title>
+    <title>Trong trận | The Olympus Online</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel="icon" type="image/x-icon" href="img/favicon.ico">
     <link href="./dist/output.css" rel="stylesheet">
@@ -18,6 +17,18 @@
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
 
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-9BZ1P9KSJR');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7312982440694951"
+        crossorigin="anonymous"></script>
+
 </head>
 
 <body class="dark:bg-neutral-900">
@@ -44,24 +55,7 @@
                     </span>
                     <span class="ml-2 font-semibold text-left">Hiển thị điểm số</span>
                 </button>
-                <!-- <button
-                    class="bg-white dark:bg-transparent text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
-                    data-popover-target="competition-settings">
-                    <span class="material-icons">
-                        settings
-                    </span>
-                    <span class="ml-2 font-semibold text-left">Cài đặt</span>
-                </button>
-                <ul role="menu" data-popover="competition-settings" data-popover-placement="bottom"
-                    class="absolute z-40 mt-2 min-w-[180px] overflow-auto rounded-lg border border-slate-200 bg-white p-1.5 shadow-lg shadow-sm focus:outline-none dark:bg-neutral-900">
-                    <li role="menuitem"
-                        class="cursor-pointer flex w-full text-sm items-center rounded-md p-3 transition-all hover:bg-slate-100 focus:bg-slate-100 active:bg-slate-100 dark:text-neutral-200 dark:hover:bg-neutral-700 dark:focus:bg-neutral-700 dark:active:bg-neutral-700"
-                        onclick="toggleDrawer()">
-                        <p class="ml-2">
-                            Hiển thị điểm số
-                        </p>
-                    </li>
-                </ul> -->
+
                 <button id="themeToggleButton" type="button" onclick="toggleTheme()"
                     class="bg-white dark:bg-transparent text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white">
                     <span id="themeIcon" class="material-icons">
@@ -77,14 +71,34 @@
             id="Waiting">
             <div class="loader">
             </div>
-            <p class="mt-3 font-semibold text-xl text-center dark:text-white">Kiểm tra kết nối, giấy, bút, máy tính sẵn
-                sàng nhé 🛜📝🔢. Iu mọi người ❤️</p>
+            <p class="mt-3 font-semibold text-xl text-center dark:text-white" id="readyText">Chào mừng bạn đến giao diện
+                thi đấu trên The Olympus Online</p>
+
+            <!-- <div class="fixed bottom-4 left-4 right-4 group">
+                <div
+                    class="relative overflow-hidden bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white px-3 py-2 rounded-lg shadow-lg border border-white/20 backdrop-blur-sm transform transition-all duration-300 flex items-center justify-center">
+                    
+                    <div
+                        class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000">
+                    </div>
+
+                    
+                    <div class="relative z-10">
+                        <p class="text-xs font-medium text-blue-100 flex items-center justify-center">
+                            <span class="material-icons text-xs mr-1">code</span>
+                            <span class="font-bold" id="waitingVersion">@2025 The Olympus Online | Thiết kế, vận hành
+                                bởi Trương Anh Khoa
+                                | Phiên bản: 25.09.05#5584428-prod</span>
+                        </p>
+                    </div>
+                </div>
+            </div> -->
         </div>
 
         <!-- Player List -->
 
         <div class="flex-grow flex items-center justify-center p-6 hidden" id="Banner">
-            <div class="w-full max-w-7xl">
+            <div class="w-full max-w-9xl">
                 <div class="flex flex-wrap justify-center gap-6 p-6 rounded-lg" id="playerListContainer">
                     <div class="loader">
                     </div>
@@ -94,15 +108,29 @@
         </div>
 
         <!-- Start I-->
-        <div class="w-full px-4 sm:px-14 py-6 hidden" id="StartI">
-            <!-- Question Section -->
+        <div class="w-full px-4 sm:px-14 py-6 hidden" id="StartI"> <!-- Question Section -->
             <div class="min-h-72 bg-gray-100 dark:bg-neutral-800 rounded-xl p-6 hover:shadow-xl transition-shadow">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-black dark:text-white">Câu hỏi</h2>
+                    <div class="flex items-center bg-white dark:bg-neutral-700 px-3 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 hidden animate-fade-in"
+                        id="StartIQuestionAudioContainer">
+                        <span class="material-icons text-black dark:text-white mr-2 animate-pulse">
+                            volume_up
+                        </span>
+                        <span class="text-sm font-medium text-black dark:text-white">Đang phát âm thanh câu hỏi</span>
+                    </div>
                 </div>
-                <p class="font-medium text-lg sm:text-xl text-gray-800 dark:text-gray-300 select-none"
-                    id="StartIQuestion">
-                </p>
+                <div class="flex flex-col lg:flex-row lg:space-x-6">
+                    <div class="flex-1">
+                        <p class="font-medium text-lg sm:text-xl text-gray-800 dark:text-gray-300 select-none whitespace-pre-line"
+                            id="StartIQuestion">
+                        </p>
+                    </div>
+                    <div class="mt-4 lg:mt-0 flex justify-end hidden" id="StartIMediaContainer">
+                        <img id="StartIQuestionImage" class="max-w-full max-h-64 rounded-lg shadow-md"
+                            alt="Question Image">
+                    </div>
+                </div>
                 <div class="flex flex-col items-center justify-center text-center dark:text-white hidden"
                     id="StartIWaiting">
                     <div class="start_question_loader"></div>
@@ -158,10 +186,25 @@
             <div class="min-h-72 bg-gray-100 dark:bg-neutral-800 rounded-xl p-6 hover:shadow-xl transition-shadow">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-black dark:text-white">Câu hỏi</h2>
+                    <div class="flex items-center bg-white dark:bg-neutral-700 px-3 py-2 rounded-lg border border-gray-300 dark:border-neutral-600 hidden animate-fade-in"
+                        id="StartIIQuestionAudioContainer">
+                        <span class="material-icons text-black dark:text-white mr-2 animate-pulse">
+                            volume_up
+                        </span>
+                        <span class="text-sm font-medium text-black dark:text-white">Đang phát âm thanh câu hỏi</span>
+                    </div>
                 </div>
-                <p class="font-medium text-lg sm:text-xl text-gray-800 dark:text-gray-300 select-none"
-                    id="StartIIQuestion">
-                </p>
+                <div class="flex flex-col lg:flex-row lg:space-x-6">
+                    <div class="flex-1">
+                        <p class="font-medium text-lg sm:text-xl text-gray-800 dark:text-gray-300 select-none whitespace-pre-line"
+                            id="StartIIQuestion">
+                        </p>
+                    </div>
+                    <div class="mt-4 lg:mt-0 flex justify-end hidden" id="StartIIMediaContainer">
+                        <img id="StartIIQuestionImage" class="max-w-full max-h-64 rounded-lg shadow-md"
+                            alt="Question Image">
+                    </div>
+                </div>
                 <div class="flex flex-col items-center justify-center text-center dark:text-white hidden"
                     id="StartIIWaiting">
                     <div class="start_question_loader"></div>
@@ -228,24 +271,45 @@
 
 
         <!--Obstacle-->
-        <div class="w-full px-4 py-6 sm:px-14 hidden" id="Obstacle">
+        <div class="w-full px-4 py-6 sm:px-14  hidden" id="Obstacle">
             <div class="w-full flex flex-col sm:flex-row">
-                <div class="w-full sm:w-1/2 mb-4 sm:mb-0 flex justify-center relative">
-                    <img id="ObstacleImage" class="w-auto h-auto object-contain rounded-lg shadow-lg" />
+                <div class="w-full sm:w-1/2 max-h-[50vh] mb-4 sm:mb-0 flex justify-center relative"
+                    id="ObstacleImageContainer">
+                    <img id="ObstacleImage" class="w-full object-cover rounded-lg shadow-lg point pointer-events-none"
+                        draggable="false" />
                     <div class="ObstacleImageOverlay">
-                        <div class="absolute top-0 left-0 w-1/2 h-1/2 bg-gray-200 dark:bg-neutral-700 rounded-tl-lg"
-                            style="clip-path: polygon(0% 0%, 101% 0%, 101% 67%, 67% 67%, 67% 100%, 0% 100%);">
+                        <!-- Góc trên trái -->
+                        <div class="absolute top-0 left-0 w-1/2 h-1/2 bg-gray-200 dark:bg-neutral-700 rounded-tl-lg border-2 border-slate-400 dark:border-white flex items-center justify-center"
+                            style="clip-path: polygon(0% 0%, 100% 0%, 100% 50%, 50% 50%, 50% 100%, 0% 100%);">
+                            <span
+                                class="text-7xl font-bold text-slate-700 dark:text-white select-none p-4 mr-16 mt-4">1</span>
                         </div>
-                        <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-gray-200 dark:bg-neutral-700 rounded-tr-lg"
-                            style="clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 33.01% 100%, 33.01% 67%, 0% 67%);">
+
+                        <!-- Góc trên phải -->
+                        <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-gray-200 dark:bg-neutral-700 rounded-tr-lg border-2 border-slate-400 dark:border-white flex items-center justify-center"
+                            style="clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 50% 100%, 50% 50%, 0% 50%);">
+                            <span
+                                class="text-7xl font-bold text-slate-700 dark:text-white select-none p-4 ml-16 mt-4">2</span>
                         </div>
-                        <div class="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gray-200 dark:bg-neutral-700 rounded-br-lg"
-                            style="clip-path: polygon(33% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 33.01%, 33% 33.01%);">
+
+                        <!-- Góc dưới phải -->
+                        <div class="absolute bottom-0 right-0 w-1/2 h-1/2 bg-gray-200 dark:bg-neutral-700 rounded-br-lg border-2 border-slate-400 dark:border-white flex items-center justify-center"
+                            style="clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 50%, 50% 50%);">
+                            <span
+                                class="text-7xl font-bold text-slate-700 dark:text-white select-none p-4 ml-16 mb-4">3</span>
                         </div>
-                        <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gray-200 dark:bg-neutral-700 rounded-bl-lg"
-                            style="clip-path: polygon(0% 0%, 67% 0%, 67% 33.01%, 101% 33.01%, 101% 100%, 0% 100%);">
+
+                        <!-- Góc dưới trái -->
+                        <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-gray-200 dark:bg-neutral-700 rounded-bl-lg border-2 border-slate-400 dark:border-white flex items-center justify-center"
+                            style="clip-path: polygon(0% 0%, 50% 0%, 50% 50%, 100% 50%, 100% 100%, 0% 100%);">
+                            <span
+                                class="text-7xl font-bold text-slate-700 dark:text-white select-none p-4 mr-16 mb-4">4</span>
                         </div>
-                        <div class="absolute inset-0 m-auto w-1/3 h-1/3 bg-blue-400 dark:bg-blue-500"></div>
+
+                        <!-- Ô trung tâm (lớn hơn) -->
+                        <div
+                            class="absolute inset-0 m-auto w-1/2 h-1/2 bg-slate-800 dark:bg-gray-500 border-2 border-white shadow-2xl">
+                        </div>
                     </div>
                 </div>
 
@@ -264,7 +328,7 @@
                 <div class="relative right-0">
                     <ul class="relative flex flex-wrap px-1.5 py-1.5 list-none rounded-md bg-gray-100 dark:bg-neutral-800"
                         data-tabs="tabs" role="list">
-                        <li class="z-30 flex-auto text-center">
+                        <li class="z-30 flex-auto text-center pointer-events-none">
                             <a class="z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-md cursor-pointer text-gray-700 dark:text-gray-300 bg-inherit"
                                 data-tab-target="" role="tab" aria-selected="true"
                                 aria-controls="obstacle-answer-question">
@@ -276,30 +340,37 @@
                                 data-tab-target="" role="tab" aria-selected="false"
                                 aria-controls="obstacle-contestant-answer">
                                 <span class="material-icons mr-1" id="ObstacleAnswerLockStatusIcon">lock</span>
-                                Đáp án thí sinh
+                                Câu trả lời của thí sinh
                             </a>
                         </li>
                     </ul>
 
                     <div data-tab-content="" class="mt-2">
                         <div id="obstacle-answer-question" role="tabpanel">
-                            <div class="min-h-40 bg-gray-100 dark:bg-neutral-800 rounded-xl p-6 mb-2">
+                            <div class="min-h-36 bg-gray-100 dark:bg-neutral-800 rounded-xl p-6 mb-2">
                                 <div class="flex justify-between items-center mb-2">
                                     <h2 class="text-xl font-bold text-black dark:text-white" id="ObstacleQuestionTitle">
                                         Câu hỏi</h2>
                                 </div>
-                                <p class="font-medium text-md sm:text-lg text-gray-700 dark:text-gray-300"
-                                    id="ObstacleQuestion">
-
-                                </p>
+                                <div class="flex flex-col lg:flex-row lg:space-x-6">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-lg sm:text-xl text-gray-800 dark:text-gray-300 select-none whitespace-pre-line"
+                                            id="ObstacleQuestion">
+                                        </p>
+                                    </div>
+                                    <div class="mt-4 lg:mt-0 flex justify-end hidden" id="ObstacleMediaContainer">
+                                        <img id="ObstacleQuestionImage" class="max-w-full max-h-64 rounded-lg shadow-md"
+                                            alt="Question Image">
+                                    </div>
+                                </div>
                             </div>
                             <label class="text-md font-semibold text-black dark:text-white"
-                                id="ObstacleAnswerOutput">Đáp án
-                                của bạn:</label>
+                                id="ObstacleAnswerOutput">Câu
+                                trả lời của bạn:</label>
                             <div class="relative w-full mt-2">
                                 <input type="text" id="ObstacleAnswerInput" disabled
                                     class="w-full p-4 pl-28 bg-gray-200 dark:bg-neutral-700 rounded-lg text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent font-semibold disabled:bg-gray-300 dark:disabled:bg-neutral-800 disabled:text-gray-500 dark:disabled:text-gray-400"
-                                    placeholder="Nhập đáp án tại đây, bấm Enter để nộp đáp án. Bạn chỉ có thể nhập đáp án khi có hiệu lệnh và trạng thái chuyển sang màu xanh."
+                                    placeholder="Nhập câu trả lời tại đây, bấm Enter để nộp. Bạn chỉ có thể nhập câu trả lời khi có hiệu lệnh và trạng thái chuyển sang màu xanh."
                                     autocomplete="off">
                                 <div class="absolute inset-y-0 left-0 flex items-center pl-2">
                                     <div
@@ -317,11 +388,13 @@
                         <div class="hidden opacity-0" id="obstacle-contestant-answer" role="tabpanel">
                             <div class="min-h-40 bg-gray-100 dark:bg-neutral-800 rounded-xl p-6 mb-2">
                                 <div class="flex justify-between items-center mb-4">
-                                    <h2 class="text-md font-semibold text-black dark:text-white">Đáp án của thí sinh
+                                    <h2 class="text-md font-semibold text-black dark:text-white">Câu trả lời của thí
+                                        sinh
                                     </h2>
                                 </div>
                                 <div class="overflow-x-auto rounded-xl">
-                                    <table class="min-w-full bg-slate-200 dark:bg-neutral-900 rounded-lg shadow">
+                                    <table class="min-w-full bg-slate-200 dark:bg-neutral-900 rounded-lg shadow"
+                                        id="obstacleAnswersTable">
                                         <thead>
                                             <tr>
                                                 <th
@@ -329,34 +402,11 @@
                                                     Thí sinh</th>
                                                 <th
                                                     class="px-6 py-3 text-left font-semibold text-black dark:text-white">
-                                                    Đáp án</th>
+                                                    Câu trả lời</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr class="bg-white dark:bg-neutral-700">
-                                                <td class="px-6 py-4 font-medium text-black dark:text-white"
-                                                    id="ObstacleAnswerPlayer1Name"></td>
-                                                <td class="px-6 py-4 text-gray-700 dark:text-gray-300 font-medium"
-                                                    id="ObstacleAnswerPlayer1"></td>
-                                            </tr>
-                                            <tr class="bg-gray-50 dark:bg-neutral-600">
-                                                <td class="px-6 py-4 font-medium text-black dark:text-white"
-                                                    id="ObstacleAnswerPlayer2Name"></td>
-                                                <td class="px-6 py-4 text-gray-700 dark:text-gray-300 font-medium"
-                                                    id="ObstacleAnswerPlayer2"></td>
-                                            </tr>
-                                            <tr class="bg-white dark:bg-neutral-700">
-                                                <td class="px-6 py-4 font-medium text-black dark:text-white"
-                                                    id="ObstacleAnswerPlayer3Name"></td>
-                                                <td class="px-6 py-4 text-gray-700 dark:text-gray-300 font-medium"
-                                                    id="ObstacleAnswerPlayer3"></td>
-                                            </tr>
-                                            <tr class="bg-gray-50 dark:bg-neutral-600">
-                                                <td class="px-6 py-4 font-medium text-black dark:text-white"
-                                                    id="ObstacleAnswerPlayer4Name"></td>
-                                                <td class="px-6 py-4 text-gray-700 dark:text-gray-300 font-medium"
-                                                    id="ObstacleAnswerPlayer4"></td>
-                                            </tr>
+                                        <tbody id="obstacleAnswersTableBody">
+                                            <!-- Table rows will be generated dynamically -->
                                         </tbody>
                                     </table>
                                 </div>
@@ -385,15 +435,16 @@
         <div class="w-full px-4 py-6 sm:px-14 hidden" id="Acceleration">
             <div class="flex flex-col lg:space-x-4">
                 <!-- Image Container -->
-                <div class="grid w-full place-items-center overflow-x-auto rounded-lg lg:overflow-visible">
-                    <video
-                        class="object-center w-full h-[50vh] bg-gray-200 dark:bg-neutral-700 rounded-lg shadow-blue-gray-900/50 shadow-t shadow-l shadow-r shadow-b"
-                        id="AccelerationMedia" muted></video>
+                <div class="AcclerationMediaContainer mb-4">
+                    <div
+                        class="grid w-full place-items-center overflow-x-auto rounded-lg min-h-[50vh] bg-gray-200 dark:bg-neutral-700 rounded-lg shadow-blue-gray-900/50 shadow-t shadow-l shadow-r shadow-b lg:overflow-visible">
+                        <video class="object-center w-full h-[50vh] " id="AccelerationMedia" muted></video>
+                    </div>
                 </div>
             </div>
             <ul class="relative flex flex-wrap px-1.5 py-1.5 list-none rounded-md bg-gray-100 dark:bg-neutral-800 mt-2"
                 data-tabs="tabs" role="list">
-                <li class="z-30 flex-auto text-center">
+                <li class="z-30 flex-auto text-center pointer-events-none">
                     <a class="z-30 flex items-center justify-center w-full px-0 py-2 text-sm mb-0 transition-all ease-in-out border-0 rounded-md cursor-pointer text-gray-700 dark:text-gray-300 bg-inherit"
                         data-tab-target="" role="tab" aria-selected="true" aria-controls="acceleration-answer-question">
                         Trả lời câu hỏi
@@ -404,18 +455,18 @@
                         data-tab-target="" role="tab" aria-selected="false"
                         aria-controls="acceleration-contestant-answer">
                         <span class="material-icons mr-1" id="AccelerationAnswerLockStatusIcon">lock</span>
-                        Đáp án thí sinh
+                        Câu trả lời của thí sinh
                     </a>
                 </li>
             </ul>
 
             <div data-tab-content="" class="mt-2">
                 <div id="acceleration-answer-question" role="tabpanel">
-                    <div class="min-h-40 bg-gray-100 dark:bg-neutral-800 rounded-xl p-6 mb-2">
+                    <div class="min-h-36 bg-gray-100 dark:bg-neutral-800 rounded-xl p-6 mb-2">
                         <div class="flex justify-between items-center mb-2">
                             <h2 class="text-xl font-bold text-black dark:text-white">Câu hỏi</h2>
                         </div>
-                        <p class="font-medium text-md sm:text-lg text-gray-700 dark:text-gray-300"
+                        <p class="font-medium text-md sm:text-lg text-gray-700 dark:text-gray-300 whitespace-pre-line"
                             id="AccelerationQuestion">
 
                         </p>
@@ -423,7 +474,7 @@
                     <div
                         class="flex items-center justify-between p-4 bg-gray-100 dark:bg-neutral-800 rounded-lg shadow-md">
                         <div class="flex flex-col">
-                            <span class="text-md font-semibold text-black dark:text-white">Đáp án của bạn:</span>
+                            <span class="text-md font-semibold text-black dark:text-white">Câu trả lời của bạn:</span>
                             <p id="AccelerationAnswerOutput" class="mt-1 text-xl font-bold text-black dark:text-white">
                             </p>
                         </div>
@@ -436,7 +487,7 @@
                     <div class="relative w-full mt-2 mb-2">
                         <input type="text" id="AccelerationAnswerInput" disabled
                             class="w-full p-4 pl-28 bg-gray-200 dark:bg-neutral-700 rounded-lg text-sm text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent font-semibold disabled:bg-gray-300 dark:disabled:bg-neutral-800 disabled:text-gray-500 dark:disabled:text-gray-400"
-                            placeholder="Nhập đáp án tại đây, bấm Enter để nộp đáp án. Bạn chỉ có thể nhập đáp án khi có hiệu lệnh và trạng thái chuyển sang màu xanh."
+                            placeholder="Nhập câu trả lời tại đây, bấm Enter để nộp. Bạn chỉ có thể nhập câu trả lời khi có hiệu lệnh và trạng thái chuyển sang màu xanh."
                             autocomplete="off">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-2">
                             <div
@@ -454,7 +505,7 @@
                 <div class="hidden opacity-0" id="acceleration-contestant-answer" role="tabpanel">
                     <div class="min-h-40 bg-gray-100 dark:bg-neutral-800 rounded-xl p-6 mb-2">
                         <div class="flex justify-between items-center mb-4">
-                            <h2 class="text-md font-semibold text-black dark:text-white">Đáp án của thí sinh
+                            <h2 class="text-md font-semibold text-black dark:text-white">Câu trả lời của thí sinh
                             </h2>
                         </div>
                         <div class="overflow-x-auto rounded-xl">
@@ -464,7 +515,7 @@
                                         <th class="px-6 py-3 text-left font-semibold text-black dark:text-white">
                                             Thí sinh</th>
                                         <th class="px-6 py-3 text-left font-semibold text-black dark:text-white">
-                                            Đáp án</th>
+                                            Câu trả lời</th>
                                         <th class="px-6 py-3 text-left font-semibold text-black dark:text-white">
                                             Thời gian</th>
                                     </tr>
@@ -541,9 +592,17 @@
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold text-black dark:text-white">Câu hỏi</h2>
                     </div>
-                    <p class="font-medium text-lg sm:text-xl text-gray-800 dark:text-gray-300 select-none"
-                        id="FinishQuestion">
-                    </p>
+                    <div class="flex flex-col lg:flex-row lg:space-x-6">
+                        <div class="flex-1">
+                            <p class="font-medium text-lg sm:text-xl text-gray-800 dark:text-gray-300 select-none whitespace-pre-line"
+                                id="FinishQuestion">
+                            </p>
+                        </div>
+                        <div class="mt-4 lg:mt-0 flex justify-end hidden" id="FinishMediaContainer">
+                            <img id="FinishQuestionImage" class="max-w-full max-h-64 rounded-lg shadow-md"
+                                alt="Question Image">
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Stats Section -->
@@ -612,27 +671,21 @@
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-black dark:text-white">Câu hỏi</h2>
                 </div>
-                <p class="font-medium text-lg sm:text-xl text-gray-800 dark:text-gray-300 select-none"
-                    id="AdditionalQuestion">
-                </p>
-                <!-- <div class="flex flex-col items-center justify-center text-center dark:text-white hidden"
-                    id="StartIIWaiting">
-                    <div class="start_question_loader"></div>
-                    <p class="mt-4 font-semibold">Câu hỏi sẽ xuất hiện tại đây...</p>
-                </div> -->
+                <div class="flex flex-col lg:flex-row lg:space-x-6">
+                    <div class="flex-1">
+                        <p class="font-medium text-lg sm:text-xl text-gray-800 dark:text-gray-300 select-none whitespace-pre-line"
+                            id="AdditionalQuestion">
+                        </p>
+                    </div>
+                    <div class="mt-4 lg:mt-0 flex justify-end hidden" id="AdditionalMediaContainer">
+                        <img id="AdditionalQuestionImage" class="max-w-full max-h-64 rounded-lg shadow-md"
+                            alt="Question Image">
+                    </div>
+                </div>
             </div>
 
             <!-- Stats Section -->
             <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Game Turn -->
-                <!-- <div
-                    class="bg-gray-100 dark:bg-neutral-800 rounded-xl p-6 flex items-center hover:shadow-xl transition-shadow">
-                    <span class="material-icons text-black dark:text-white mr-4 text-3xl">play_circle_filled</span>
-                    <div>
-                        <h3 class="text-md font-medium text-gray-700 dark:text-gray-300">Lượt thi</h3>
-                        <p class="text-xl font-bold text-black dark:text-white" id="StartIITurn">Chung</p>
-                    </div>
-                </div> -->
                 <!-- Question Number -->
                 <div
                     class="bg-gray-100 dark:bg-neutral-800 rounded-xl p-6 flex items-center hover:shadow-xl transition-shadow">
@@ -677,29 +730,9 @@
                     Giành quyền trả lời câu hỏi
                 </button>
                 <div id="AdditionalBuzzerList">
-                    <!-- <div
-                        class="w-full mt-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-center font-semibold py-4 rounded-xl dark:from-blue-700 dark:to-indigo-700">
-                        Thí sinh Nguyễn Văn A đã giành quyền trả lời chướng ngại vật
-                    </div> -->
                 </div>
             </div>
         </div>
-
-
-
-
-
-        <!-- Bottom Center Button -->
-        <!-- <div class="fixed bottom-4 left-1/2 transform -translate-x-1/2">
-            <button type="button" id="showScoresButton"
-                class="bg-white dark:bg-neutral-900 text-black border border-neutral-300 hover:bg-black hover:text-white focus:ring-4 focus:outline-none focus:ring-gray-500 font-medium rounded-lg text-sm p-2.5 text-center inline-flex items-center dark:border-white dark:text-white dark:hover:text-black dark:focus:ring-white dark:hover:bg-white"
-                onclick="toggleDrawer()">
-                <span class="material-icons">
-                    arrow_upward
-                </span>
-                <span class="ml-2 font-semibold">Hiển thị điểm số</span>
-            </button>
-        </div> -->
 
         <!-- Drawer -->
         <div id="drawer"
@@ -723,35 +756,56 @@
                 </div>
             </div>
         </div>
-
-
     </div>
 
+    <!-- Video Dialog -->
+    <div id="FinishVideoDialog"
+        class="fixed inset-0 z-[999] grid h-screen w-screen place-items-center bg-black bg-opacity-60 opacity-0 pointer-events-none backdrop-blur-sm transition-opacity duration-300">
+        <div
+            class="relative m-4 p-4 w-full max-w-lg sm:max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl 2xl:max-w-[60vw] rounded-lg bg-white dark:bg-neutral-800 shadow-sm">
+            <div class="flex shrink-0 items-center pb-4 text-xl sm:text-2xl font-medium text-slate-800 dark:text-white">
+                Video câu hỏi về đích
+            </div>
+            <div
+                class="relative border-t border-slate-200 dark:border-neutral-600 py-4 leading-normal text-slate-600 dark:text-gray-300 font-light">
+                <video id="FinishVideo" autoplay width="100%"
+                    class="sm:h-72 md:h-80 lg:h-80 xl:h-96 2xl:h-[24rem] rounded-lg">
+                    Your browser does not support the video tag.
+                </video>
+                <iframe id="FinishVideoIframe" allow="autoplay" src="" width="100%" height="300"
+                    class="sm:h-72 md:h-80 lg:h-80 xl:h-96 2xl:h-[24rem] rounded-lg pointer-events-none hidden"
+                    frameborder="0" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
 
     <audio id="audio_StartingStart"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZMOOPaKZQGVoa1K2FsmpRiNrqdHx6g3TyblUf"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FStart%2FStartingStart.mp3?alt=media&token=49615db1-a2dd-452d-abbd-2ef8e45fa122"></audio>
     <audio id="audio_StartQuestionShow"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZyHNEa7vgFXToSBx0vmK51IefkrAc9dE8Gis7"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FStart%2FStartingQuestionShow.mp3?alt=media&token=73f8dbed-e8b1-4dac-8355-1d6c264944c8"></audio>
     <audio id="audio_StartStartQuestionShow"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZCM5laOWOaEDzwRhfsbpY5lgTGWVuA3UNM0Zo"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FStart%2FStartStartQuestionShow.mp3?alt=media&token=2277e4b0-66a6-4af9-aa5d-d16798eaaff9"></audio>
     <audio id="audio_StartingTimes_Phase1"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZmn4qukyUKHcZEVWdMGb3vD97y02TxswhXIQ1" loop></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online/o/Sounds%2FStartingTimes-Phase1.mp3?alt=media&token=16c71c33-9149-4326-87a5-92560c48047e"
+        loop></audio>
     <audio id="audio_StartingTimes_Phase2"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZpX7gTOP8OFPLHXsCy9crjYkx2KaTnh0EuwmV" loop></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online/o/Sounds%2FStartingTimes-Phase2.mp3?alt=media&token=6acf49b9-1c4a-41f9-851b-17ff1eb2daf5"
+        loop></audio>
     <audio id="audio_StartingTimes_Phase3"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZbopeTtxn0yFl8YpIeLOGWQZ5qMsVAKdB2xg4"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online/o/Sounds%2FStartingTimes-Phase3.mp3?alt=media&token=7b0ec461-96c2-4959-99ac-0bbdeca1cf19"></audio>
     <audio id="audio_StartingRightAnswer"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZfi0pp4JlzUCVJKIq6DSZOk92QnxsyGaFLrpE"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FStart%2FStartingRightAnswer.mp3?alt=media&token=235c7131-6c4c-4b39-aa6d-f39d2198646f"></audio>
     <audio id="audio_StartingWrongAnswer"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZhNQEJwLM5LzqPKtc7Nf1IpdS4jBo0Uu9OlHY"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FStart%2FStartingWrongAnswer.mp3?alt=media&token=1f29ec10-7f4d-45bf-a969-bfc9cf7cc213"></audio>
     <audio id="audio_StartingFinish"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZEQ1yJHeptLwFPAimQzTJ1BYZrDGxchMCv8dN"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FStart%2FStartingFinish.mp3?alt=media&token=2c7dd2a6-5097-4248-8722-a59b4d75d7e5"></audio>
     <audio id="audio_Spacing" src="audio/Others/Space.mp3"></audio>
 
     <audio id="audio_StartIIAnswerGranted"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZFz8Iubcx2uGCD1lNJpjt0KI6rTO49esoHMUg"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FStartII%2FStartO22AnswerGranted.mp3?alt=media&token=f21024b9-3d8c-4607-92e2-06628790e20a"></audio>
     <audio id="audio_StartIIFinish"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZEQ1yJHeptLwFPAimQzTJ1BYZrDGxchMCv8dN"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FStart%2FStartingFinish.mp3?alt=media&token=2c7dd2a6-5097-4248-8722-a59b4d75d7e5"></audio>
+
 
     <audio id="audio_StartIIStartingTimes_Phase1"
         src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZmn4qukyUKHcZEVWdMGb3vD97y02TxswhXIQ1" loop></audio>
@@ -760,104 +814,122 @@
     <audio id="audio_StartIIStartingTimes_Phase3"
         src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZbopeTtxn0yFl8YpIeLOGWQZ5qMsVAKdB2xg4"></audio>
 
-
     <audio id="audio_ObstacleStart"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZzNZvlNTX3gtyoIfpjTQ7eJrCl8aq49S20zsN"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FObstacle%2FObstacleStart.mp3?alt=media&token=11b34bd1-6d39-4574-9d73-f5442fddf807"></audio>
     <audio id="audio_ObstacleRowShow"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZWH8b2vYlrREebLjN754wgxmVJUcOFk0HIoun"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FObstacle%2FObstacleRowShow.mp3?alt=media&token=659fb0ed-49bf-49d9-b6db-fc5026e759d2"></audio>
     <audio id="audio_ObstacleRowChoose"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZTCLF0a2difZWrIsun5OBgvjhxGScoqY7aJb4"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FObstacle%2FObstacleRowChoose.mp3?alt=media&token=85007fe0-30f2-443c-8fe4-c0eae90e74c4"></audio>
     <audio id="audio_ObstacleRowThinking"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZhq5ZDoLM5LzqPKtc7Nf1IpdS4jBo0Uu9OlHY"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FObstacle%2FObstacleRowThinking.mp3?alt=media&token=81511002-dfdf-4140-9256-81f8af39d57f"></audio>
     <audio id="audio_ObstacleAnswers"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZAvopDGzdi3x0rVPYaT41mfpzFEj6G95Cu2Ht"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FObstacle%2FObstacleAnswers.mp3?alt=media&token=8317bb87-b752-405b-8ad5-c203c09d104e"></audio>
     <audio id="audio_ObstacleRightAnswer"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZbXCoD7n0yFl8YpIeLOGWQZ5qMsVAKdB2xg4v"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FObstacle%2FObstacleRightAnswer.mp3?alt=media&token=4d9bfb1b-a621-499a-aa3b-7840f632535d"></audio>
     <audio id="audio_ObstacleRowWrongAnswer"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZenZsCGMWbBwknvXtpo0KOsgh9amQz8NAGqeD"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FObstacle%2FObstacleRowWrongAnswer.mp3?alt=media&token=ba757c49-475a-4390-979d-5c0b360c10ae"></audio>
     <audio id="audio_ObstacleAnswerBuzzer"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZcLEmAFO5xRQI90JGo2lPMnKj4yqiXZsHLfEr"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FObstacle%2FObstacleAnswer.mp3?alt=media&token=dd7cc59f-c3f0-4aaf-8d84-b6259a7e298d"></audio>
     <audio id="audio_ObstacleRight"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZAfpBuszdi3x0rVPYaT41mfpzFEj6G95Cu2Ht"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FObstacle%2FObstacleRight.mp3?alt=media&token=097820c4-d776-42ab-8cc6-5fa89bc56752"></audio>
     <audio id="audio_ObstacleImageShow"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZLcT2ZvQCq6wNr4If3iO5JXoRM8SxbDBGyWzL"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FObstacle%2FObstacleImageShow.mp3?alt=media&token=31e5aab6-a05d-49c9-ae83-0255a6cc8a4c"></audio>
     <audio id="ObstacleAudio"></audio>
 
 
     <audio id="audio_AccelerationStart"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZsn0e8lhMyBNCjtX245xlw6m7TDE9bH13JaPL"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FAcceleration%2FAccelerationStart.mp3?alt=media&token=39a2bcbc-a198-4dae-a8c5-0bd65138039a"></audio>
     <audio id="audio_AccelerationQuestionShow"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZLX2tLOQCq6wNr4If3iO5JXoRM8SxbDBGyWzL"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FAcceleration%2FAccelerationQuestionShow.mp3?alt=media&token=8b137d22-80b9-439f-b4d1-628f39188d5f"></audio>
     <audio id="audio_Acceleration10Seconds"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZJnhNUAleNIqAyl1FzwEOxmt7WonQZrVgR489"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FAcceleration%2FAcceleration10Seconds.mp3?alt=media&token=dee511ed-1b5c-4011-ac1d-1a58a17a341b"></audio>
     <audio id="audio_Acceleration20Seconds"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZYSLSv0UJjztUWYSPblX47iOKDHk3BLr0MZoR"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FAcceleration%2FAcceleration20Seconds.mp3?alt=media&token=16f11899-1550-41b5-917a-819a5602cabe"></audio>
     <audio id="audio_Acceleration30Seconds"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZ60ndDio4HmS597g3GXOJ0PbeFqtpZCTrLKou"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FAcceleration%2FAcceleration30Seconds.mp3?alt=media&token=1863bd87-37d1-4c36-8617-509ab98a31cc"></audio>
     <audio id="audio_Acceleration40Seconds"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZdfuUmy5phZQzW928epxMnPduvmIHgrjatTNi"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FAcceleration%2FAcceleration40Seconds.mp3?alt=media&token=e9cf565c-898c-4be8-8ef3-0be5ba7f20d6"></audio>
     <audio id="audio_AccelerationAnswerShow"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZOkTtWj7jUvIdaTVE9R6SGMJgbzlXtsepFrxB"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FAcceleration%2FAccelerationAnswerShow.mp3?alt=media&token=75341370-989b-447f-beaa-119fe4ec965d"></audio>
     <audio id="audio_AccelerationRightAnswer"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZFjiZcqx2uGCD1lNJpjt0KI6rTO49esoHMUgQ"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FAcceleration%2FAccelerationRightAnswer.mp3?alt=media&token=6d362e99-6a19-453e-a5b4-699d9a164c14"></audio>
     <audio id="audio_AccelerationWrongAnswer"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZW3oQJLYlrREebLjN754wgxmVJUcOFk0HIoun"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FAcceleration%2FAccelerationWrongAnswer.mp3?alt=media&token=f87cc123-8e35-4a6f-934e-1c3ceacb942c"></audio>
+
 
 
     <audio id="audio_FinishStart"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZYBSWCMUJjztUWYSPblX47iOKDHk3BLr0MZoR"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishStart.mp3?alt=media&token=d7702a64-f730-4411-bd9c-0c7dea821141"></audio>
     <audio id="audio_FinishUserStart"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZrhyjuo0wMnsgj7HZBepkmPzxFUta0vd1rfyu"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishUserStart.mp3?alt=media&token=f8b7875c-7ee0-4222-ba2f-82b501198f96"></audio>
     <audio id="audio_FinishQuestionPackShow"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZ0H6Lp6aMpNOthZsbKkJ5wFAcgSWXaUEeYL1D"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishQuestionPackShow.mp3?alt=media&token=27aa6e68-e135-4f15-94a2-9402e84f8572"></audio>
     <audio id="audio_FinishQuestionChoiceChoosen"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZ8zy1B1DW5gb1eIcdxrtunOw27CHjmPL4aDEi3"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishQuestionChoiceChoosen.mp3?alt=media&token=39614de7-1458-4a4a-b32c-f24b84da8803"></audio>
     <audio id="audio_FinishQuestionPackChoose"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZGVF9ux1seZPE6YRAf0Up7DxJobHrC8ymVjLM"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishQuestionPackChoose.mp3?alt=media&token=af0ef90a-1b3f-4dcf-bc30-91541be09e38"></audio>
     <audio id="audio_Finish10Seconds"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZS0uywYqeB0ViLY9OWojqQ58CbIZ6nXMRHkyr"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinish10Seconds.mp3?alt=media&token=8b8f99be-4603-49f2-8963-1e5daf2a04cb"></audio>
     <audio id="audio_Finish15Seconds"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZaegYriJVcnLAJNQl2j3EW6gkoyY9UwPGz1bv"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinish15Seconds.mp3?alt=media&token=ce2ea6a3-5d9d-4fe1-8a3c-c1455c78e431"></audio>
     <audio id="audio_Finish20Seconds"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZL9OeFCQCq6wNr4If3iO5JXoRM8SxbDBGyWzL"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinish20Seconds.mp3?alt=media&token=4c42681f-1546-4a78-96b8-e215538b4263"></audio>
     <audio id="audio_FinishRightAnswer"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZEZLLtxTeptLwFPAimQzTJ1BYZrDGxchMCv8d"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishRightAnswer.mp3?alt=media&token=30f3e965-b954-405d-a1e4-e93f7546648e"></audio>
     <audio id="audio_FinishWrongAnswer"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZJCrpYSleNIqAyl1FzwEOxmt7WonQZrVgR489"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishWrongAnswer.mp3?alt=media&token=0a788aab-f910-4f5d-b3a0-9ca41d52329c"></audio>
     <audio id="audio_Finish5Seconds"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZo3ERlH8dZUi708lePcInwMNOA6BV34YF19Gh"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinish5Seconds.mp3?alt=media&token=a91010c7-a91e-4483-a5ed-53e4a789f059"></audio>
     <audio id="audio_FinishAnswerGranted"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZrkb9UGwMnsgj7HZBepkmPzxFUta0vd1rfyu5"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishAnswerGranted.mp3?alt=media&token=e5e8bb92-c1fc-470e-9848-b4c2535f00aa"></audio>
     <audio id="audio_FinishFinish"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZqG6rKdIa5npSzXG9krHUlxVDwKJBFcd3fWZ2"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishFinish.mp3?alt=media&token=687db32d-3c15-4d74-bdac-a47c65e7b825"></audio>
     <audio id="audio_FinishStarChose"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZnNCRPD650PC8JB3tSoDMcO6U7pgXEzZslYLa"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishStarChose.mp3?alt=media&token=558507ea-e368-4b69-b640-1430858ee484"></audio>
+    <audio id="audio_FinishPracticeGuestWelcome"
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FFinish%2FFinishPraticeGuestWelcome.mp3?alt=media&token=a19a1fbd-0d68-4f39-80a7-820d170245d3"></audio>
+    <audio id="audio_FinishPractice20Seconds"
+        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZSaDrVXqeB0ViLY9OWojqQ58CbIZ6nXMRHkyr"></audio>
+    <audio id="audio_FinishPractice30Seconds"
+        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZC6j9fBWOaEDzwRhfsbpY5lgTGWVuA3UNM0Zo"></audio>
+    <audio id="audio_FinishPractice40Seconds"
+        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZMCwQ8VZQGVoa1K2FsmpRiNrqdHx6g3TyblUf"></audio>
+    <audio id="audio_FinishPractice60Seconds"
+        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZAQfVcxzdi3x0rVPYaT41mfpzFEj6G95Cu2Ht"></audio>
+
 
     <audio id="audio_AdditionalRound"
-        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZYaLOZjcUJjztUWYSPblX47iOKDHk3BLr0MZo"></audio>
+        src="https://firebasestorage.googleapis.com/v0/b/the-olympus-online.appspot.com/o/Sounds%2FAdditional%2FAdditionalMainMusic.mp3?alt=media&token=57f7a2d1-1cc3-4f5b-b9a4-4d90a95e3fe3"></audio>
     <audio id="audio_TenseMoments"
         src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZyHTnc4vgFXToSBx0vmK51IefkrAc9dE8Gis7"></audio>
 
-
+    <audio id="audio_PointSummary"
+        src="https://9hfekx97eu.ufs.sh/f/mIqcdVyUKHcZ8z1dEoDW5gb1eIcdxrtunOw27CHjmPL4aDEi"></audio>
 
 </body>
 
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-functions.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-firestore-compat.js"></script>
+<!-- Firebase Storage removed - now using Cloudinary -->
+<!-- <script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-storage-compat.js"></script> -->
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-functions-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-app-check-compat.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="js/keypress-2.1.5.min.js"></script>
 <script src="js/components/tab2/tab2.js"></script>
 <script src="js/firebaseConfig.js"></script>
+<script src="js/cloudinaryConfig.js"></script>
 <script src="js/main/firebaseDefenition.js"></script>
 <script src="js/Utilities.js"></script>
+<script src="js/authentication/UserLoggedin.js"></script>
 <script type="module" src="js/components/popover/popover.js"></script>
 <script src="js/components/dialog/dialog.js"></script>
 <script src="js/components/toast/toast.js"></script>
 <script src="js/ingame/ui.js"></script>
 <script src="js/ingame/connection.js"></script>
+<script src="js/ingame/matchdata/tts/tts.js"></script>
 <script src="js/ingame/matchdata/playerlist/playerlist.js"></script>
 <script src="js/ingame/matchdata/startI/startI.js"></script>
 <script src="js/ingame/matchdata/startII/startII.js"></script>
@@ -867,6 +939,11 @@
 <script src="js/ingame/matchdata/additional/additional.js"></script>
 <script src="js/ingame/matchdata/sounds/sounds.js"></script>
 <script src="js/ingame/participant/participant.js"></script>
-<script src="js/blockConsole.js"></script>
+<script src="js/utilities/indexedDBHelpers.js"></script>
+<script src="js/utilities/mediaUtils.js"></script>
+<script src="js/utilities/dynamicYear.js"></script>
+<script src="js/utilities/versionManager.js"></script>
+<script src="js/utilities/initVersion.js"></script>
+<script src="js/ingame/matchdata/files/files.js"></script>
 
 </html>

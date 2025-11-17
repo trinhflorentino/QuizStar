@@ -1,0 +1,39 @@
+/* QuizPreview - Normal font weight for preview text content only */
+/* Keep headings bold, but make text content normal */
+.quiz-preview-container p,
+.quiz-preview-container span:not(.font-bold):not(.font-semibold),
+.quiz-preview-container div:not(h2):not(h3):not(h4):not(h5):not(h6):not(.font-bold):not(.font-semibold),
+.quiz-preview-container .text-gray-800,
+.quiz-preview-container .text-gray-700,
+.quiz-preview-container .text-gray-500,
+.quiz-preview-container .text-gray-400 {
+  font-weight: 400 !important;
+  font-family: "Montserrat", sans-serif !important;
+  font-variation-settings: "wght" 400 !important;
+}
+
+/* Ensure prose classes don't add bold */
+.quiz-preview-container .prose,
+.quiz-preview-container .prose-sm,
+.quiz-preview-container .prose *,
+.quiz-preview-container .prose-sm *,
+.quiz-preview-container .prose p,
+.quiz-preview-container .prose-sm p,
+.quiz-preview-container .prose span,
+.quiz-preview-container .prose-sm span {
+  font-weight: 400 !important;
+  font-family: "Montserrat", sans-serif !important;
+  font-variation-settings: "wght" 400 !important;
+}
+
+/* Keep headings and bold classes bold */
+.quiz-preview-container h2,
+.quiz-preview-container h3,
+.quiz-preview-container h4,
+.quiz-preview-container h5,
+.quiz-preview-container h6,
+.quiz-preview-container .font-bold,
+.quiz-preview-container .font-semibold {
+  font-weight: 700 !important;
+}
+

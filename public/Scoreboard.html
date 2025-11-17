@@ -4,13 +4,14 @@
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Bảng điểm số</title>
+    <title>Bảng điểm số | The Olympus Online</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel="icon" type="image/png" href="img/Logo.png" />
-    <link rel='stylesheet' type='text/css' media='screen' href='css/Scoreboard.css'>
     <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link href="./dist/output.css" rel="stylesheet">
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-9BZ1P9KSJR"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
@@ -20,26 +21,37 @@
     </script>
 </head>
 
-<body>
-    <div class="container">
-        <div class="competitor-name-container">
-            <p class="competitor-name" id="competitor-name"></p>
+<body class="overflow-hidden m-0 p-0 box-border">
+    <div class="w-full h-screen flex flex-col">
+        <div class="w-full h-[25vh] flex justify-center items-center relative" id="scoreboardPlayerNameContainer">
+            <p class="font-tahoma font-bold text-[7vw] uppercase whitespace-nowrap z-10 " id="competitor-name"></p>
         </div>
-        <div class="competitor-point-container">
-            <p class="competitor-point" id="competitor-point"></p>
+        <div class="w-full h-[75vh] flex justify-center items-center relative" id="scoreboardPlayerPointContainer">
+            <p class="text-[34vw] z-10" id="competitor-point"
+                style="font-family: Arial Black, Arial Bold, Gadget, sans-serif; font-weight: bolder;"></p>
         </div>
     </div>
 </body>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-storage.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-functions.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-firestore-compat.js"></script>
+<!-- Firebase Storage removed - now using Cloudinary -->
+<!-- <script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-storage-compat.js"></script> -->
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-functions-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.12.1/firebase-app-check-compat.js"></script>
+<script src="js/keypress-2.1.5.min.js"></script>
 <script src="js/keyboardshortcut.js"></script>
+<script src="js/firebaseConfig.js"></script>
+<script src="js/cloudinaryConfig.js"></script>
+<script src="js/main/firebaseDefenition.js"></script>
+<script src="js/Utilities.js"></script>
 <script src="js/authloggedin.js"></script>
 <script src='js/Scoreboard.js'></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="js/components/toast/toast.js"></script>
 <script src="js/blockConsole.js"></script>
-<script src="js/Participant.js"></script>
+<!-- <script src="js/Participant.js"></script> -->
 
 </html>

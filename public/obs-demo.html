@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBS WebSocket Integration Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section.hidden {
+            display: none;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .control-group {
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+        }
+        .control-group h4 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>OBS WebSocket Integration Demo</h1>
+        
+        <!-- Connection Status -->
+        <div class="section">
+            <h3>Trạng thái kết nối</h3>
+            <div id="connection-status" class="status disconnected">
+                Chưa kết nối
+            </div>
+            <div class="controls">
+                <div class="control-group">
+                    <h4>Kết nối OBS</h4>
+                    <input type="text" id="obs-address" placeholder="ws://localhost:4455" value="ws://localhost:4455">
+                    <input type="password" id="obs-password" placeholder="Mật khẩu (nếu có)">
+                    <button id="connect-btn">Kết nối</button>
+                    <button id="disconnect-btn" disabled>Ngắt kết nối</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene Control -->
+        <div class="section">
+            <h3>Điều khiển Scene</h3>
+            <div class="controls">
+                <div class="control-group">
+                    <h4>Scene hiện tại</h4>
+                    <div id="current-scene">Chưa có</div>
+                </div>
+                <div class="control-group">
+                    <h4>Chuyển đổi Scene</h4>
+                    <select id="scene-select">
+                        <option value="">Chọn scene...</option>
+                    </select>
+                    <select id="transition-select">
+                        <option value="Fade">Fade</option>
+                        <option value="Cut">Cut</option>
+                        <option value="Slide">Slide</option>
+                    </select>
+                    <button id="switch-scene-btn" disabled>Chuyển Scene</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Phase Simulation -->
+        <div class="section">
+            <h3>Mô phỏng Game Phase</h3>
+            <p>Click vào các nút để mô phỏng chuyển đổi phase trong game:</p>
+            <div class="controls">
+                <button onclick="simulatePhase('title')">Title Screen</button>
+                <button onclick="simulatePhase('startI')">Start I</button>
+                <button onclick="simulatePhase('startII')">Start II</button>
+                <button onclick="simulatePhase('obstacle')">Obstacle</button>
+                <button onclick="simulatePhase('acceleration')">Acceleration</button>
+                <button onclick="simulatePhase('finish')">Finish</button>
+                <button onclick="simulatePhase('pointSummary')">Point Summary</button>
+            </div>
+        </div>
+
+        <!-- Manual Controls -->
+        <div class="section">
+            <h3>Điều khiển thủ công</h3>
+            <div class="controls">
+                <div class="control-group">
+                    <h4>Studio Mode</h4>
+                    <button id="toggle-studio-mode" disabled>Toggle Studio Mode</button>
+                    <button id="trigger-transition" disabled>Trigger Transition</button>
+                </div>
+                <div class="control-group">
+                    <h4>Auto Scene Switching</h4>
+                    <label>
+                        <input type="checkbox" id="auto-switch" checked> 
+                        Tự động chuyển scene theo phase
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log -->
+        <div class="section">
+            <h3>Log</h3>
+            <div id="log" class="log"></div>
+            <button onclick="clearLog()">Xóa log</button>
+        </div>
+    </div>
+
+    <!-- Load OBS WebSocket Library -->
+    <script src="https://cdn.jsdelivr.net/npm/obs-websocket-js@5.0.6/dist/obs-websocket.umd.js"></script>
+    
+    <script>
+        // Global variables
+        let obs = null;
+        let isConnected = false;
+        let currentScene = null;
+        let autoSceneSwitching = true;
+
+        // Initialize OBS WebSocket
+        async function initializeOBS() {
+            try {
+                obs = new OBSWebSocket();
+                setupEventListeners();
+                log('OBS WebSocket initialized');
+                return true;
+            } catch (error) {
+                log('Failed to initialize OBS WebSocket: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            obs.on('ConnectionOpened', () => {
+                log('Connection opened');
+            });
+
+            obs.on('ConnectionClosed', (error) => {
+                log('Connection closed: ' + (error ? error.message : 'Normal'));
+                updateConnectionStatus(false);
+            });
+
+            obs.on('ConnectionError', (error) => {
+                log('Connection error: ' + error.message, 'error');
+                updateConnectionStatus(false);
+            });
+
+            obs.on('CurrentProgramSceneChanged', (data) => {
+                log('Scene changed to: ' + data.sceneName);
+                updateCurrentScene(data.sceneName);
+            });
+
+            obs.on('CurrentPreviewSceneChanged', (data) => {
+                log('Preview scene changed to: ' + data.sceneName);
+            });
+
+            obs.on('StudioModeStateChanged', (data) => {
+                log('Studio mode: ' + (data.studioModeEnabled ? 'enabled' : 'disabled'));
+            });
+        }
+
+        // Connect to OBS
+        async function connectToOBS() {
+            const address = document.getElementById('obs-address').value;
+            const password = document.getElementById('obs-password').value;
+
+            if (!address) {
+                log('Please enter OBS WebSocket address', 'error');
+                return;
+            }
+
+            try {
+                log('Connecting to: ' + address);
+                await obs.connect(address, password);
+                
+                isConnected = true;
+                updateConnectionStatus(true);
+                
+                // Get version info
+                const version = await obs.call('GetVersion');
+                log('Connected successfully! OBS Version: ' + version.obsVersion);
+                
+                // Refresh scenes
+                await refreshScenes();
+                
+            } catch (error) {
+                log('Connection failed: ' + error.message, 'error');
+                updateConnectionStatus(false);
+            }
+        }
+
+        // Disconnect from OBS
+        async function disconnectFromOBS() {
+            try {
+                await obs.disconnect();
+                isConnected = false;
+                updateConnectionStatus(false);
+                log('Disconnected from OBS');
+            } catch (error) {
+                log('Error disconnecting: ' + error.message, 'error');
+            }
+        }
+
+        // Refresh scene list
+        async function refreshScenes() {
+            try {
+                const sceneList = await obs.call('GetSceneList');
+                const sceneSelect = document.getElementById('scene-select');
+                
+                sceneSelect.innerHTML = '<option value="">Chọn scene...</option>';
+                sceneList.scenes.forEach(scene => {
+                    const option = document.createElement('option');
+                    option.value = scene.sceneName;
+                    option.textContent = scene.sceneName;
+                    sceneSelect.appendChild(option);
+                });
+
+                updateCurrentScene(sceneList.currentProgramSceneName);
+                log('Scenes refreshed: ' + sceneList.scenes.length + ' scenes found');
+                
+            } catch (error) {
+                log('Failed to refresh scenes: ' + error.message, 'error');
+            }
+        }
+
+        // Switch scene
+        async function switchScene() {
+            const sceneName = document.getElementById('scene-select').value;
+            const transitionName = document.getElementById('transition-select').value;
+
+            if (!sceneName) {
+                log('Please select a scene', 'error');
+                return;
+            }
+
+            try {
+                await obs.call('SetCurrentProgramScene', { sceneName });
+                log('Switched to scene: ' + sceneName + ' with transition: ' + transitionName);
+            } catch (error) {
+                log('Failed to switch scene: ' + error.message, 'error');
+            }
+        }
+
+        // Toggle studio mode
+        async function toggleStudioMode() {
+            try {
+                const studioModeState = await obs.call('GetStudioModeEnabled');
+                await obs.call('SetStudioModeEnabled', { studioModeEnabled: !studioModeState.studioModeEnabled });
+                log('Studio mode toggled');
+            } catch (error) {
+                log('Failed to toggle studio mode: ' + error.message, 'error');
+            }
+        }
+
+        // Trigger transition
+        async function triggerTransition() {
+            try {
+                await obs.call('TriggerStudioModeTransition');
+                log('Transition triggered');
+            } catch (error) {
+                log('Failed to trigger transition: ' + error.message, 'error');
+            }
+        }
+
+        // Simulate game phase
+        function simulatePhase(phase) {
+            log('Simulating phase: ' + phase);
+            
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Show corresponding section (simulate)
+            const sectionMap = {
+                'title': 'title-section',
+                'startI': 'start-i-section',
+                'startII': 'start-ii-section',
+                'obstacle': 'obstacle-section',
+                'acceleration': 'acceleration-section',
+                'finish': 'finish-section',
+                'pointSummary': 'point-summary-section'
+            };
+
+            const sectionId = sectionMap[phase];
+            if (sectionId) {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    section.classList.remove('hidden');
+                }
+            }
+
+            // Auto switch OBS scene if enabled
+            if (autoSceneSwitching && isConnected) {
+                setTimeout(() => {
+                    switchToGamePhase(phase);
+                }, 500);
+            }
+        }
+
+        // Switch to game phase
+        async function switchToGamePhase(phase) {
+            const sceneMap = {
+                'title': 'Title Screen',
+                'startI': 'Start I Phase',
+                'startII': 'Start II Phase',
+                'obstacle': 'Obstacle Phase',
+                'acceleration': 'Acceleration Phase',
+                'finish': 'Finish Phase',
+                'pointSummary': 'Point Summary'
+            };
+
+            const sceneName = sceneMap[phase];
+            if (sceneName && isConnected) {
+                try {
+                    await obs.call('SetCurrentProgramScene', { sceneName });
+                    log('Auto-switched to scene: ' + sceneName);
+                } catch (error) {
+                    log('Failed to auto-switch scene: ' + error.message, 'error');
+                }
+            }
+        }
+
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connection-status');
+            const connectBtn = document.getElementById('connect-btn');
+            const disconnectBtn = document.getElementById('disconnect-btn');
+            const switchBtn = document.getElementById('switch-scene-btn');
+            const studioBtn = document.getElementById('toggle-studio-mode');
+            const transitionBtn = document.getElementById('trigger-transition');
+
+            isConnected = connected;
+
+            if (connected) {
+                statusElement.className = 'status connected';
+                statusElement.textContent = 'Đã kết nối';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                switchBtn.disabled = false;
+                studioBtn.disabled = false;
+                transitionBtn.disabled = false;
+            } else {
+                statusElement.className = 'status disconnected';
+                statusElement.textContent = 'Chưa kết nối';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                switchBtn.disabled = true;
+                studioBtn.disabled = true;
+                transitionBtn.disabled = true;
+            }
+        }
+
+        // Update current scene display
+        function updateCurrentScene(sceneName) {
+            currentScene = sceneName;
+            document.getElementById('current-scene').textContent = sceneName || 'Chưa có';
+        }
+
+        // Log function
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            
+            let className = '';
+            if (type === 'error') className = 'color: red;';
+            else if (type === 'success') className = 'color: green;';
+            
+            logEntry.innerHTML = `<span style="color: #666;">[${timestamp}]</span> <span style="${className}">${message}</span>`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // Clear log
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Event listeners
+        document.getElementById('connect-btn').addEventListener('click', connectToOBS);
+        document.getElementById('disconnect-btn').addEventListener('click', disconnectFromOBS);
+        document.getElementById('switch-scene-btn').addEventListener('click', switchScene);
+        document.getElementById('toggle-studio-mode').addEventListener('click', toggleStudioMode);
+        document.getElementById('trigger-transition').addEventListener('click', triggerTransition);
+        
+        document.getElementById('auto-switch').addEventListener('change', (e) => {
+            autoSceneSwitching = e.target.checked;
+            log('Auto scene switching: ' + (autoSceneSwitching ? 'enabled' : 'disabled'));
+        });
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeOBS();
+            log('Demo page loaded. Ready to connect to OBS WebSocket.');
+        });
+    </script>
+</body>
+</html>

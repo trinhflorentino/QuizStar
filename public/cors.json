@@ -1,0 +1,11 @@
+[
+  {
+    "origin": [
+      "https://lelong-too-project.web.app",
+      "https://lelong-too-project.firebaseapp.com"
+    ],
+    "method": ["GET", "HEAD"],
+    "responseHeader": ["Content-Type", "x-goog-meta-*"],
+    "maxAgeSeconds": 3600
+  }
+]

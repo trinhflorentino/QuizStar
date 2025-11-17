@@ -1,5 +1,21 @@
-body {
-    /* background-color: gray; */
+/* Hide scrollbar for webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for Firefox */
+html {
+    scrollbar-width: none;
+}
+
+/* Hide scrollbar for all elements while maintaining scroll functionality */
+* {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+    display: none;
 }
 
 .questionAppearAnimation {
@@ -72,16 +88,9 @@ body {
     }
 }
 
-.accelerationQuestion {
-    animation: zoomIn 0.35s ease-out forwards;
-    transform-origin: top left;
-    transform: scaleY(0);
-    opacity: 0;
-    animation-delay: 0.5s;
-}
 
-.accelerationMedia {
-    animation: zoomIn 0.35s ease-out forwards;
+.accelerationAppearAnimation {
+    animation: zoomIn 0.3s ease-out forwards;
     transform-origin: center left;
     transform: scaleY(0);
     opacity: 0;
@@ -125,7 +134,7 @@ body {
     }
 
     100% {
-        transform: translateX(-100%);
+        transform: translateX(100%);
         opacity: 0;
     }
 }
@@ -140,6 +149,145 @@ body {
 .fly-out {
     opacity: 0;
     animation: flyOut 0.5s ease-in forwards;
+}
+
+
+.startQuestionAppearAnimation {
+    animation: zoomIn 0.4s ease-out forwards;
+    transform-origin: top left;
+    transform: scaleY(0);
+    opacity: 0;
+    animation-delay: 0.5s;
+}
+
+.questionNumberAppearAnimation {
+    animation: zoomIn 0.35s ease-out forwards;
+    transform-origin: top left;
+    transform: scaleY(0);
+    opacity: 0;
+    animation-delay: 0.75s;
+}
+
+.startPlayerListAppearAnimation {
+    animation: flyInUp 0.45s ease-out forwards;
+    transform: translateY(50%);
+    opacity: 0;
+    animation-delay: 0.55s;
+}
+
+@keyframes flyInUp {
+    0% {
+        transform: translateY(50%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.finishQuestionAppearAnimation {
+    animation: zoomIn 0.4s ease-out forwards;
+    transform-origin: top left;
+    transform: scaleY(0);
+    opacity: 0;
+    animation-delay: 0.65s;
+}
+
+@keyframes flyInRight {
+    0% {
+        transform: translateX(-50%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    25% {
+        background-position: 50% 60%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    75% {
+        background-position: 50% 40%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.animate-gradient {
+    background: linear-gradient(-45deg, #1e293b, #1e40af, #1e3a8a);
+    background-size: 400% 400%;
+    animation: gradientMove 6s ease-in-out infinite;
+}
+
+.shimmer-animation {
+    position: relative;
+    overflow: hidden;
+}
+
+.shimmer-animation::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 1.5s forwards;
+    animation-delay: 0.75s;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+
+.elegantZoomIn {
+    animation: elegantZoom 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    transform: scale(0.8);
+    opacity: 0;
+}
+
+@keyframes elegantZoom {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+        filter: blur(4px);
+    }
+
+    60% {
+        transform: scale(1.02);
+        opacity: 0.8;
+        filter: blur(1px);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+        filter: blur(0);
+    }
 }
 
 /* 
